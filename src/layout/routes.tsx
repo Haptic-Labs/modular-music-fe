@@ -2,6 +2,7 @@
 import { RouteObject } from "react-router-dom";
 import { AppLayout } from ".";
 import { HomePage, PageNotFound } from "../pages";
+import { AuthPage } from "../pages/auth";
 
 export const TOP_LEVEL_ROUTES: RouteObject[] = [
   {
@@ -21,6 +22,10 @@ export const ROUTES: RouteObject[] = [
     path: "/",
     element: <AppLayout />,
     children: TOP_LEVEL_ROUTES,
+  },
+  {
+    path: "/auth",
+    element: <AuthPage />,
   },
   {
     path: "*",

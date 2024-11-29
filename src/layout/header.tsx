@@ -1,11 +1,15 @@
+import { Button } from "@radix-ui/themes";
 import { Wordmark } from "../assets";
+import { useAuth } from "../providers";
 
 export const Header = () => {
+  const { session, login, logout } = useAuth();
+
   return (
     <nav
       css={(theme) => ({
         display: "flex",
-        width: "100%",
+        maxWidth: "100vw",
         height: 60,
         alignItems: "center",
         justifyContent: "space-between",
@@ -20,6 +24,17 @@ export const Header = () => {
           width: "auto",
         }}
       />
+      <Button
+        onClick={() => {
+          if (session) {
+            logout();
+          } else {
+            login();
+          }
+        }}
+      >
+        {session ? "Logout" : "Login"}
+      </Button>
     </nav>
   );
 };

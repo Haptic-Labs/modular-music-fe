@@ -124,8 +124,7 @@ export const AuthProvider = ({ children }: SupabaseProviderProps) => {
 
   useEffect(() => {
     if (!auth.user || !auth.session) login();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [!!supabaseClient]);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ supabaseClient, ...auth, login, logout }}>

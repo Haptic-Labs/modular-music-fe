@@ -1,3 +1,6 @@
+import { useAuth } from "../providers";
+
 export const HomePage = () => {
-  return <div></div>;
+  const { user } = useAuth();
+  return <div>{JSON.stringify(user)}</div>;
 };
