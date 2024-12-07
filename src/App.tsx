@@ -6,6 +6,7 @@ import { theme } from "./theme";
 import { ROUTES } from "./layout/routes";
 import { AuthProvider } from "./providers";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SoundifyProvider } from "./providers/soundify-provider";
 
 const router = createBrowserRouter(ROUTES);
 const queryClient = new QueryClient({});
@@ -16,7 +17,9 @@ function App() {
       <EmotionThemeProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <RouterProvider router={router} />
+            <SoundifyProvider>
+              <RouterProvider router={router} />
+            </SoundifyProvider>
           </AuthProvider>
         </QueryClientProvider>
       </EmotionThemeProvider>

@@ -1,8 +1,18 @@
-import { Button, Dialog, Flex, TextField } from "@radix-ui/themes";
+import {
+  Button,
+  Dialog,
+  Flex,
+  TextField,
+  Text,
+  Container,
+  ScrollArea,
+} from "@radix-ui/themes";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Database } from "../../types";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useDebouncedValue } from "@mantine/hooks";
+import { useSoundify } from "../../providers";
+import { SpotifyQueries } from "../../queries";
 
 type SpotifySourceSelectionModalProps = {
   searchProps?: {
@@ -34,22 +44,52 @@ export const SpotifySourceSelectionModal = ({
   const searchText = searchProps?.searchText ?? uncontrolledSearchText;
   const setSearchText = searchProps?.setSearchText ?? setUncontrolledSearchText;
 
-  const debouncedSearchText = useDebouncedValue(searchText, 300);
+  const [debouncedSearchText] = useDebouncedValue(searchText, 300);
+
+  const searchQuery = SpotifyQueries.useSearchQuery(
+    {
+      query: debouncedSearchText,
+    },
+    { enabled: !!debouncedSearchText },
+  );
 
   return (
-    <Dialog.Content {...rest}>
-      <Dialog.Title>Add Sources</Dialog.Title>
-      <Dialog.Description>Search for sources from Spotify</Dialog.Description>
-      <Flex>
+    <Dialog.Content
+      css={{
+        maxHeight: "75vh",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+      }}
+      {...rest}
+    >
+      <div css={{ width: "100%", minHeight: "max-content" }}>
+        <Dialog.Title>Add Sources</Dialog.Title>
+        <Dialog.Description>Search for sources from Spotify</Dialog.Description>
         <TextField.Root
           value={searchText}
           onChange={(e) => setSearchText(e.currentTarget.value)}
+          css={{
+            width: "100%",
+          }}
         >
           <TextField.Slot>
             <MagnifyingGlassIcon width={16} height={16} />
           </TextField.Slot>
         </TextField.Root>
-      </Flex>
+      </div>
+      <ScrollArea>
+        {searchQuery.data?.tracks.items.map((track) => (
+          <Text
+            css={{
+              height: "auto",
+              minHeight: 0,
+            }}
+          >
+            {JSON.stringify(track)}
+          </Text>
+        ))}
+      </ScrollArea>
       <Dialog.Close
         onClick={() => {
           onSelect(selectedSources);

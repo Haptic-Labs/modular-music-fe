@@ -3,6 +3,7 @@ import { ModulesQueries } from "../../queries";
 import { Button, Card, Dialog, Grid, Heading, Text } from "@radix-ui/themes";
 import { SourceImage } from "../../ui/source-image";
 import { PlusIcon } from "@radix-ui/react-icons";
+import { SpotifySourceSelectionModal } from "../../components";
 
 export const ModulePage = () => {
   const { moduleId } = useParams();
@@ -69,6 +70,9 @@ export const ModulePage = () => {
               <Text>Add Source</Text>
             </Button>
           </Dialog.Trigger>
+          <SpotifySourceSelectionModal
+            onSelect={(source) => console.log(source)}
+          />
         </Dialog.Root>
       </Grid>
     </div>

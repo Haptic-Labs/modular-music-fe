@@ -100,12 +100,6 @@ export const AuthProvider = ({ children }: SupabaseProviderProps) => {
         console.error("Error fetching spotify tokens", error);
         return;
       }
-      await supabaseClient.schema("spotify_auth").rpc("UpsertProviderData", {
-        p_user_id: newTokensResponse.user_id,
-        p_access: newTokensResponse.access,
-        p_refresh: newTokensResponse.refresh,
-        p_expires_at: newTokensResponse.expires_at,
-      });
     }
 
     // Set context values
