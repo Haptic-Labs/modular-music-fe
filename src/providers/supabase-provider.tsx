@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }: SupabaseProviderProps) => {
           method: "POST",
         });
       if (error || !newTokensResponse) {
-        console.error("Error fetching spotify tokens");
+        console.error("Error fetching spotify tokens", error);
         return;
       }
       await supabaseClient.schema("spotify_auth").rpc("UpsertProviderData", {

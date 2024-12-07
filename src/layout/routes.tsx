@@ -3,6 +3,7 @@ import { RouteObject } from "react-router-dom";
 import { AppLayout } from ".";
 import { HomePage, PageNotFound } from "../pages";
 import { AuthPage } from "../pages/auth";
+import { ModulePage, ModulesPage } from "../pages/modules";
 
 export const TOP_LEVEL_ROUTES: RouteObject[] = [
   {
@@ -12,7 +13,7 @@ export const TOP_LEVEL_ROUTES: RouteObject[] = [
   },
   {
     path: "/modules",
-    element: <PageNotFound />,
+    element: <ModulesPage />,
     id: "Modules",
   },
 ] as const;
@@ -21,7 +22,13 @@ export const ROUTES: RouteObject[] = [
   {
     path: "/",
     element: <AppLayout />,
-    children: TOP_LEVEL_ROUTES,
+    children: [
+      ...TOP_LEVEL_ROUTES,
+      {
+        path: "/modules/:moduleId",
+        element: <ModulePage />,
+      },
+    ],
   },
   {
     path: "/auth",
