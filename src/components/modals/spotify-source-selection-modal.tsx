@@ -1,18 +1,18 @@
 import {
   Button,
   Dialog,
-  Flex,
   TextField,
-  Text,
-  Container,
   ScrollArea,
+  Grid,
+  Heading,
 } from "@radix-ui/themes";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Database } from "../../types";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useDebouncedValue } from "@mantine/hooks";
-import { useSoundify } from "../../providers";
 import { SpotifyQueries } from "../../queries";
+import { SpotifyComponents } from "../../ui";
+import { getSmallestSpotifyImage } from "../../utils";
 
 type SpotifySourceSelectionModalProps = {
   searchProps?: {
@@ -26,7 +26,7 @@ type SpotifySourceSelectionModalProps = {
   };
   singleSelect?: boolean;
   onSelect: (
-    sources: Database["public"]["Tables"]["module_sources"]["Row"][],
+    sources: Database["public"]["Tables"]["module_sources"]["Insert"][],
   ) => void;
 } & Dialog.ContentProps;
 
@@ -38,8 +38,35 @@ export const SpotifySourceSelectionModal = ({
 }: SpotifySourceSelectionModalProps) => {
   const [uncontrolledSearchText, setUncontrolledSearchText] = useState("");
   const [selectedSources, setSelectedSources] = useState<
-    Database["public"]["Tables"]["module_sources"]["Row"][]
+    Database["public"]["Tables"]["module_sources"]["Insert"][]
   >([]);
+
+  const handleSourceClick = (
+    source: Database["public"]["Tables"]["module_sources"]["Insert"],
+  ) => {
+    if (singleSelect) {
+      setSelectedSources((prev) => {
+        if (prev[0]?.spotify_id === source.spotify_id) {
+          return [];
+        } else {
+          return [source];
+        }
+      });
+    } else {
+      setSelectedSources((prev) => {
+        const alreadySelected = prev.some(
+          ({ spotify_id }) => spotify_id === source.spotify_id,
+        );
+        if (alreadySelected) {
+          return prev.filter(
+            ({ spotify_id }) => spotify_id !== source.spotify_id,
+          );
+        } else {
+          return [...prev, source];
+        }
+      });
+    }
+  };
 
   const searchText = searchProps?.searchText ?? uncontrolledSearchText;
   const setSearchText = searchProps?.setSearchText ?? setUncontrolledSearchText;
@@ -78,17 +105,39 @@ export const SpotifySourceSelectionModal = ({
           </TextField.Slot>
         </TextField.Root>
       </div>
-      <ScrollArea>
-        {searchQuery.data?.tracks.items.map((track) => (
-          <Text
-            css={{
-              height: "auto",
-              minHeight: 0,
-            }}
-          >
-            {JSON.stringify(track)}
-          </Text>
-        ))}
+      <ScrollArea
+        scrollbars="vertical"
+        css={{
+          padding: "8px 0px",
+          width: "100%",
+        }}
+      >
+        <Heading as="h3" mb="2">
+          Tracks
+        </Heading>
+        <Grid columns="2" gap="2">
+          {searchQuery.data?.tracks.items.map((track) => (
+            <SpotifyComponents.SearchResult
+              type="track"
+              item={track}
+              onClick={() => {
+                handleSourceClick({
+                  spotify_id: track.id,
+                  type: "TRACK",
+                  title: track.name,
+                  image_url:
+                    getSmallestSpotifyImage({
+                      images: track.album.images,
+                      minimumSize: 50,
+                    })?.url ?? "",
+                });
+              }}
+              isSelected={selectedSources.some(
+                (source) => source.spotify_id === track.id,
+              )}
+            />
+          ))}
+        </Grid>
       </ScrollArea>
       <Dialog.Close
         onClick={() => {

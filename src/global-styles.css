@@ -312,3 +312,7 @@
   font-weight: var(--font-weight-medium);
   height: var(--base-button-height);
 }
+
+.rt-ScrollAreaViewport > div {
+  width: auto;
+}
