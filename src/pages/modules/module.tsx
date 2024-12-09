@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { ModulesQueries } from "../../queries";
 import { Button, Card, Dialog, Grid, Heading, Text } from "@radix-ui/themes";
-import { SourceImage } from "../../ui/source-image";
+import { SpotifyComponents } from "../../ui";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { SpotifySourceSelectionModal } from "../../components";
 
@@ -39,7 +39,7 @@ export const ModulePage = () => {
               alignItems: "center",
             }}
           >
-            <SourceImage
+            <SpotifyComponents.SourceImage
               src={source.image_url}
               sourceType={source.type}
               css={{

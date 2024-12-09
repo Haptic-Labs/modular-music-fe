@@ -72,36 +72,6 @@ export const AuthProvider = ({ children }: SupabaseProviderProps) => {
       return;
     }
 
-    // Upsert new tokens if they exist
-    const { provider_token, provider_refresh_token } = existingSession;
-    if (
-      typeof provider_token === "string" &&
-      typeof provider_refresh_token === "string"
-    ) {
-      await supabaseClient.schema("spotify_auth").rpc("UpsertProviderData", {
-        p_user_id: existingSession.user.id,
-        p_access: provider_token,
-        p_refresh: provider_refresh_token,
-        p_expires_at: provider_token
-          ? existingSession.expires_at
-            ? new Date(existingSession.expires_at * 1000).toISOString()
-            : new Date(new Date().getTime() * 1000).toISOString()
-          : undefined,
-      });
-    } else {
-      // If they don't exist on the session, get a new token via edge function
-      const { data: newTokensResponse, error } =
-        await supabaseClient.functions.invoke<
-          Database["spotify_auth"]["Tables"]["provider_session_data"]["Row"]
-        >(`spotify/auth/refresh-token/${existingSession.user.id}`, {
-          method: "POST",
-        });
-      if (error || !newTokensResponse) {
-        console.error("Error fetching spotify tokens", error);
-        return;
-      }
-    }
-
     // Set context values
     setAuth({
       session: existingSession,

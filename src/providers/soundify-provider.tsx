@@ -24,10 +24,17 @@ export const SoundifyProvider = ({ children }: SoundifyProviderProps) => {
   const { supabaseClient, user } = useAuth();
   const [spotifyClient, setSpotifyClient] = useState<SpotifyClient>();
 
-  const createSpotifyClient = () => {
-    if (!user?.id) return;
+  const createSpotifyClient = async () => {
+    if (!user?.id) {
+      setSpotifyClient(undefined);
+      return;
+    }
 
-    return new SpotifyClient(null, {
+    const initialToken = await supabaseClient.functions.invoke<
+      Database["spotify_auth"]["Tables"]["provider_session_data"]["Row"]
+    >(`spotify/auth/refresh-token/${user.id}`, { method: "POST" });
+
+    const newClient = new SpotifyClient(initialToken.data?.access ?? null, {
       refresher: async () => {
         const { data: newTokensResponse, error } =
           await supabaseClient.functions.invoke<
@@ -43,10 +50,11 @@ export const SoundifyProvider = ({ children }: SoundifyProviderProps) => {
         return newTokensResponse.access;
       },
     });
+    setSpotifyClient(newClient);
   };
 
   useEffect(() => {
-    setSpotifyClient(createSpotifyClient());
+    createSpotifyClient();
   }, [user?.id]);
 
   return (
