@@ -5,8 +5,18 @@ import {
   ScrollArea,
   Grid,
   Heading,
+  Spinner,
+  Flex,
+  Text,
 } from "@radix-ui/themes";
-import { Dispatch, SetStateAction, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Database } from "../../types";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useDebouncedValue } from "@mantine/hooks";
@@ -79,6 +89,45 @@ export const SpotifySourceSelectionModal = ({
     },
     { enabled: !!debouncedSearchText },
   );
+  const [previousSearchResults, setPreviousSearchResults] =
+    useState<(typeof searchQuery)["data"]>();
+
+  useEffect(() => {
+    if (searchQuery.data) {
+      console.log("brayden-test", { newData: searchQuery.data });
+      setPreviousSearchResults(searchQuery.data);
+    }
+  }, [JSON.stringify(searchQuery.data)]);
+
+  useEffect(() => {
+    if (!debouncedSearchText) {
+      setPreviousSearchResults(undefined);
+    }
+  }, [debouncedSearchText]);
+
+  const getResultsCount = useCallback(
+    (results: (typeof searchQuery)["data"]) => {
+      return Object.values(results ?? {}).reduce<number>(
+        (acc, curr) => acc + curr.items.length,
+        0,
+      );
+    },
+    [],
+  );
+  const showLoader =
+    searchQuery.isLoading ||
+    (searchText !== debouncedSearchText && !!searchText);
+
+  const resultsToDisplay = searchQuery.data ?? previousSearchResults;
+  const resultsToDisplayCount = useMemo(
+    () => getResultsCount(resultsToDisplay),
+    [getResultsCount, JSON.stringify(resultsToDisplay)],
+  );
+  const loaderType = showLoader
+    ? resultsToDisplayCount
+      ? "overlay"
+      : "loader-only"
+    : "none";
 
   return (
     <Dialog.Content
@@ -105,40 +154,86 @@ export const SpotifySourceSelectionModal = ({
           </TextField.Slot>
         </TextField.Root>
       </div>
-      <ScrollArea
-        scrollbars="vertical"
-        css={{
-          padding: "8px 0px",
-          width: "100%",
-        }}
-      >
-        <Heading as="h3" mb="2">
-          Tracks
-        </Heading>
-        <Grid columns="2" gap="2">
-          {searchQuery.data?.tracks.items.map((track) => (
-            <SpotifyComponents.SearchResult
-              type="track"
-              item={track}
-              onClick={() => {
-                handleSourceClick({
-                  spotify_id: track.id,
-                  type: "TRACK",
-                  title: track.name,
-                  image_url:
-                    getSmallestSpotifyImage({
-                      images: track.album.images,
-                      minimumSize: 50,
-                    })?.url ?? "",
-                });
-              }}
-              isSelected={selectedSources.some(
-                (source) => source.spotify_id === track.id,
+      {
+        <ScrollArea
+          scrollbars="vertical"
+          css={[
+            {
+              padding: "8px 0px",
+              width: "100%",
+              position: "relative",
+              ".results": {
+                transition: "opacity 300ms ease-in-out",
+              },
+            },
+            loaderType === "overlay" && {
+              ".results": {
+                opacity: 0.5,
+              },
+            },
+          ]}
+        >
+          {!resultsToDisplayCount ? (
+            <Flex height="300px" justify="center" align="center">
+              {loaderType === "loader-only" ? (
+                <Spinner size="3" />
+              ) : (
+                <Text>
+                  {searchText.length
+                    ? "No results to display"
+                    : "Type something to search Spotify"}
+                </Text>
               )}
-            />
-          ))}
-        </Grid>
-      </ScrollArea>
+            </Flex>
+          ) : (
+            <>
+              {!!resultsToDisplay?.tracks.items.length && (
+                <>
+                  <Heading as="h3" mb="2" className="results">
+                    Tracks
+                  </Heading>
+                  <Grid columns="2" gap="2" className="results">
+                    {resultsToDisplay.tracks.items.map((track) => (
+                      <SpotifyComponents.SearchResult
+                        type="track"
+                        item={track}
+                        onClick={() => {
+                          handleSourceClick({
+                            spotify_id: track.id,
+                            type: "TRACK",
+                            title: track.name,
+                            image_url:
+                              getSmallestSpotifyImage({
+                                images: track.album.images,
+                                minimumSize: 50,
+                              })?.url ?? "",
+                          });
+                        }}
+                        isSelected={selectedSources.some(
+                          (source) => source.spotify_id === track.id,
+                        )}
+                      />
+                    ))}
+                  </Grid>
+                </>
+              )}
+            </>
+          )}
+          {loaderType === "overlay" && (
+            <Flex
+              align="center"
+              justify="center"
+              top="0"
+              bottom="0"
+              left="0"
+              right="0"
+              position="absolute"
+            >
+              <Spinner size="3" />
+            </Flex>
+          )}
+        </ScrollArea>
+      }
       <Dialog.Close
         onClick={() => {
           onSelect(selectedSources);
