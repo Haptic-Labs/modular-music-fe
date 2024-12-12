@@ -46,10 +46,10 @@ export const SearchResult = <T extends ItemType>({
         src={displayData.imgSrc}
         sourceType={convertItemTypeToSourceType(type)}
         css={{
-          width: 50,
-          minWidth: 50,
-          height: 50,
-          minHeight: 50,
+          width: imageSize,
+          minWidth: imageSize,
+          height: imageSize,
+          minHeight: imageSize,
           borderRadius: 8,
         }}
       />

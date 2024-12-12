@@ -11,8 +11,8 @@ export const LikedSongsIcon = ({
 }: LikedSongsIconProps) => {
   return (
     <svg
-      height="16"
-      width="16"
+      height="50"
+      width="50"
       viewBox="0 0 16 16"
       {...rest}
       css={{ fill: color }}

@@ -23,6 +23,8 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { SpotifyQueries } from "../../queries";
 import { SpotifyComponents } from "../../ui";
 import { getSmallestSpotifyImage } from "../../utils";
+import { StaticSourceCard } from "../../ui/spotify";
+import { colors } from "../../theme/colors";
 
 type SpotifySourceSelectionModalProps = {
   searchProps?: {
@@ -56,7 +58,10 @@ export const SpotifySourceSelectionModal = ({
   ) => {
     if (singleSelect) {
       setSelectedSources((prev) => {
-        if (prev[0]?.spotify_id === source.spotify_id) {
+        if (
+          prev[0]?.spotify_id === source.spotify_id &&
+          prev[0]?.type === source.type
+        ) {
           return [];
         } else {
           return [source];
@@ -65,11 +70,13 @@ export const SpotifySourceSelectionModal = ({
     } else {
       setSelectedSources((prev) => {
         const alreadySelected = prev.some(
-          ({ spotify_id }) => spotify_id === source.spotify_id,
+          ({ spotify_id, type }) =>
+            spotify_id === source.spotify_id && source.type === type,
         );
         if (alreadySelected) {
           return prev.filter(
-            ({ spotify_id }) => spotify_id !== source.spotify_id,
+            ({ spotify_id, type }) =>
+              spotify_id !== source.spotify_id && type === source.type,
           );
         } else {
           return [...prev, source];
@@ -94,7 +101,6 @@ export const SpotifySourceSelectionModal = ({
 
   useEffect(() => {
     if (searchQuery.data) {
-      console.log("brayden-test", { newData: searchQuery.data });
       setPreviousSearchResults(searchQuery.data);
     }
   }, [JSON.stringify(searchQuery.data)]);
@@ -141,99 +147,142 @@ export const SpotifySourceSelectionModal = ({
     >
       <div css={{ width: "100%", minHeight: "max-content" }}>
         <Dialog.Title>Add Sources</Dialog.Title>
-        <Dialog.Description>Search for sources from Spotify</Dialog.Description>
+        <Dialog.Description mb="2" color="gray">
+          Select sources to add to your module
+        </Dialog.Description>
+        <Grid
+          columns="2"
+          gap="2"
+          pb="2"
+          css={{
+            borderBottom: `1px solid ${colors.grayDark.gray7}`,
+          }}
+        >
+          <StaticSourceCard
+            type="LIKED_SONGS"
+            isSelected={selectedSources.some(
+              ({ type }) => type === "LIKED_SONGS",
+            )}
+            onClick={() => {
+              handleSourceClick({
+                type: "LIKED_SONGS",
+                title: "Liked Songs",
+                spotify_id: "",
+                image_url: "",
+              });
+            }}
+          />
+          <StaticSourceCard
+            type="RECENTLY_PLAYED"
+            isSelected={selectedSources.some(
+              ({ type }) => type === "RECENTLY_PLAYED",
+            )}
+            onClick={() => {
+              handleSourceClick({
+                type: "RECENTLY_PLAYED",
+                title: "Recently Played",
+                spotify_id: "",
+                image_url: "",
+              });
+            }}
+          />
+        </Grid>
+        <Text as="p" my="2" color="gray">
+          Search Spotify for other sources
+        </Text>
+        {/* TODO: add filter and clear buttons */}
         <TextField.Root
           value={searchText}
           onChange={(e) => setSearchText(e.currentTarget.value)}
           css={{
             width: "100%",
           }}
+          placeholder="Type something..."
+          mb="2"
         >
           <TextField.Slot>
             <MagnifyingGlassIcon width={16} height={16} />
           </TextField.Slot>
         </TextField.Root>
       </div>
-      {
-        <ScrollArea
-          scrollbars="vertical"
-          css={[
-            {
-              padding: "8px 0px",
-              width: "100%",
-              position: "relative",
-              ".results": {
-                transition: "opacity 300ms ease-in-out",
-              },
+      <ScrollArea
+        scrollbars="vertical"
+        css={[
+          {
+            padding: "8px 0px",
+            width: "100%",
+            position: "relative",
+            ".results": {
+              transition: "opacity 300ms ease-in-out",
             },
-            loaderType === "overlay" && {
-              ".results": {
-                opacity: 0.5,
-              },
+          },
+          loaderType === "overlay" && {
+            ".results": {
+              opacity: 0.5,
             },
-          ]}
-        >
-          {!resultsToDisplayCount ? (
-            <Flex height="300px" justify="center" align="center">
-              {loaderType === "loader-only" ? (
-                <Spinner size="3" />
-              ) : (
-                <Text>
-                  {searchText.length
-                    ? "No results to display"
-                    : "Type something to search Spotify"}
-                </Text>
-              )}
-            </Flex>
-          ) : (
-            <>
-              {!!resultsToDisplay?.tracks.items.length && (
-                <>
-                  <Heading as="h3" mb="2" className="results">
-                    Tracks
-                  </Heading>
-                  <Grid columns="2" gap="2" className="results">
-                    {resultsToDisplay.tracks.items.map((track) => (
-                      <SpotifyComponents.SearchResult
-                        type="track"
-                        item={track}
-                        onClick={() => {
-                          handleSourceClick({
-                            spotify_id: track.id,
-                            type: "TRACK",
-                            title: track.name,
-                            image_url:
-                              getSmallestSpotifyImage({
-                                images: track.album.images,
-                                minimumSize: 50,
-                              })?.url ?? "",
-                          });
-                        }}
-                        isSelected={selectedSources.some(
-                          (source) => source.spotify_id === track.id,
-                        )}
-                      />
-                    ))}
-                  </Grid>
-                </>
-              )}
-            </>
-          )}
-          {loaderType === "overlay" && (
-            <Flex
-              align="center"
-              justify="center"
-              top="0"
-              bottom="0"
-              left="0"
-              right="0"
-              position="absolute"
-            >
+          },
+        ]}
+      >
+        {!resultsToDisplayCount ? (
+          <Flex height="300px" justify="center" align="center">
+            {loaderType === "loader-only" ? (
               <Spinner size="3" />
-            </Flex>
-          )}
-        </ScrollArea>
-      }
+            ) : (
+              <Text>
+                {searchText.length
+                  ? "No results to display"
+                  : "Type something to search for other sources from Spotify"}
+              </Text>
+            )}
+          </Flex>
+        ) : (
+          <>
+            {!!resultsToDisplay?.tracks.items.length && (
+              <>
+                <Heading as="h3" className="results" mb="2">
+                  Tracks
+                </Heading>
+                <Grid columns="2" gap="2" className="results">
+                  {resultsToDisplay.tracks.items.map((track) => (
+                    <SpotifyComponents.SearchResult
+                      type="track"
+                      item={track}
+                      onClick={() => {
+                        handleSourceClick({
+                          spotify_id: track.id,
+                          type: "TRACK",
+                          title: track.name,
+                          image_url:
+                            getSmallestSpotifyImage({
+                              images: track.album.images,
+                              minimumSize: 50,
+                            })?.url ?? "",
+                        });
+                      }}
+                      isSelected={selectedSources.some(
+                        (source) => source.spotify_id === track.id,
+                      )}
+                    />
+                  ))}
+                </Grid>
+              </>
+            )}
+          </>
+        )}
+        {loaderType === "overlay" && (
+          <Flex
+            align="center"
+            justify="center"
+            top="0"
+            bottom="0"
+            left="0"
+            right="0"
+            position="absolute"
+          >
+            <Spinner size="3" />
+          </Flex>
+        )}
+      </ScrollArea>
       <Dialog.Close
         onClick={() => {
           onSelect(selectedSources);
