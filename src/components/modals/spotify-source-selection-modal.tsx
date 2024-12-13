@@ -8,6 +8,7 @@ import {
   Spinner,
   Flex,
   Text,
+  IconButton,
 } from "@radix-ui/themes";
 import {
   Dispatch,
@@ -18,7 +19,7 @@ import {
   useState,
 } from "react";
 import { Database } from "../../types";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { Cross1Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useDebouncedValue } from "@mantine/hooks";
 import { SpotifyQueries } from "../../queries";
 import { SpotifyComponents } from "../../ui";
@@ -200,8 +201,24 @@ export const SpotifySourceSelectionModal = ({
           placeholder="Type something..."
           mb="2"
         >
-          <TextField.Slot>
+          <TextField.Slot side="left">
             <MagnifyingGlassIcon width={16} height={16} />
+          </TextField.Slot>
+          <TextField.Slot side="right">
+            <IconButton
+              variant="ghost"
+              color="gray"
+              css={{
+                padding: 4,
+              }}
+            >
+              <Cross1Icon width={16} height={16} />
+            </IconButton>
+          </TextField.Slot>
+          <TextField.Slot side="right">
+            <IconButton variant="ghost" color="gray">
+              <Cross1Icon width={16} height={16} />
+            </IconButton>
           </TextField.Slot>
         </TextField.Root>
       </div>

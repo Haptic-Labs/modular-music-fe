@@ -41,6 +41,7 @@ export const StaticSourceCard = ({
           borderRadius: 8,
           padding: 8,
         }}
+        color={isSelected ? "white" : undefined}
       />
       <Text
         as="p"
