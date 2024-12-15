@@ -27,7 +27,7 @@ export const RecentlyListenedConfigPopover = ({
       <Flex direction="column">
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
-            <TextField></TextField>
+            <TextField.Root type="number" />
           </DropdownMenu.Trigger>
         </DropdownMenu.Root>
       </Flex>

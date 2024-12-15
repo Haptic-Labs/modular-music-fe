@@ -9,6 +9,7 @@ import {
   Flex,
   Text,
   IconButton,
+  Popover,
 } from "@radix-ui/themes";
 import {
   Dispatch,
@@ -18,7 +19,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { Database } from "../../types";
+import { Database, RecentlyListenedConfig } from "../../types";
 import { Cross1Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useDebouncedValue } from "@mantine/hooks";
 import { SpotifyQueries } from "../../queries";
@@ -26,6 +27,7 @@ import { SpotifyComponents } from "../../ui";
 import { getSmallestSpotifyImage } from "../../utils";
 import { StaticSourceCard } from "../../ui/spotify";
 import { colors } from "../../theme/colors";
+import { RecentlyListenedConfigPopover } from "../popovers";
 
 type SpotifySourceSelectionModalProps = {
   searchProps?: {
@@ -50,6 +52,7 @@ export const SpotifySourceSelectionModal = ({
   ...rest
 }: SpotifySourceSelectionModalProps) => {
   const [uncontrolledSearchText, setUncontrolledSearchText] = useState("");
+  // TODO: handle sources with config
   const [selectedSources, setSelectedSources] = useState<
     Database["public"]["Tables"]["module_sources"]["Insert"][]
   >([]);
@@ -173,20 +176,34 @@ export const SpotifySourceSelectionModal = ({
               });
             }}
           />
-          <StaticSourceCard
-            type="RECENTLY_PLAYED"
-            isSelected={selectedSources.some(
-              ({ type }) => type === "RECENTLY_PLAYED",
-            )}
-            onClick={() => {
-              handleSourceClick({
-                type: "RECENTLY_PLAYED",
-                title: "Recently Played",
-                spotify_id: "",
-                image_url: "",
-              });
-            }}
-          />
+          <Popover.Root>
+            <Popover.Trigger>
+              <StaticSourceCard
+                type="RECENTLY_PLAYED"
+                isSelected={selectedSources.some(
+                  ({ type }) => type === "RECENTLY_PLAYED",
+                )}
+                onClick={() => {
+                  handleSourceClick({
+                    type: "RECENTLY_PLAYED",
+                    title: "Recently Played",
+                    spotify_id: "",
+                    image_url: "",
+                  });
+                }}
+              />
+            </Popover.Trigger>
+            <RecentlyListenedConfigPopover
+              onSave={(config) => {
+                handleSourceClick({
+                  type: "RECENTLY_PLAYED",
+                  title: "Recently Listened",
+                  spotify_id: "",
+                  image_url: "",
+                });
+              }}
+            />
+          </Popover.Root>
         </Grid>
         <Text as="p" my="2" color="gray">
           Search Spotify for other sources
