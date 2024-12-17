@@ -27,7 +27,14 @@ export const RecentlyListenedConfigPopover = ({
       <Flex direction="column">
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
-            <TextField.Root type="number" />
+            <TextField.Root
+              type="number"
+              value={quantity}
+              onChange={(e) =>
+                setQuantity(Number(e.currentTarget.value || "0"))
+              }
+              placeholder="Quantity"
+            />
           </DropdownMenu.Trigger>
         </DropdownMenu.Root>
       </Flex>

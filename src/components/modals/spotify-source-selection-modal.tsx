@@ -1,5 +1,4 @@
 import {
-  Button,
   Dialog,
   TextField,
   ScrollArea,
@@ -21,13 +20,29 @@ import {
 } from "react";
 import { Database, RecentlyListenedConfig } from "../../types";
 import { Cross1Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
-import { useDebouncedValue } from "@mantine/hooks";
+import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
 import { SpotifyQueries } from "../../queries";
 import { SpotifyComponents } from "../../ui";
 import { getSmallestSpotifyImage } from "../../utils";
 import { StaticSourceCard } from "../../ui/spotify";
 import { colors } from "../../theme/colors";
 import { RecentlyListenedConfigPopover } from "../popovers";
+
+type SourceTypesWithAdditionalConfig = "RECENTLY_PLAYED";
+type AdditionalConfig<
+  T extends Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"],
+> = T extends "RECENTLY_PLAYED" ? RecentlyListenedConfig : never;
+export type SourceConfig<
+  T extends
+    Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"] = Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"],
+> = Database["public"]["Tables"]["module_sources"]["Insert"] &
+  (T extends SourceTypesWithAdditionalConfig
+    ? {
+        additionalConfig: AdditionalConfig<T>;
+      }
+    : {
+        additionalConfig?: never;
+      });
 
 type SpotifySourceSelectionModalProps = {
   searchProps?: {
@@ -39,55 +54,23 @@ type SpotifySourceSelectionModalProps = {
     >;
     hideTypeFilter?: boolean;
   };
-  singleSelect?: boolean;
-  onSelect: (
-    sources: Database["public"]["Tables"]["module_sources"]["Insert"][],
+  // singleSelect?: boolean; // TODO: implement multi-selection later
+  onSelect: <T extends Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]>(
+    source: SourceConfig<T>,
   ) => void;
-} & Dialog.ContentProps;
+} & Omit<Dialog.ContentProps, "onSelect">;
 
 export const SpotifySourceSelectionModal = ({
   searchProps,
-  singleSelect = true,
+  // singleSelect = true,
   onSelect,
   ...rest
 }: SpotifySourceSelectionModalProps) => {
   const [uncontrolledSearchText, setUncontrolledSearchText] = useState("");
-  // TODO: handle sources with config
-  const [selectedSources, setSelectedSources] = useState<
-    Database["public"]["Tables"]["module_sources"]["Insert"][]
-  >([]);
-
-  const handleSourceClick = (
-    source: Database["public"]["Tables"]["module_sources"]["Insert"],
-  ) => {
-    if (singleSelect) {
-      setSelectedSources((prev) => {
-        if (
-          prev[0]?.spotify_id === source.spotify_id &&
-          prev[0]?.type === source.type
-        ) {
-          return [];
-        } else {
-          return [source];
-        }
-      });
-    } else {
-      setSelectedSources((prev) => {
-        const alreadySelected = prev.some(
-          ({ spotify_id, type }) =>
-            spotify_id === source.spotify_id && source.type === type,
-        );
-        if (alreadySelected) {
-          return prev.filter(
-            ({ spotify_id, type }) =>
-              spotify_id !== source.spotify_id && type === source.type,
-          );
-        } else {
-          return [...prev, source];
-        }
-      });
-    }
-  };
+  const [
+    recentlyListenedConfigIsOpen,
+    { open: openRecentlyListenedConfig, close: closeRecentlyListenedConfig },
+  ] = useDisclosure(false);
 
   const searchText = searchProps?.searchText ?? uncontrolledSearchText;
   const setSearchText = searchProps?.setSearchText ?? setUncontrolledSearchText;
@@ -164,11 +147,8 @@ export const SpotifySourceSelectionModal = ({
         >
           <StaticSourceCard
             type="LIKED_SONGS"
-            isSelected={selectedSources.some(
-              ({ type }) => type === "LIKED_SONGS",
-            )}
             onClick={() => {
-              handleSourceClick({
+              onSelect({
                 type: "LIKED_SONGS",
                 title: "Liked Songs",
                 spotify_id: "",
@@ -176,31 +156,29 @@ export const SpotifySourceSelectionModal = ({
               });
             }}
           />
-          <Popover.Root>
+          <Popover.Root
+            open={recentlyListenedConfigIsOpen}
+            onOpenChange={(open) =>
+              open
+                ? openRecentlyListenedConfig()
+                : closeRecentlyListenedConfig()
+            }
+          >
             <Popover.Trigger>
-              <StaticSourceCard
-                type="RECENTLY_PLAYED"
-                isSelected={selectedSources.some(
-                  ({ type }) => type === "RECENTLY_PLAYED",
-                )}
-                onClick={() => {
-                  handleSourceClick({
-                    type: "RECENTLY_PLAYED",
-                    title: "Recently Played",
-                    spotify_id: "",
-                    image_url: "",
-                  });
-                }}
-              />
+              <StaticSourceCard type="RECENTLY_PLAYED" />
             </Popover.Trigger>
             <RecentlyListenedConfigPopover
               onSave={(config) => {
-                handleSourceClick({
+                onSelect({
                   type: "RECENTLY_PLAYED",
                   title: "Recently Listened",
                   spotify_id: "",
                   image_url: "",
+                  additionalConfig: {
+                    ...config,
+                  },
                 });
+                closeRecentlyListenedConfig();
               }}
             />
           </Popover.Root>
@@ -281,8 +259,8 @@ export const SpotifySourceSelectionModal = ({
                     <SpotifyComponents.SearchResult
                       type="track"
                       item={track}
-                      onClick={() => {
-                        handleSourceClick({
+                      onClick={() =>
+                        onSelect({
                           spotify_id: track.id,
                           type: "TRACK",
                           title: track.name,
@@ -291,11 +269,8 @@ export const SpotifySourceSelectionModal = ({
                               images: track.album.images,
                               minimumSize: 50,
                             })?.url ?? "",
-                        });
-                      }}
-                      isSelected={selectedSources.some(
-                        (source) => source.spotify_id === track.id,
-                      )}
+                        })
+                      }
                     />
                   ))}
                 </Grid>
@@ -317,13 +292,6 @@ export const SpotifySourceSelectionModal = ({
           </Flex>
         )}
       </ScrollArea>
-      <Dialog.Close
-        onClick={() => {
-          onSelect(selectedSources);
-        }}
-      >
-        <Button>Select</Button>
-      </Dialog.Close>
     </Dialog.Content>
   );
 };

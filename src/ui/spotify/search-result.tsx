@@ -12,7 +12,7 @@ type SearchResultProps<T extends ItemType> = {
   type: T;
   item: SpotifySearchItem<T>;
   imageSize?: number;
-  isSelected: boolean;
+  isSelected?: boolean;
 } & Pick<ButtonProps, "color" | "variant" | "onClick"> &
   HTMLAttributes<HTMLButtonElement>;
 
@@ -20,7 +20,7 @@ export const SearchResult = <T extends ItemType>({
   type,
   item,
   imageSize = 50,
-  isSelected,
+  isSelected = false,
   ...rest
 }: SearchResultProps<T>) => {
   const displayData = getSpotifySearchResultDisplayData<T>({

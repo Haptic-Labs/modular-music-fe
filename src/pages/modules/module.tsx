@@ -3,7 +3,9 @@ import { ModulesQueries } from "../../queries";
 import { Button, Card, Dialog, Grid, Heading, Text } from "@radix-ui/themes";
 import { SpotifyComponents } from "../../ui";
 import { PlusIcon } from "@radix-ui/react-icons";
-import { SpotifySourceSelectionModal } from "../../components";
+import { SourceConfig, SpotifySourceSelectionModal } from "../../components";
+import { useDisclosure } from "@mantine/hooks";
+import { Database } from "../../types";
 
 export const ModulePage = () => {
   const { moduleId } = useParams();
@@ -15,6 +17,7 @@ export const ModulePage = () => {
       enabled: !!moduleId,
     },
   );
+  const [isOpen, { open, close }] = useDisclosure(false);
 
   return (
     <div
@@ -53,7 +56,10 @@ export const ModulePage = () => {
             </div>
           </Card>
         ))}
-        <Dialog.Root>
+        <Dialog.Root
+          open={isOpen}
+          onOpenChange={(newVal) => (newVal ? open() : close())}
+        >
           <Dialog.Trigger>
             <Button
               variant="soft"
@@ -71,7 +77,14 @@ export const ModulePage = () => {
             </Button>
           </Dialog.Trigger>
           <SpotifySourceSelectionModal
-            onSelect={(source) => console.log(source)}
+            onSelect={<
+              T extends Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"],
+            >(
+              source: SourceConfig<T>,
+            ) => {
+              console.log(source);
+              close();
+            }}
           />
         </Dialog.Root>
       </Grid>
