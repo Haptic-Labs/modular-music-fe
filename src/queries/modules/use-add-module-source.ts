@@ -9,6 +9,7 @@ import { modulesMutationKeys, modulesQueryKeys } from "./keys";
 import { ModuleSourcesResponse } from "./use-module-sources";
 import { Compulsory } from "ts-toolbelt/out/Object/Compulsory";
 import { Optional } from "ts-toolbelt/out/Object/Optional";
+import { UseRecentlyListenedConfigResponse } from "./use-recently-listened-config";
 
 type AddBasicSourceRequest =
   Database["public"]["Tables"]["module_sources"]["Insert"];
@@ -61,22 +62,32 @@ export const useAddBasicModuleSourceMutation = <E = unknown, C = unknown>(
   });
 };
 
-const convertRecentlyListenedResponseToSource = (
+const parseAddRecentlyListenedResponse = (
   response: AddRecentlyListenedResponse,
-): ModuleSourcesResponse[number] => ({
-  id: response.source_id,
-  module_id: response.module_id,
-  type: response.type,
-  spotify_id: response.spotify_id,
-  created_at: response.created_at ?? null,
-  updated_at: response.updated_at ?? null,
-  deleted_at: response.deleted_at ?? null,
-  limit: response.limit ?? null,
-  image_url: response.image_url,
-  title: response.title,
+): {
+  source: Database["public"]["Tables"]["module_sources"]["Row"];
+  config: Database["public"]["Tables"]["recently_played_source_configs"]["Row"];
+} => ({
+  source: {
+    id: response.source_id,
+    module_id: response.module_id,
+    type: response.type,
+    spotify_id: response.spotify_id,
+    created_at: response.created_at ?? null,
+    updated_at: response.updated_at ?? null,
+    deleted_at: response.deleted_at ?? null,
+    limit: response.limit ?? null,
+    image_url: response.image_url,
+    title: response.title,
+  },
+  config: {
+    id: response.config_id,
+    created_at: response.config_created_at,
+    interval: response.interval,
+    quantity: response.quantity,
+    updated_at: response.config_updated_at ?? null,
+  },
 });
-
-// TODO: convertRecentlyListenedResponseToConfig
 
 type AddRecentlyListenedIO =
   Database["public"]["Functions"]["UpsertModuleSource:RecentlyListened"];
@@ -112,15 +123,26 @@ export const useAddRecentlyListenedSource = <E = unknown, C = unknown>(
     },
     ...options,
     onSuccess: (res, ...rest) => {
+      const { source, config } = parseAddRecentlyListenedResponse(res);
       queryClient.setQueriesData<ModuleSourcesResponse>(
         {
           queryKey: modulesQueryKeys.moduleSources({ moduleId: res.module_id }),
           exact: false,
         },
         (data) => {
-          if (!data) return [convertRecentlyListenedResponseToSource(res)];
-          return [...data, convertRecentlyListenedResponseToSource(res)];
+          if (!data) return [source];
+          return [...data, source];
         },
+      );
+
+      queryClient.setQueriesData<UseRecentlyListenedConfigResponse>(
+        {
+          queryKey: modulesQueryKeys.recentlyListenedConfig({
+            sourceId: res.config_id,
+          }),
+          exact: false,
+        },
+        config,
       );
 
       return options?.onSuccess?.(res, ...rest);
