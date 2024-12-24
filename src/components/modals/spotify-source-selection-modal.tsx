@@ -22,9 +22,8 @@ import { Database, RecentlyListenedConfig } from "../../types";
 import { Cross1Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
 import { SpotifyQueries } from "../../queries";
-import { SpotifyComponents } from "../../ui";
+import { SpotifyComponents } from "../../components";
 import { getSmallestSpotifyImage } from "../../utils";
-import { StaticSourceCard } from "../../ui/spotify";
 import { colors } from "../../theme/colors";
 import { RecentlyListenedConfigPopover } from "../popovers";
 
@@ -145,7 +144,7 @@ export const SpotifySourceSelectionModal = ({
             borderBottom: `1px solid ${colors.grayDark.gray7}`,
           }}
         >
-          <StaticSourceCard
+          <SpotifyComponents.StaticSourceCard
             type="LIKED_SONGS"
             onClick={() => {
               onSelect({
@@ -165,7 +164,7 @@ export const SpotifySourceSelectionModal = ({
             }
           >
             <Popover.Trigger>
-              <StaticSourceCard type="RECENTLY_PLAYED" />
+              <SpotifyComponents.StaticSourceCard type="RECENTLY_PLAYED" />
             </Popover.Trigger>
             <RecentlyListenedConfigPopover
               onSave={(config) => {

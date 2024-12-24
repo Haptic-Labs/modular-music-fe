@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../providers";
 import { Database, LimitedQueryOptions } from "../../types";
-import { modulesQueryKeys } from "./query-keys";
+import { modulesQueryKeys } from "./keys";
 
 export type ModuleSourcesRequest = {
   moduleId: string;
 };
 
-type ModuleSourcesResponse =
+export type ModuleSourcesResponse =
   Database["public"]["Tables"]["module_sources"]["Row"][];
 
 export const useModuleSourcesQuery = <E = unknown, D = ModuleSourcesResponse>(

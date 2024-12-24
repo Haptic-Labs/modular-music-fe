@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Database, LimitedQueryOptions } from "../../types";
-import { modulesQueryKeys } from "./query-keys";
+import { modulesQueryKeys } from "./keys";
 import { useAuth } from "../../providers";
 
 export type UserModulesRequest = {

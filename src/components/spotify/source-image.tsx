@@ -1,6 +1,6 @@
 import { HTMLAttributes } from "react";
 import { Database } from "../../types";
-import { LikedSongsIcon, RecentlyListenedIcon } from "../vectors";
+import { LikedSongsIcon, RecentlyListenedIcon } from "../../ui/vectors";
 import { colors } from "../../theme/colors";
 import {
   IconMusic,

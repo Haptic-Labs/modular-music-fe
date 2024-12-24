@@ -1,9 +1,21 @@
 import { useParams } from "react-router-dom";
 import { ModulesQueries } from "../../queries";
-import { Button, Card, Dialog, Grid, Heading, Text } from "@radix-ui/themes";
-import { SpotifyComponents } from "../../ui";
-import { PlusIcon } from "@radix-ui/react-icons";
-import { SourceConfig, SpotifySourceSelectionModal } from "../../components";
+import {
+  Button,
+  Card,
+  Dialog,
+  Flex,
+  Grid,
+  Heading,
+  IconButton,
+  Text,
+} from "@radix-ui/themes";
+import { Cross1Icon, PlusIcon } from "@radix-ui/react-icons";
+import {
+  SourceConfig,
+  SpotifySourceSelectionModal,
+  SpotifyComponents,
+} from "../../components";
 import { useDisclosure } from "@mantine/hooks";
 import { Database } from "../../types";
 
@@ -31,6 +43,8 @@ export const ModulePage = () => {
           initial: "2",
           sm: "2",
           xs: "1",
+          lg: "3",
+          xl: "4",
         }}
         gap="2"
       >
@@ -40,20 +54,24 @@ export const ModulePage = () => {
               display: "flex",
               gap: 8,
               alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            <SpotifyComponents.SourceImage
-              src={source.image_url}
-              sourceType={source.type}
-              css={{
-                width: 20,
-                height: 20,
-                padding: 4,
-              }}
-            />
-            <div>
+            <Flex gap="2" align="center">
+              <SpotifyComponents.SourceImage
+                src={source.image_url}
+                sourceType={source.type}
+                css={{
+                  width: 20,
+                  height: 20,
+                  padding: 4,
+                }}
+              />
               <Text>{source.title}</Text>
-            </div>
+            </Flex>
+            <IconButton color="gray" variant="ghost" mr="1" onClick={() => {}}>
+              <Cross1Icon />
+            </IconButton>
           </Card>
         ))}
         <Dialog.Root
