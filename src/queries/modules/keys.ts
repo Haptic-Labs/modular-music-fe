@@ -7,15 +7,40 @@ import {
 import { UserModulesRequest } from "./use-user-modules";
 
 export const modulesQueryKeys = {
-  userModules: (request: UserModulesRequest) => ["user-modules", request],
-  moduleSources: (request: ModuleSourcesRequest) => ["module-sources", request],
-  recentlyListenedConfig: (request: UseRecentlyListenedConfigRequest) => [
-    "recently-listened-config",
-    request,
-  ],
+  userModules: (request?: UserModulesRequest) => {
+    const key: (string | UserModulesRequest)[] = ["user-modules"];
+    if (request) {
+      key.push(request);
+    }
+    return key;
+  },
+  moduleSources: (request?: ModuleSourcesRequest) => {
+    const key: (string | ModuleSourcesRequest)[] = ["module-sources"];
+    if (request) {
+      key.push(request);
+    }
+    return key;
+  },
+  recentlyListenedConfig: (request?: UseRecentlyListenedConfigRequest) => {
+    const key: (string | UseRecentlyListenedConfigRequest)[] = [
+      "recently-listened-config",
+    ];
+    if (request) {
+      key.push(request);
+    }
+    return key;
+  },
   multipleRecentlyListenedConfigs: (
-    request: UseMultipleRecentlyListenedConfigsRequest,
-  ) => ["recently-listened-config", request],
+    request?: UseMultipleRecentlyListenedConfigsRequest,
+  ) => {
+    const key: (string | UseMultipleRecentlyListenedConfigsRequest)[] = [
+      "recently-listened-config",
+    ];
+    if (request) {
+      key.push(request);
+    }
+    return key;
+  },
 };
 
 export const modulesMutationKeys = {

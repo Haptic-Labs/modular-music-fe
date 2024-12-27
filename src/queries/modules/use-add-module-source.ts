@@ -1,9 +1,5 @@
-import {
-  useMutation,
-  UseMutationOptions,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { Database } from "../../types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Database, LimitedMutationOptions } from "../../types";
 import { useAuth } from "../../providers";
 import { modulesMutationKeys, modulesQueryKeys } from "./keys";
 import { ModuleSourcesResponse } from "./use-module-sources";
@@ -18,7 +14,7 @@ type AddBasicSourceResponse =
   Database["public"]["Tables"]["module_sources"]["Row"];
 
 export const useAddBasicModuleSourceMutation = <E = unknown, C = unknown>(
-  options?: UseMutationOptions<
+  options?: LimitedMutationOptions<
     AddBasicSourceResponse,
     E,
     AddBasicSourceRequest,
@@ -86,6 +82,7 @@ const parseAddRecentlyListenedResponse = (
     interval: response.interval,
     quantity: response.quantity,
     updated_at: response.config_updated_at ?? null,
+    deleted_at: response.deleted_at ?? null,
   },
 });
 
@@ -98,7 +95,7 @@ type AddRecentlyListenedResponse = Optional<
 >;
 
 export const useAddRecentlyListenedSource = <E = unknown, C = unknown>(
-  options?: UseMutationOptions<
+  options?: LimitedMutationOptions<
     AddRecentlyListenedResponse,
     E,
     AddRecentlyListenedRequest,

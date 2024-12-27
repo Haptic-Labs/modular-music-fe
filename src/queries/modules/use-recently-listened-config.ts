@@ -28,6 +28,7 @@ export const useRecentlyListenedConfigQuery = <
         .from("recently_played_source_configs")
         .select("*")
         .eq("id", request.sourceId)
+        .is("deleted_at", null)
         .throwOnError()
         .maybeSingle();
 
@@ -67,6 +68,7 @@ export const useMultipleRecentlyListenedConfigsQuery = <
         .from("recently_played_source_configs")
         .select("*")
         .in("id", request.sourceIds)
+        .is("deleted_at", null)
         .throwOnError();
 
       const { data: res } = await query;

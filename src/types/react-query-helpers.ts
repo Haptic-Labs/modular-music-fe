@@ -1,4 +1,9 @@
-import { QueryKey, UseQueryOptions } from "@tanstack/react-query";
+import {
+  MutationKey,
+  QueryKey,
+  UseMutationOptions,
+  UseQueryOptions,
+} from "@tanstack/react-query";
 
 export type LimitedQueryOptions<
   ResponseData = unknown,
@@ -8,4 +13,14 @@ export type LimitedQueryOptions<
 > = Omit<
   UseQueryOptions<ResponseData, Error, TransformedData, Key>,
   "queryKey" | "queryFn"
+>;
+
+export type LimitedMutationOptions<
+  ResponseData = unknown,
+  Error = unknown,
+  Request = unknown,
+  Context = unknown,
+> = Omit<
+  UseMutationOptions<ResponseData, Error, Request, Context>,
+  "mutationFn" | "mutationKey"
 >;

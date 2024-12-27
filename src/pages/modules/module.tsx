@@ -43,6 +43,8 @@ export const ModulePage = () => {
     ModulesQueries.useAddRecentlyListenedSource();
   const { mutate: saveNewSource } =
     ModulesQueries.useAddBasicModuleSourceMutation();
+  const { mutate: removeSource } =
+    ModulesQueries.useRemoveModuleSourceMutation();
   const [isOpen, { open, close }] = useDisclosure(false);
 
   return (
@@ -88,7 +90,7 @@ export const ModulePage = () => {
                     padding: 4,
                   }}
                 />
-                <Flex gap="1" direction="column">
+                <Flex direction="column">
                   <Text>{source.title}</Text>
                   {recentlyListenedConfig && (
                     <Text
@@ -102,7 +104,9 @@ export const ModulePage = () => {
                 color="gray"
                 variant="ghost"
                 mr="1"
-                onClick={() => {}}
+                onClick={() => {
+                  removeSource({ sourceId: source.id });
+                }}
               >
                 <Cross1Icon />
               </IconButton>

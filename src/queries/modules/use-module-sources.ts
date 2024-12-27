@@ -23,6 +23,7 @@ export const useModuleSourcesQuery = <E = unknown, D = ModuleSourcesResponse>(
         .from("module_sources")
         .select("*")
         .eq("module_id", request.moduleId)
+        .is("deleted_at", null)
         .throwOnError();
 
       const { data: res } = await query;

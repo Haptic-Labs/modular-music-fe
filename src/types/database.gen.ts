@@ -224,6 +224,7 @@ export type Database = {
       recently_played_source_configs: {
         Row: {
           created_at: string
+          deleted_at: string | null
           id: string
           interval: Database["public"]["Enums"]["RECENTLY_PLAYED_INTERVAL"]
           quantity: number
@@ -231,6 +232,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
           id: string
           interval: Database["public"]["Enums"]["RECENTLY_PLAYED_INTERVAL"]
           quantity: number
@@ -238,6 +240,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
           id?: string
           interval?: Database["public"]["Enums"]["RECENTLY_PLAYED_INTERVAL"]
           quantity?: number
