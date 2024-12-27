@@ -29,6 +29,20 @@ export const ModulePage = () => {
       enabled: !!moduleId,
     },
   );
+  const recentlyListenedSourceIds = sources
+    .filter((source) => source.type === "RECENTLY_PLAYED")
+    .map((source) => source.id);
+  const { data: recentlyListenedConfigs } =
+    ModulesQueries.useMultipleRecentlyListenedConfigsQuery(
+      {
+        sourceIds: recentlyListenedSourceIds,
+      },
+      { enabled: !!recentlyListenedSourceIds.length },
+    );
+  const { mutate: saveRecentlyListened } =
+    ModulesQueries.useAddRecentlyListenedSource();
+  const { mutate: saveNewSource } =
+    ModulesQueries.useAddBasicModuleSourceMutation();
   const [isOpen, { open, close }] = useDisclosure(false);
 
   return (
@@ -48,32 +62,53 @@ export const ModulePage = () => {
         }}
         gap="2"
       >
-        {sources.map((source) => (
-          <Card
-            css={{
-              display: "flex",
-              gap: 8,
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Flex gap="2" align="center">
-              <SpotifyComponents.SourceImage
-                src={source.image_url}
-                sourceType={source.type}
-                css={{
-                  width: 20,
-                  height: 20,
-                  padding: 4,
-                }}
-              />
-              <Text>{source.title}</Text>
-            </Flex>
-            <IconButton color="gray" variant="ghost" mr="1" onClick={() => {}}>
-              <Cross1Icon />
-            </IconButton>
-          </Card>
-        ))}
+        {sources.map((source) => {
+          const recentlyListenedConfig = recentlyListenedSourceIds.includes(
+            source.id,
+          )
+            ? recentlyListenedConfigs?.find((config) => config.id === source.id)
+            : undefined;
+          return (
+            <Card
+              key={source.id}
+              css={{
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Flex gap="2" align="center">
+                <SpotifyComponents.SourceImage
+                  src={source.image_url}
+                  sourceType={source.type}
+                  css={{
+                    width: 20,
+                    height: 20,
+                    padding: 4,
+                  }}
+                />
+                <Flex gap="1" direction="column">
+                  <Text>{source.title}</Text>
+                  {recentlyListenedConfig && (
+                    <Text
+                      color="gray"
+                      size="2"
+                    >{`Last ${recentlyListenedConfig.quantity.toLocaleString()} ${recentlyListenedConfig.interval.toLowerCase()}`}</Text>
+                  )}
+                </Flex>
+              </Flex>
+              <IconButton
+                color="gray"
+                variant="ghost"
+                mr="1"
+                onClick={() => {}}
+              >
+                <Cross1Icon />
+              </IconButton>
+            </Card>
+          );
+        })}
         <Dialog.Root
           open={isOpen}
           onOpenChange={(newVal) => (newVal ? open() : close())}
@@ -98,10 +133,27 @@ export const ModulePage = () => {
             onSelect={<
               T extends Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"],
             >(
-              source: SourceConfig<T>,
+              source: Omit<SourceConfig<T>, "module_id">,
             ) => {
-              // TODO: add saving and cache update or refetch
-              console.log(source);
+              if (!moduleId) return;
+              if (
+                source.type === "RECENTLY_PLAYED" &&
+                !!source.additionalConfig
+              ) {
+                saveRecentlyListened({
+                  p_module_id: moduleId,
+                  p_interval: source.additionalConfig.interval,
+                  p_quantity: source.additionalConfig.quantity,
+                });
+              } else if (source.type !== "RECENTLY_PLAYED") {
+                saveNewSource({
+                  module_id: moduleId,
+                  spotify_id: source.spotify_id,
+                  image_url: source.image_url,
+                  title: source.title,
+                  type: source.type,
+                });
+              }
               close();
             }}
           />

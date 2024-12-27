@@ -1,6 +1,9 @@
 import { Database } from "../../types";
 import { ModuleSourcesRequest } from "./use-module-sources";
-import { UseRecentlyListenedConfigRequest } from "./use-recently-listened-config";
+import {
+  UseMultipleRecentlyListenedConfigsRequest,
+  UseRecentlyListenedConfigRequest,
+} from "./use-recently-listened-config";
 import { UserModulesRequest } from "./use-user-modules";
 
 export const modulesQueryKeys = {
@@ -10,6 +13,9 @@ export const modulesQueryKeys = {
     "recently-listened-config",
     request,
   ],
+  multipleRecentlyListenedConfigs: (
+    request: UseMultipleRecentlyListenedConfigsRequest,
+  ) => ["recently-listened-config", request],
 };
 
 export const modulesMutationKeys = {

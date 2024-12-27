@@ -55,7 +55,7 @@ type SpotifySourceSelectionModalProps = {
   };
   // singleSelect?: boolean; // TODO: implement multi-selection later
   onSelect: <T extends Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]>(
-    source: SourceConfig<T>,
+    source: Omit<SourceConfig<T>, "module_id">,
   ) => void;
 } & Omit<Dialog.ContentProps, "onSelect">;
 
@@ -256,6 +256,7 @@ export const SpotifySourceSelectionModal = ({
                 <Grid columns="2" gap="2" className="results">
                   {resultsToDisplay.tracks.items.map((track) => (
                     <SpotifyComponents.SearchResult
+                      key={track.id}
                       type="track"
                       item={track}
                       onClick={() =>
