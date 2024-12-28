@@ -8,16 +8,19 @@ import {
   Grid,
   Heading,
   IconButton,
+  Popover,
   Text,
 } from "@radix-ui/themes";
-import { Cross1Icon, PlusIcon } from "@radix-ui/react-icons";
+import { Cross1Icon, Pencil1Icon, PlusIcon } from "@radix-ui/react-icons";
 import {
   SourceConfig,
   SpotifySourceSelectionModal,
   SpotifyComponents,
+  ModuleSourceCard,
 } from "../../components";
 import { useDisclosure } from "@mantine/hooks";
 import { Database } from "../../types";
+import { RecentlyListenedConfigPopover } from "../../components/popovers";
 
 export const ModulePage = () => {
   const { moduleId } = useParams();
@@ -64,55 +67,80 @@ export const ModulePage = () => {
         }}
         gap="2"
       >
-        {sources.map((source) => {
-          const recentlyListenedConfig = recentlyListenedSourceIds.includes(
-            source.id,
-          )
-            ? recentlyListenedConfigs?.find((config) => config.id === source.id)
-            : undefined;
-          return (
-            <Card
-              key={source.id}
-              css={{
-                display: "flex",
-                gap: 8,
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Flex gap="2" align="center">
-                <SpotifyComponents.SourceImage
-                  src={source.image_url}
-                  sourceType={source.type}
-                  css={{
-                    width: 20,
-                    height: 20,
-                    padding: 4,
-                  }}
-                />
-                <Flex direction="column">
-                  <Text>{source.title}</Text>
-                  {recentlyListenedConfig && (
-                    <Text
-                      color="gray"
-                      size="2"
-                    >{`Last ${recentlyListenedConfig.quantity.toLocaleString()} ${recentlyListenedConfig.interval.toLowerCase()}`}</Text>
-                  )}
-                </Flex>
-              </Flex>
-              <IconButton
-                color="gray"
-                variant="ghost"
-                mr="1"
-                onClick={() => {
-                  removeSource({ sourceId: source.id });
-                }}
-              >
-                <Cross1Icon />
-              </IconButton>
-            </Card>
-          );
-        })}
+        {sources.map(
+          (source) => (
+            <ModuleSourceCard source={source} />
+          ),
+          //   {
+          //   const recentlyListenedConfig = recentlyListenedSourceIds.includes(
+          //     source.id,
+          //   )
+          //     ? recentlyListenedConfigs?.find((config) => config.id === source.id)
+          //     : undefined;
+          //   return (
+          //     <Card
+          //       key={source.id}
+          //       css={{
+          //         display: "flex",
+          //         gap: 8,
+          //         alignItems: "center",
+          //         justifyContent: "space-between",
+          //       }}
+          //     >
+          //       <Flex gap="2" align="center">
+          //         <SpotifyComponents.SourceImage
+          //           src={source.image_url}
+          //           sourceType={source.type}
+          //           css={{
+          //             width: 20,
+          //             height: 20,
+          //             padding: 4,
+          //           }}
+          //         />
+          //         <Flex direction="column">
+          //           <Text>{source.title}</Text>
+          //           {!!recentlyListenedConfig && (
+          //             <Text
+          //               color="gray"
+          //               size="2"
+          //             >{`Last ${recentlyListenedConfig.quantity.toLocaleString()} ${recentlyListenedConfig.interval.toLowerCase()}`}</Text>
+          //           )}
+          //         </Flex>
+          //       </Flex>
+          //       <Flex gap="4" mr="2" align="center">
+          //         {!!recentlyListenedConfig && (
+          //           <Popover.Root>
+          //             <Popover.Trigger>
+          //               <IconButton color="gray" variant="ghost">
+          //                 <Pencil1Icon />
+          //               </IconButton>
+          //             </Popover.Trigger>
+          //             <RecentlyListenedConfigPopover
+          //               onSave={({ interval, quantity }) => {
+          //                 saveRecentlyListened({
+          //                   p_interval: interval,
+          //                   p_quantity: quantity,
+          //                   p_module_id: source.module_id,
+          //                   p_source_id: source.id,
+          //                 });
+          //               }}
+          //             />
+          //           </Popover.Root>
+          //         )}
+          //         <IconButton
+          //           color="gray"
+          //           variant="ghost"
+          //           onClick={() => {
+          //             removeSource({ sourceId: source.id });
+          //           }}
+          //         >
+          //           <Cross1Icon />
+          //         </IconButton>
+          //       </Flex>
+          //     </Card>
+          //   );
+          // }
+        )}
         <Dialog.Root
           open={isOpen}
           onOpenChange={(newVal) => (newVal ? open() : close())}
@@ -130,7 +158,9 @@ export const ModulePage = () => {
               radius="large"
             >
               <PlusIcon width={25} height={25} />
-              <Text>Add Source</Text>
+              <Text size="3" weight="regular">
+                Add Source
+              </Text>
             </Button>
           </Dialog.Trigger>
           <SpotifySourceSelectionModal

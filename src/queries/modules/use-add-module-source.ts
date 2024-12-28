@@ -128,6 +128,14 @@ export const useAddRecentlyListenedSource = <E = unknown, C = unknown>(
         },
         (data) => {
           if (!data) return [source];
+
+          const existingSource = data.find(
+            (source) => source.id === res.source_id,
+          );
+          if (existingSource)
+            return data.map((existingSource) =>
+              existingSource.id === source.id ? source : existingSource,
+            );
           return [...data, source];
         },
       );
