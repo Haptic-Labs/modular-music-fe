@@ -63,6 +63,10 @@ export const RecentlyListenedConfigPopover = ({
     form.resetDirty();
   }, [JSON.stringify(initialConfig)]);
 
+  useEffect(() => {
+    form.validateField("quantity");
+  }, [form.values.interval]);
+
   return (
     <Popover.Content {...rest}>
       <Form
