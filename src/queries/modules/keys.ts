@@ -1,4 +1,5 @@
 import { Database } from "../../types";
+import { ModuleActionsRequest } from "./use-module-actions";
 import { ModuleSourcesRequest } from "./use-module-sources";
 import {
   UseMultipleRecentlyListenedConfigsRequest,
@@ -16,6 +17,13 @@ export const modulesQueryKeys = {
   },
   moduleSources: (request?: ModuleSourcesRequest) => {
     const key: (string | ModuleSourcesRequest)[] = ["module-sources"];
+    if (request) {
+      key.push(request);
+    }
+    return key;
+  },
+  moduleActions: (request?: ModuleActionsRequest) => {
+    const key: (string | ModuleActionsRequest)[] = ["module-actions"];
     if (request) {
       key.push(request);
     }
