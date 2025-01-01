@@ -281,26 +281,47 @@ export type Database = {
           updated_at: string | null
         }
       }
-      UpsertModuleFilterAction: {
-        Args: {
-          p_module_id: string
-          p_order: number
-          p_sources: Json[]
-          p_id?: string
-        }
-        Returns: {
-          config: Json
-          created_at: string
-          deleted_at: string | null
-          id: string
-          image_url: string | null
-          module_id: string
-          order: number
-          title: string
-          type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"]
-          updated_at: string | null
-        }
-      }
+      UpsertModuleFilterAction:
+        | {
+            Args: {
+              p_module_id: string
+              p_order: number
+              p_sources: Database["public"]["CompositeTypes"]["SimpleSource"][]
+              p_id?: string
+            }
+            Returns: {
+              config: Json
+              created_at: string
+              deleted_at: string | null
+              id: string
+              image_url: string | null
+              module_id: string
+              order: number
+              title: string
+              type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"]
+              updated_at: string | null
+            }
+          }
+        | {
+            Args: {
+              p_module_id: string
+              p_order: number
+              p_sources: Json[]
+              p_id?: string
+            }
+            Returns: {
+              config: Json
+              created_at: string
+              deleted_at: string | null
+              id: string
+              image_url: string | null
+              module_id: string
+              order: number
+              title: string
+              type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"]
+              updated_at: string | null
+            }
+          }
       UpsertModuleLimitAction: {
         Args: {
           p_module_id: string
@@ -383,6 +404,11 @@ export type Database = {
         config_updated_at: string | null
         quantity: number | null
         interval: Database["public"]["Enums"]["RECENTLY_PLAYED_INTERVAL"] | null
+      }
+      SimpleSource: {
+        source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"] | null
+        spotify_id: string | null
+        limit: number | null
       }
     }
   }
