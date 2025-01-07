@@ -47,40 +47,148 @@ export type Database = {
   }
   public: {
     Tables: {
-      module_actions: {
+      combine_action_sources: {
         Row: {
-          config: Json
+          action_id: string
           created_at: string
           deleted_at: string | null
           id: string
-          image_url: string | null
+          limit: number | null
+          source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
+          spotify_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          action_id: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          limit?: number | null
+          source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
+          spotify_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          action_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          limit?: number | null
+          source_type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
+          spotify_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "combine_action_sources_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "module_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      filter_action_sources: {
+        Row: {
+          action_id: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          limit: number | null
+          source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
+          spotify_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          action_id: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          limit?: number | null
+          source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
+          spotify_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          action_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          limit?: number | null
+          source_type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
+          spotify_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "filter_action_sources_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "module_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      limit_action_configs: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          limit: number
+          type: Database["public"]["Enums"]["LIMIT_TYPE"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id: string
+          limit: number
+          type?: Database["public"]["Enums"]["LIMIT_TYPE"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          limit?: number
+          type?: Database["public"]["Enums"]["LIMIT_TYPE"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "limit_action_configs_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "module_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_actions: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
           module_id: string
           order: number
-          title: string
           type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"]
           updated_at: string | null
         }
         Insert: {
-          config: Json
           created_at?: string
           deleted_at?: string | null
           id?: string
-          image_url?: string | null
           module_id: string
           order: number
-          title: string
           type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"]
           updated_at?: string | null
         }
         Update: {
-          config?: Json
           created_at?: string
           deleted_at?: string | null
           id?: string
-          image_url?: string | null
           module_id?: string
           order?: number
-          title?: string
           type?: Database["public"]["Enums"]["MODULE_ACTION_TYPE"]
           updated_at?: string | null
         }
@@ -256,112 +364,79 @@ export type Database = {
           },
         ]
       }
+      shuffle_action_configs: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          shuffle_type: Database["public"]["Enums"]["SHUFFLE_TYPE"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id: string
+          shuffle_type: Database["public"]["Enums"]["SHUFFLE_TYPE"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          shuffle_type?: Database["public"]["Enums"]["SHUFFLE_TYPE"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shuffle_action_configs_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "module_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      UpsertModuleCombineAction: {
+      UpsertModuleActionCombine: {
         Args: {
-          p_module_id: string
-          p_order: number
-          p_sources: Json[]
-          p_id?: string
-        }
-        Returns: {
-          config: Json
-          created_at: string
-          deleted_at: string | null
-          id: string
-          image_url: string | null
           module_id: string
           order: number
-          title: string
-          type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"]
-          updated_at: string | null
+          sources: Database["public"]["CompositeTypes"]["CombineSourceUpsertRequest"][]
+          id?: string
         }
+        Returns: Database["public"]["CompositeTypes"]["ModuleAction:Combine"]
       }
-      UpsertModuleFilterAction:
-        | {
-            Args: {
-              p_module_id: string
-              p_order: number
-              p_sources: Database["public"]["CompositeTypes"]["SimpleSource"][]
-              p_id?: string
-            }
-            Returns: {
-              config: Json
-              created_at: string
-              deleted_at: string | null
-              id: string
-              image_url: string | null
-              module_id: string
-              order: number
-              title: string
-              type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"]
-              updated_at: string | null
-            }
-          }
-        | {
-            Args: {
-              p_module_id: string
-              p_order: number
-              p_sources: Json[]
-              p_id?: string
-            }
-            Returns: {
-              config: Json
-              created_at: string
-              deleted_at: string | null
-              id: string
-              image_url: string | null
-              module_id: string
-              order: number
-              title: string
-              type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"]
-              updated_at: string | null
-            }
-          }
-      UpsertModuleLimitAction: {
+      UpsertModuleActionFilter: {
         Args: {
-          p_module_id: string
-          p_order: number
-          p_limit: number
-          p_source_type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
-          p_id?: string
-        }
-        Returns: {
-          config: Json
-          created_at: string
-          deleted_at: string | null
-          id: string
-          image_url: string | null
           module_id: string
           order: number
-          title: string
-          type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"]
-          updated_at: string | null
+          sources: Database["public"]["CompositeTypes"]["FilterSourceUpsertRequest"][]
+          id?: string
         }
+        Returns: Database["public"]["CompositeTypes"]["ModuleAction:Filter"]
       }
-      UpsertModuleShuffleAction: {
+      UpsertModuleActionLimit: {
         Args: {
-          p_module_id: string
-          p_order: number
-          p_shuffle_type: Database["public"]["Enums"]["SHUFFLE_TYPE"]
-          p_id?: string
-        }
-        Returns: {
-          config: Json
-          created_at: string
-          deleted_at: string | null
-          id: string
-          image_url: string | null
           module_id: string
           order: number
-          title: string
-          type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"]
-          updated_at: string | null
+          limit: number
+          id?: string
+          type?: Database["public"]["Enums"]["LIMIT_TYPE"]
         }
+        Returns: Database["public"]["CompositeTypes"]["ModuleAction:Limit"]
+      }
+      UpsertModuleActionShuffle: {
+        Args: {
+          module_id: string
+          order: number
+          id?: string
+          shuffle_type?: Database["public"]["Enums"]["SHUFFLE_TYPE"]
+        }
+        Returns: Database["public"]["CompositeTypes"]["ModuleAction:Shuffle"]
       }
       "UpsertModuleSource:RecentlyListened": {
         Args: {
@@ -374,6 +449,7 @@ export type Database = {
       }
     }
     Enums: {
+      LIMIT_TYPE: "OVERALL" | "PER_SOURCE"
       MODULE_ACTION_TYPE: "FILTER" | "SHUFFLE" | "LIMIT" | "COMBINE" | "MODULE"
       MODULE_OUTPUT_MODE: "REPLACE" | "APPEND" | "PREPEND"
       RECENTLY_PLAYED_INTERVAL: "DAYS" | "WEEKS" | "MONTHS"
@@ -388,6 +464,83 @@ export type Database = {
         | "LIKED_SONGS"
     }
     CompositeTypes: {
+      CombineSourceUpsertRequest: {
+        id: string | null
+        action_id: string | null
+        source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"] | null
+        spotify_id: string | null
+        limit: number | null
+      }
+      FilterSourceUpsertRequest: {
+        id: string | null
+        action_id: string | null
+        source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"] | null
+        spotify_id: string | null
+        limit: number | null
+      }
+      "ModuleAction:Combine": {
+        id: string | null
+        module_id: string | null
+        order: number | null
+        type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"] | null
+        created_at: string | null
+        updated_at: string | null
+        deleted_at: string | null
+        sources:
+          | Database["public"]["Tables"]["combine_action_sources"]["Row"][]
+          | null
+      }
+      "ModuleAction:Filter": {
+        id: string | null
+        module_id: string | null
+        order: number | null
+        type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"] | null
+        created_at: string | null
+        updated_at: string | null
+        deleted_at: string | null
+        sources:
+          | Database["public"]["Tables"]["filter_action_sources"]["Row"][]
+          | null
+      }
+      "ModuleAction:Limit": {
+        id: string | null
+        module_id: string | null
+        order: number | null
+        type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"] | null
+        created_at: string | null
+        updated_at: string | null
+        deleted_at: string | null
+        config:
+          | Database["public"]["CompositeTypes"]["ModuleAction:Limit:Config"]
+          | null
+      }
+      "ModuleAction:Limit:Config": {
+        id: string | null
+        created_at: string | null
+        updated_at: string | null
+        limit: number | null
+        type: Database["public"]["Enums"]["LIMIT_TYPE"] | null
+        deleted_at: string | null
+      }
+      "ModuleAction:Shuffle": {
+        id: string | null
+        module_id: string | null
+        order: number | null
+        type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"] | null
+        created_at: string | null
+        updated_at: string | null
+        deleted_at: string | null
+        config:
+          | Database["public"]["CompositeTypes"]["ModuleAction:Shuffle:Config"]
+          | null
+      }
+      "ModuleAction:Shuffle:Config": {
+        id: string | null
+        created_at: string | null
+        updated_at: string | null
+        shuffle_type: Database["public"]["Enums"]["SHUFFLE_TYPE"] | null
+        deleted_at: string | null
+      }
       recently_listened_source_with_config: {
         source_id: string | null
         module_id: string | null

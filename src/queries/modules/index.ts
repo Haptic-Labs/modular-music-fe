@@ -5,3 +5,7 @@ export * from "./use-module-actions";
 export * from "./use-add-module-source";
 export * from "./use-recently-listened-config";
 export * from "./use-remove-module-source";
+export * from "./use-add-module-combine-action";
+export * from "./use-add-module-filter-action";
+export * from "./use-add-module-limit-action";
+export * from "./use-add-module-shuffle-action";

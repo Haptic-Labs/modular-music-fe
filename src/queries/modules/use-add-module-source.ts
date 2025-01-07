@@ -110,7 +110,8 @@ export const useAddRecentlyListenedSource = <E = unknown, C = unknown>(
     mutationFn: async (req) => {
       const query = supabaseClient
         .schema("public")
-        .rpc("UpsertModuleSource:RecentlyListened", req);
+        .rpc("UpsertModuleSource:RecentlyListened", req)
+        .throwOnError();
 
       const { data: res } = await query;
 

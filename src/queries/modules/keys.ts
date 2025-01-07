@@ -56,4 +56,7 @@ export const modulesMutationKeys = {
     type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"],
   ) => (type ? ["module-sources", "add", type] : ["module-sources", "add"]),
   removeModuleSource: ["module-sources", "remove"],
+  addModuleAction: (
+    type?: Database["public"]["Enums"]["MODULE_ACTION_TYPE"],
+  ) => (type ? ["module-actions", "add", type] : ["module-actions", "add"]),
 };
