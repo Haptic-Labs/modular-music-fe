@@ -11,7 +11,7 @@ type AddCombineActionRequest =
 type AddCombineActionResponse =
   Database["public"]["Functions"]["UpsertModuleActionCombine"]["Returns"];
 
-export const useAddModuleCombineAction = <E = unknown, C = unknown>(
+export const useAddModuleCombineActionMutation = <E = unknown, C = unknown>(
   options?: LimitedMutationOptions<
     AddCombineActionResponse,
     E,
@@ -38,6 +38,7 @@ export const useAddModuleCombineAction = <E = unknown, C = unknown>(
     },
     ...options,
     onSuccess: (res, ...rest) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { sources: _, ...action } = res;
       const filteredAction = removeNullishFromObject(action);
 

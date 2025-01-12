@@ -11,7 +11,7 @@ type AddFilterActionRequest =
 type AddFilterActionResponse =
   Database["public"]["Functions"]["UpsertModuleActionFilter"]["Returns"];
 
-export const useAddModuleFilterAction = <E = unknown, C = unknown>(
+export const useAddModuleFilterActionMutation = <E = unknown, C = unknown>(
   options?: LimitedMutationOptions<
     AddFilterActionResponse,
     E,
@@ -38,6 +38,7 @@ export const useAddModuleFilterAction = <E = unknown, C = unknown>(
     },
     ...options,
     onSuccess: (res, ...rest) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { sources: _, ...action } = res;
       const filteredAction = removeNullishFromObject(action);
 

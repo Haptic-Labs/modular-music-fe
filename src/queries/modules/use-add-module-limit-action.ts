@@ -11,7 +11,7 @@ type AddLimitActionRequest =
 type AddLimitActionResponse =
   Database["public"]["Functions"]["UpsertModuleActionLimit"]["Returns"];
 
-export const useAddModuleLimitAction = <E = unknown, C = unknown>(
+export const useAddModuleLimitActionMutation = <E = unknown, C = unknown>(
   options?: LimitedMutationOptions<
     AddLimitActionResponse,
     E,
@@ -38,6 +38,7 @@ export const useAddModuleLimitAction = <E = unknown, C = unknown>(
     },
     ...options,
     onSuccess: (res, ...rest) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { config: _, ...action } = res;
       const filteredAction = removeNullishFromObject(action);
 

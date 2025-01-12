@@ -11,7 +11,7 @@ type AddShuffleActionRequest =
 type AddShuffleActionResponse =
   Database["public"]["Functions"]["UpsertModuleActionShuffle"]["Returns"];
 
-export const useAddModuleShuffleAction = <E = unknown, C = unknown>(
+export const useAddModuleShuffleActionMutation = <E = unknown, C = unknown>(
   options?: LimitedMutationOptions<
     AddShuffleActionResponse,
     E,
@@ -38,6 +38,7 @@ export const useAddModuleShuffleAction = <E = unknown, C = unknown>(
     },
     ...options,
     onSuccess: (res, ...rest) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { config: _, ...action } = res;
       const filteredAction = removeNullishFromObject(action);
 

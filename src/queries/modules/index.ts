@@ -9,3 +9,4 @@ export * from "./use-add-module-combine-action";
 export * from "./use-add-module-filter-action";
 export * from "./use-add-module-limit-action";
 export * from "./use-add-module-shuffle-action";
+export * from "./use-add-module-action-mutations";
