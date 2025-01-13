@@ -1,7 +1,7 @@
 import { Dialog, Grid } from "@radix-ui/themes";
-import { Database } from "../../types";
-import { colors } from "../../theme/colors";
-import { ModuleActionCard } from "../actions";
+import { Database } from "../../../types";
+import { colors } from "../../../theme/colors";
+import { ModuleActionCard } from "../../actions";
 import { useState } from "react";
 
 interface ActionTypeUpsertRequestMap
@@ -72,6 +72,7 @@ export const ModuleActionSelectionModal = ({
             isSelected={selectedActionType === "COMBINE"}
           />
         </Grid>
+        <div></div>
       </div>
     </Dialog.Content>
   );

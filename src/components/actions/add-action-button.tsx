@@ -2,7 +2,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { ModulesQueries } from "../../queries";
 import { Button, Dialog, Text } from "@radix-ui/themes";
 import { PlusIcon } from "@radix-ui/react-icons";
-import { ModuleActionSelectionModal } from "../modals/module-action-selection-modal";
+import { ModuleActionSelectionModal } from "../modals";
 
 type AddActionButtonProps = {
   moduleId: string;

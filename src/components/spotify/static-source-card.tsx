@@ -1,18 +1,19 @@
 import { Button, ButtonProps, Text } from "@radix-ui/themes";
-import { forwardRef, HTMLAttributes } from "react";
+import { forwardRef, HTMLAttributes, ReactNode } from "react";
 import { SourceImage } from "./source-image";
 
 type StaticSourceCardProps = {
   type: "LIKED_SONGS" | "RECENTLY_PLAYED";
   imageSize?: number;
   isSelected?: boolean;
+  subtitle?: ReactNode;
 } & Pick<ButtonProps, "color" | "variant" | "onClick"> &
   HTMLAttributes<HTMLButtonElement>;
 
 export const StaticSourceCard = forwardRef<
   HTMLButtonElement,
   StaticSourceCardProps
->(({ type, imageSize = 30, isSelected = false, ...rest }, ref) => {
+>(({ type, imageSize = 30, isSelected = false, subtitle, ...rest }, ref) => {
   const title =
     type === "LIKED_SONGS" ? "My Liked Songs" : "My Recently Played Songs";
 
@@ -51,6 +52,7 @@ export const StaticSourceCard = forwardRef<
       >
         {title}
       </Text>
+      {subtitle}
     </Button>
   );
 });
