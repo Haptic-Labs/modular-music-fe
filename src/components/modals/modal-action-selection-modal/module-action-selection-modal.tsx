@@ -3,6 +3,7 @@ import { Database } from "../../../types";
 import { colors } from "../../../theme/colors";
 import { ModuleActionCard } from "../../actions";
 import { useState } from "react";
+import { SpotifySourceSearch } from "../../spotify/spotify-source-search";
 
 interface ActionTypeUpsertRequestMap
   extends Record<Database["public"]["Enums"]["MODULE_ACTION_TYPE"], object> {
@@ -72,7 +73,7 @@ export const ModuleActionSelectionModal = ({
             isSelected={selectedActionType === "COMBINE"}
           />
         </Grid>
-        <div></div>
+        <SpotifySourceSearch title="Select Sources" />
       </div>
     </Dialog.Content>
   );

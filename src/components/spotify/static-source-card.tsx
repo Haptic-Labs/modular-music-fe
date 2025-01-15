@@ -1,4 +1,4 @@
-import { Button, ButtonProps, Text } from "@radix-ui/themes";
+import { Button, ButtonProps, Flex, Text } from "@radix-ui/themes";
 import { forwardRef, HTMLAttributes, ReactNode } from "react";
 import { SourceImage } from "./source-image";
 
@@ -13,7 +13,7 @@ type StaticSourceCardProps = {
 export const StaticSourceCard = forwardRef<
   HTMLButtonElement,
   StaticSourceCardProps
->(({ type, imageSize = 30, isSelected = false, subtitle, ...rest }, ref) => {
+>(({ type, imageSize = 24, isSelected = false, subtitle, ...rest }, ref) => {
   const title =
     type === "LIKED_SONGS" ? "My Liked Songs" : "My Recently Played Songs";
 
@@ -39,20 +39,27 @@ export const StaticSourceCard = forwardRef<
           height: imageSize,
           minHeight: imageSize,
           borderRadius: 8,
-          padding: 8,
         }}
         color={isSelected ? "white" : undefined}
       />
-      <Text
-        as="p"
-        truncate
-        css={{
-          maxWidth: "100%",
-        }}
-      >
-        {title}
-      </Text>
-      {subtitle}
+      <Flex direction="column" align="start">
+        <Text
+          as="p"
+          truncate
+          css={{
+            maxWidth: "100%",
+          }}
+        >
+          {title}
+        </Text>
+        {typeof subtitle === "string" ? (
+          <Text color="gray" size="1">
+            {subtitle}
+          </Text>
+        ) : (
+          subtitle
+        )}
+      </Flex>
     </Button>
   );
 });

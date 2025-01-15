@@ -3,6 +3,8 @@ import { Database } from "../../types";
 import { LikedSongsIcon, RecentlyListenedIcon } from "../../ui/vectors";
 import { colors } from "../../theme/colors";
 import {
+  IconHeart,
+  IconHeartFilled,
   IconMusic,
   IconPlaylist,
   IconProps,
@@ -34,7 +36,7 @@ export const SourceImage = <
 }: SourceImageProps<T, Src>) => {
   if (sourceType === "LIKED_SONGS") {
     const typedRest = rest as HTMLAttributes<SVGElement>;
-    return <LikedSongsIcon color={color} {...typedRest} />;
+    return <IconHeartFilled color={color} {...typedRest} />;
   } else if (sourceType === "RECENTLY_PLAYED") {
     const typedRest = rest as HTMLAttributes<SVGElement>;
     return <RecentlyListenedIcon color={color} {...typedRest} />;
@@ -45,13 +47,13 @@ export const SourceImage = <
     const typedRest = rest as IconProps;
     switch (sourceType) {
       case "TRACK":
-        return <IconMusic color={colors.greenDark.green5} {...typedRest} />;
+        return <IconMusic color={color} {...typedRest} />;
       case "ALBUM":
-        return <IconVinyl color={colors.greenDark.green5} {...typedRest} />;
+        return <IconVinyl color={color} {...typedRest} />;
       case "ARTIST":
-        return <IconUser color={colors.greenDark.green5} {...typedRest} />;
+        return <IconUser color={color} {...typedRest} />;
       case "PLAYLIST":
-        return <IconPlaylist color={colors.greenDark.green5} {...typedRest} />;
+        return <IconPlaylist color={color} {...typedRest} />;
     }
   }
 };
