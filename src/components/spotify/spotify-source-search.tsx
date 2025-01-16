@@ -2,11 +2,21 @@ import { ReactNode, useState } from "react";
 import { SpotifyQueries } from "../../queries";
 import { Database } from "../../types";
 import { useDebouncedValue, useDisclosure } from "@mantine/hooks";
-import { Grid, Popover, Text } from "@radix-ui/themes";
+import {
+  Button,
+  Grid,
+  IconButton,
+  Popover,
+  Text,
+  TextField,
+} from "@radix-ui/themes";
 import { SpotifyComponents } from "..";
 import { colors } from "../../theme/colors";
 import { getIntervalString } from "../../utils";
 import { RecentlyListenedConfigPopover } from "../popovers";
+import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { SourceImage } from "./source-image";
+import { SpotifySourceSearchPopover } from "../popovers/spotify-source-search-popover";
 
 type SpotifySearchedSourceConfig = {
   spotifyId: string;
@@ -57,9 +67,6 @@ export const SpotifySourceSearch = ({
     searchText,
     300,
   );
-  const searchQuery = SpotifyQueries.useSearchQuery({
-    query: debouncedSearchText,
-  });
 
   const [selectedSource, setSelectedSource] = useState<SelectedSource>();
   const [
@@ -77,7 +84,10 @@ export const SpotifySourceSearch = ({
       <Grid
         columns="2"
         gap="2"
-        css={{ borderBottom: `1px solid ${colors.grayDark.gray7}` }}
+        css={{
+          borderBottom: `1px solid ${colors.grayDark.gray7}`,
+          padding: "8px 0px",
+        }}
       >
         <SpotifyComponents.StaticSourceCard
           type="LIKED_SONGS"
@@ -85,9 +95,6 @@ export const SpotifySourceSearch = ({
             setSelectedSource({ sourceType: "LIKED_SONGS", config: {} })
           }
           isSelected={selectedSource?.sourceType === "LIKED_SONGS"}
-          css={{
-            minHeight: 55,
-          }}
         />
         <Popover.Root
           open={recentlyListenedConfigIsOpen}
@@ -104,9 +111,6 @@ export const SpotifySourceSearch = ({
                   ? `Last ${(selectedSource.config as SelectedSource<"RECENTLY_PLAYED">["config"]).quantity.toLocaleString()} ${getIntervalString((selectedSource.config as SelectedSource<"RECENTLY_PLAYED">["config"]).interval)}`
                   : undefined
               }
-              css={{
-                minHeight: 55,
-              }}
             />
           </Popover.Trigger>
           <RecentlyListenedConfigPopover
@@ -122,7 +126,58 @@ export const SpotifySourceSearch = ({
             }}
           />
         </Popover.Root>
+        <Popover.Root>
+          <Popover.Trigger>
+            {/* TODO: Make button height the same as above */}
+            <Button
+              variant="soft"
+              color="gray"
+              css={{
+                justifyContent: "start",
+                padding: 8,
+              }}
+            >
+              <SourceImage sourceType="PLAYLIST" />
+              <Text>Add Playlist</Text>
+            </Button>
+          </Popover.Trigger>
+          <SpotifySourceSearchPopover
+            type="playlist"
+            onSourceSelect={() => {}}
+          />
+        </Popover.Root>
       </Grid>
+      <div
+        css={{
+          padding: "8px 0px",
+        }}
+      >
+        <Text size="2" color="gray">
+          Search Spotify for other sources:
+        </Text>
+        <TextField.Root
+          value={searchText}
+          onChange={(e) => setSearchText(e.currentTarget.value)}
+        >
+          <TextField.Slot>
+            <MagnifyingGlassIcon />
+          </TextField.Slot>
+          {!!searchText && (
+            <TextField.Slot>
+              <IconButton
+                variant="ghost"
+                color="gray"
+                onClick={() => {
+                  setSearchText("");
+                  cancelSearchTextDebounce();
+                }}
+              >
+                <Cross2Icon />
+              </IconButton>
+            </TextField.Slot>
+          )}
+        </TextField.Root>
+      </div>
     </div>
   );
 };

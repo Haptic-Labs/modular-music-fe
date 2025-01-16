@@ -26,6 +26,12 @@ export const useSearchQuery = <
 ) => {
   const { spotifyClient } = useSoundify();
 
+  console.log("brayden-test", {
+    options,
+    condition1: options?.enabled !== false,
+    condition2: !!spotifyClient,
+  });
+
   return useQuery<QuerySearchResponse<T>, E, D>({
     queryKey: queryKeys.search<T>({
       query,
