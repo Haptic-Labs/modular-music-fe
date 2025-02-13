@@ -68,6 +68,10 @@
 
   /* Background color */
   --color-background: #fff;
+
+  /* Cursors */
+  --cursor-checkbox: pointer;
+  --cursor-button: pointer;
 }
 
 @supports (color: color(display-p3 1 1 1)) {
@@ -216,6 +220,10 @@
 
   /* Background */
   --color-background: #07090a;
+
+  /* Cursors */
+  --cursor-checkbox: pointer;
+  --cursor-button: pointer;
 }
 
 @supports (color: color(display-p3 1 1 1)) {
@@ -301,11 +309,11 @@
   margin: 0;
 }
 
-.rt-BaseButton:not([data-disabled="true"]) {
+.rt-BaseButton:not([data-disabled='true']) {
   cursor: pointer;
 }
 
-.rt-variant-ghost[data-override="inline-ghost"] {
+.rt-variant-ghost[data-override='inline-ghost'] {
   margin: 0;
   box-sizing: border-box;
   padding: 0px 16px;

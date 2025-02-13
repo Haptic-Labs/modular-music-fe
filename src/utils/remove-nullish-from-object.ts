@@ -12,7 +12,7 @@ export const removeNullishFromObject = <T extends object>(
 
   const filteredEntries = entries.reduce<[string, unknown][]>(
     (acc, [key, value]) => {
-      if (typeof value === "object") {
+      if (typeof value === "object" && value !== null) {
         acc.push([key, removeNullishFromObject(value)]);
       } else if (value !== undefined && value !== null) {
         acc.push([key, value]);

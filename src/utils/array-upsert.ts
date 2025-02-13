@@ -3,13 +3,16 @@ export const arrayUpsert = <T>(
   upsert: T extends symbol ? (oldItem: T) => T : T | ((oldItem: T) => T),
   predicate: (item: T) => boolean,
 ): T[] => {
-  return arr.reduce<T[]>((acc, curr) => {
-    if (predicate(curr)) {
-      acc.push(typeof upsert === "function" ? upsert(curr) : upsert);
+  let hasUpdated = false;
+  const updatedArr = arr.map((item) => {
+    if (predicate(item)) {
+      hasUpdated = true;
+      return typeof upsert === "function" ? upsert(item) : upsert;
     } else {
-      acc.push(curr);
+      return item;
     }
+  });
 
-    return acc;
-  }, []);
+  if (hasUpdated) return updatedArr;
+  return [...updatedArr, typeof upsert === "function" ? upsert() : upsert];
 };

@@ -43,7 +43,7 @@ type SpotifySourceSelectionFn = <
   source: SelectedSource<T>,
 ) => void | Promise<void>;
 
-type SelectedSource<
+export type SelectedSource<
   T extends
     Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"] = Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"],
 > = {
@@ -85,7 +85,6 @@ export const SpotifySourceSearch = ({
         columns="2"
         gap="2"
         css={{
-          borderBottom: `1px solid ${colors.grayDark.gray7}`,
           padding: "8px 0px",
         }}
       >
@@ -135,49 +134,28 @@ export const SpotifySourceSearch = ({
               css={{
                 justifyContent: "start",
                 padding: 8,
+                height: "max-content",
               }}
             >
               <SourceImage sourceType="PLAYLIST" />
-              <Text>Add Playlist</Text>
+              <Text as="p">Add Playlist</Text>
             </Button>
           </Popover.Trigger>
           <SpotifySourceSearchPopover
             type="playlist"
-            onSourceSelect={() => {}}
+            onSourceSelect={(playlistSource) => {
+              onSelect({
+                sourceType: "PLAYLIST",
+                config: {
+                  title: playlistSource.name,
+                  spotifyId: playlistSource.id,
+                  imageUrl: playlistSource.images[0]?.url,
+                },
+              });
+            }}
           />
         </Popover.Root>
       </Grid>
-      <div
-        css={{
-          padding: "8px 0px",
-        }}
-      >
-        <Text size="2" color="gray">
-          Search Spotify for other sources:
-        </Text>
-        <TextField.Root
-          value={searchText}
-          onChange={(e) => setSearchText(e.currentTarget.value)}
-        >
-          <TextField.Slot>
-            <MagnifyingGlassIcon />
-          </TextField.Slot>
-          {!!searchText && (
-            <TextField.Slot>
-              <IconButton
-                variant="ghost"
-                color="gray"
-                onClick={() => {
-                  setSearchText("");
-                  cancelSearchTextDebounce();
-                }}
-              >
-                <Cross2Icon />
-              </IconButton>
-            </TextField.Slot>
-          )}
-        </TextField.Root>
-      </div>
     </div>
   );
 };

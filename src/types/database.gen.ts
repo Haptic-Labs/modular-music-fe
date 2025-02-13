@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -55,6 +56,7 @@ export type Database = {
           limit: number | null
           source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
           spotify_id: string
+          title: string | null
           updated_at: string | null
         }
         Insert: {
@@ -65,6 +67,7 @@ export type Database = {
           limit?: number | null
           source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
           spotify_id: string
+          title?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -75,6 +78,7 @@ export type Database = {
           limit?: number | null
           source_type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
           spotify_id?: string
+          title?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -93,9 +97,11 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           id: string
+          image_url: string | null
           limit: number | null
           source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
           spotify_id: string
+          title: string | null
           updated_at: string | null
         }
         Insert: {
@@ -103,9 +109,11 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           id?: string
+          image_url?: string | null
           limit?: number | null
           source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
           spotify_id: string
+          title?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -113,9 +121,11 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           id?: string
+          image_url?: string | null
           limit?: number | null
           source_type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
           spotify_id?: string
+          title?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -400,6 +410,42 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      GetCombineAction: {
+        Args: {
+          actionId: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["ModuleAction:Combine"]
+      }
+      GetFilterAction: {
+        Args: {
+          actionId: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["ModuleAction:Filter"]
+      }
+      GetLimitAction: {
+        Args: {
+          actionId: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["ModuleAction:Limit"]
+      }
+      GetModuleActions: {
+        Args: {
+          moduleId: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["ModuleActions"]
+      }
+      GetShuffleAction: {
+        Args: {
+          actionId: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["ModuleAction:Shuffle"]
+      }
+      RemoveModuleAction: {
+        Args: {
+          actionId: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["RemoveModuleActionResponse"]
+      }
       UpsertModuleActionCombine: {
         Args: {
           module_id: string
@@ -430,10 +476,10 @@ export type Database = {
       }
       UpsertModuleActionShuffle: {
         Args: {
-          module_id: string
-          order: number
-          id?: string
-          shuffle_type?: Database["public"]["Enums"]["SHUFFLE_TYPE"]
+          moduleId: string
+          newOrder: number
+          actionId?: string
+          shuffleType?: Database["public"]["Enums"]["SHUFFLE_TYPE"]
         }
         Returns: Database["public"]["CompositeTypes"]["ModuleAction:Shuffle"]
       }
@@ -469,6 +515,7 @@ export type Database = {
         source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"] | null
         spotify_id: string | null
         limit: number | null
+        title: string | null
       }
       FilterSourceUpsertRequest: {
         id: string | null
@@ -476,6 +523,17 @@ export type Database = {
         source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"] | null
         spotify_id: string | null
         limit: number | null
+        title: string | null
+        image_url: string | null
+      }
+      ModuleAction: {
+        id: string | null
+        module_id: string | null
+        order: number | null
+        type: Database["public"]["Enums"]["MODULE_ACTION_TYPE"] | null
+        created_at: string | null
+        updated_at: string | null
+        deleted_at: string | null
       }
       "ModuleAction:Combine": {
         id: string | null
@@ -540,6 +598,20 @@ export type Database = {
         shuffle_type: Database["public"]["Enums"]["SHUFFLE_TYPE"] | null
         deleted_at: string | null
       }
+      ModuleActions: {
+        shuffleActions:
+          | Database["public"]["CompositeTypes"]["ModuleAction:Shuffle"][]
+          | null
+        filterActions:
+          | Database["public"]["CompositeTypes"]["ModuleAction:Filter"][]
+          | null
+        limitActions:
+          | Database["public"]["CompositeTypes"]["ModuleAction:Limit"][]
+          | null
+        combineActions:
+          | Database["public"]["CompositeTypes"]["ModuleAction:Combine"][]
+          | null
+      }
       recently_listened_source_with_config: {
         source_id: string | null
         module_id: string | null
@@ -557,10 +629,23 @@ export type Database = {
         quantity: number | null
         interval: Database["public"]["Enums"]["RECENTLY_PLAYED_INTERVAL"] | null
       }
+      RemoveModuleActionResponse: {
+        updated_actions:
+          | Database["public"]["Tables"]["module_actions"]["Row"][]
+          | null
+        module_id: string | null
+      }
       SimpleSource: {
         source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"] | null
         spotify_id: string | null
         limit: number | null
+      }
+      SpotifySource: {
+        spotify_id: string | null
+        source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"] | null
+        limit: number | null
+        title: string | null
+        image_url: string | null
       }
     }
   }

@@ -42,13 +42,15 @@ export const useAddModuleShuffleActionMutation = <E = unknown, C = unknown>(
       const { config: _, ...action } = res;
       const filteredAction = removeNullishFromObject(action);
 
-      if (!filteredAction.id) return options?.onSuccess?.(res, ...rest);
+      if (!filteredAction.module_id) return options?.onSuccess?.(res, ...rest);
+
+      const queryKey = modulesQueryKeys.moduleActions({
+        moduleId: filteredAction.module_id,
+      });
 
       queryClient.setQueriesData<ModuleActionsResponse>(
         {
-          queryKey: modulesQueryKeys.moduleActions({
-            moduleId: filteredAction?.id,
-          }),
+          queryKey,
           exact: false,
         },
         (data) => {
@@ -61,6 +63,8 @@ export const useAddModuleShuffleActionMutation = <E = unknown, C = unknown>(
           );
         },
       );
+
+      return options?.onSuccess?.(res, ...rest);
     },
   });
 };

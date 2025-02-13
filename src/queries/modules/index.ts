@@ -11,3 +11,4 @@ export * from "./use-add-module-limit-action";
 export * from "./use-add-module-shuffle-action";
 export * from "./use-add-module-action-mutations";
 export * from "./use-filter-action-sources";
+export * from "./use-remove-module-action";

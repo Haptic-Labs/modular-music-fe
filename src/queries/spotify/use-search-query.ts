@@ -1,20 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
-import { LimitedQueryOptions } from "../../types";
-import { queryKeys } from "./query-keys";
-import { useSoundify } from "../../providers";
-import { ItemType, search, SearchResponse } from "@soundify/web-api";
-import { AllItemTypes, ItemTypesToSearchResultKeys } from "./types";
-import { ALL_ITEM_TYPES } from "./constants";
+import { useQuery } from '@tanstack/react-query';
+import { LimitedQueryOptions } from '../../types';
+import { queryKeys } from './query-keys';
+import { useSoundify } from '../../providers';
+import { ItemType, search, SearchResponse } from '@soundify/web-api';
+import { AllItemTypes, ItemTypesToSearchResultKeys } from './types';
+import { ALL_ITEM_TYPES } from './constants';
 
 export type SearchRequest<T extends ItemType[] | ItemType = AllItemTypes> = {
   query: Parameters<typeof search<T>>[2];
   type?: T;
 };
 
-type QuerySearchResponse<T extends ItemType[] | ItemType = AllItemTypes> = Pick<
-  SearchResponse,
-  ItemTypesToSearchResultKeys<T>
->;
+type CorrectedSearchResponse = {
+  [K in keyof SearchResponse]?: Omit<SearchResponse[K], 'items'> & {
+    items: (SearchResponse[K]['items'][number] | null)[];
+  };
+};
+
+export type QuerySearchResponse<
+  T extends ItemType[] | ItemType = AllItemTypes,
+> = Pick<CorrectedSearchResponse, ItemTypesToSearchResultKeys<T>>;
 
 export const useSearchQuery = <
   T extends ItemType[] | ItemType = AllItemTypes,
@@ -25,12 +30,6 @@ export const useSearchQuery = <
   options?: LimitedQueryOptions<QuerySearchResponse<T>, E, D>,
 ) => {
   const { spotifyClient } = useSoundify();
-
-  console.log("brayden-test", {
-    options,
-    condition1: options?.enabled !== false,
-    condition2: !!spotifyClient,
-  });
 
   return useQuery<QuerySearchResponse<T>, E, D>({
     queryKey: queryKeys.search<T>({
@@ -43,6 +42,7 @@ export const useSearchQuery = <
         type ?? (ALL_ITEM_TYPES as T),
         query,
       );
+
       return res;
     },
     ...options,

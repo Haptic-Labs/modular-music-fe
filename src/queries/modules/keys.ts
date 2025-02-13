@@ -65,4 +65,5 @@ export const modulesMutationKeys = {
   addModuleAction: (
     type?: Database["public"]["Enums"]["MODULE_ACTION_TYPE"],
   ) => (type ? ["module-actions", "add", type] : ["module-actions", "add"]),
+  removeModuleAction: ["module-actions", "remove"],
 };

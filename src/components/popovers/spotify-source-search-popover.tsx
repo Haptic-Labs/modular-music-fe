@@ -7,6 +7,7 @@ import {
   ScrollArea,
   TextField,
   Text,
+  Spinner,
 } from "@radix-ui/themes";
 import { useState } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
@@ -31,7 +32,7 @@ export const SpotifySourceSearchPopover = <T extends ItemType>({
     300,
   );
 
-  const { data } = SpotifyQueries.useSearchQuery<
+  const { data, isLoading, isFetched } = SpotifyQueries.useSearchQuery<
     T,
     unknown,
     SpotifySearchItem<T>[]
@@ -43,7 +44,6 @@ export const SpotifySourceSearchPopover = <T extends ItemType>({
     {
       enabled: !!debouncedSearchText,
       select: (data): SpotifySearchItem<T>[] => {
-        console.log("brayden-test", { data });
         const key = type + "s";
         if (key in data)
           return data[key as keyof typeof data].items.filter((item) => !!item);
@@ -52,13 +52,32 @@ export const SpotifySourceSearchPopover = <T extends ItemType>({
     },
   );
 
+  const showResults = isLoading || isFetched;
+
   return (
-    <Popover.Content {...rest}>
-      <Text color="gray">Search for {type + "s"}:</Text>
+    <Popover.Content
+      css={{
+        maxWidth: "var(--radix-popover-trigger-width)",
+      }}
+      {...rest}
+    >
+      <span
+        css={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Text color="gray">Search for {type + "s"}:</Text>
+        <Popover.Close>
+          <IconButton variant="ghost" color="gray">
+            <Cross2Icon />
+          </IconButton>
+        </Popover.Close>
+      </span>
       <div
         css={{
           padding: "8px 0px",
-          borderBottom: `1px solid ${colors.grayDark.gray7}`,
         }}
       >
         <TextField.Root
@@ -84,23 +103,45 @@ export const SpotifySourceSearchPopover = <T extends ItemType>({
           )}
         </TextField.Root>
       </div>
-      <ScrollArea scrollbars="vertical" css={{ maxHeight: "min(250px, 90vh)" }}>
-        <Flex direction="column" gap="1" css={{ width: "min(350px, 90vw)" }}>
-          {data?.map((searchItem) => {
-            return (
-              <SearchResult
-                key={searchItem.id}
-                type={type}
-                item={searchItem}
-                onClick={() => {
-                  onSourceSelect(searchItem);
-                }}
-                imageSize={40}
-              />
-            );
-          })}
-        </Flex>
-      </ScrollArea>
+      {showResults &&
+        (isLoading ? (
+          <span
+            css={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              paddingTop: 16,
+            }}
+          >
+            <Spinner />
+          </span>
+        ) : (
+          <ScrollArea
+            scrollbars="vertical"
+            css={{
+              paddingTop: 8,
+              maxHeight: "min(250px, 90vh)",
+              borderTop: `1px solid ${colors.grayDark.gray7}`,
+            }}
+            type="auto"
+          >
+            <Flex direction="column" gap="1">
+              {data?.map((searchItem) => {
+                return (
+                  <SearchResult
+                    key={searchItem.id}
+                    type={type}
+                    item={searchItem}
+                    onClick={() => {
+                      onSourceSelect(searchItem);
+                    }}
+                    imageSize={40}
+                  />
+                );
+              })}
+            </Flex>
+          </ScrollArea>
+        ))}
     </Popover.Content>
   );
 };

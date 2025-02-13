@@ -1,10 +1,10 @@
 import { Database } from "../../types";
 import {
-  IconArrowMerge,
   IconArrowsShuffle,
   IconComponents,
   IconFilter,
   IconLayoutAlignTop,
+  IconMusicPlus,
   IconProps,
 } from "@tabler/icons-react";
 
@@ -23,6 +23,6 @@ export const ModuleActionIcon = ({ type, ...rest }: ModuleActionIconProps) => {
     case "MODULE":
       return <IconComponents {...rest} />;
     case "COMBINE":
-      return <IconArrowMerge {...rest} css={{ rotate: "90deg" }} />;
+      return <IconMusicPlus {...rest} />;
   }
 };
