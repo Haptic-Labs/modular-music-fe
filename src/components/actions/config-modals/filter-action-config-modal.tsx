@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Database } from '../../../types';
 import {
   Dialog,
@@ -11,6 +11,7 @@ import {
   Button,
   Popover,
   CheckboxGroup,
+  Spinner,
 } from '@radix-ui/themes';
 import {
   ArrowLeftIcon,
@@ -28,6 +29,9 @@ import { ALL_ITEM_TYPES } from '../../../queries/spotify/constants';
 import { titleCase } from '../../../utils';
 import { colors } from '../../../theme/colors';
 import { AnimatePresence, motion } from 'motion/react';
+import { keepPreviousData } from '@tanstack/react-query';
+
+const MotionDialogContent = motion(Dialog.Content);
 
 type FilterActionConfigModalProps = {
   onSave: (
@@ -36,6 +40,7 @@ type FilterActionConfigModalProps = {
 };
 
 export const FilterActionConfigModal = () => {
+  const [lastResultCount, setLastResultCount] = useState(0);
   const [selectedSources, setSelectedSources] = useState<
     Database['public']['Functions']['UpsertModuleActionFilter']['Args']['sources']
   >([]);
@@ -48,6 +53,8 @@ export const FilterActionConfigModal = () => {
   const [filteredTypes, setFilteredTypes] =
     useState<ItemType[]>(ALL_ITEM_TYPES);
 
+  const textFieldRef = useRef<HTMLInputElement>(null);
+
   const spotifySearchQuery = useSearchQuery(
     {
       query: debouncedSearchText,
@@ -57,11 +64,25 @@ export const FilterActionConfigModal = () => {
           ? undefined
           : filteredTypes,
     },
-    { enabled: !!debouncedSearchText },
+    {
+      enabled: !!debouncedSearchText,
+      placeholderData:
+        searchText && lastResultCount !== 0 ? keepPreviousData : undefined,
+    },
   );
 
+  const totalSearchedSources = spotifySearchQuery.data?.playlists?.items.length;
+  const showLoader =
+    (searchText !== debouncedSearchText && !!searchText) ||
+    spotifySearchQuery.isFetching;
+  const showOnlyLoader = showLoader && !totalSearchedSources;
+
+  useEffect(() => {
+    setLastResultCount(totalSearchedSources ?? 0);
+  }, [totalSearchedSources]);
+
   return (
-    <Dialog.Content
+    <MotionDialogContent
       maxHeight='90vh'
       maxWidth='none'
       minWidth='min(600px, 90vw)'
@@ -72,8 +93,16 @@ export const FilterActionConfigModal = () => {
         flexDirection: 'column',
         gap: 12,
       }}
+      initial={{
+        height: showOnlyLoader || !totalSearchedSources ? 650 : 'auto',
+        minHeight: showOnlyLoader || !totalSearchedSources ? 650 : 'none',
+      }}
+      animate={{
+        height: showOnlyLoader || !totalSearchedSources ? 650 : 'auto',
+        minHeight: showOnlyLoader || !totalSearchedSources ? 650 : 'none',
+      }}
     >
-      <Flex>
+      <Flex height='100%'>
         <div css={{ flexGrow: 1 }}>
           <Dialog.Title as='h3' size='4' css={{ height: 20 }}>
             Select Filter Sources:
@@ -121,6 +150,7 @@ export const FilterActionConfigModal = () => {
             />
           </Grid>
           <TextField.Root
+            ref={textFieldRef}
             placeholder='Search Spotify for more sources...'
             value={searchText}
             onChange={(e) => setSearchText(e.currentTarget.value)}
@@ -133,12 +163,7 @@ export const FilterActionConfigModal = () => {
               <Popover.Root>
                 <Popover.Trigger>
                   <IconButton
-                    variant={
-                      // filteredTypes.length === 0 ||
-                      // filteredTypes.length === ALL_ITEM_TYPES.length
-                      //   ? 'soft'
-                      'ghost'
-                    }
+                    variant={'ghost'}
                     size='1'
                     css={{ margin: 0 }}
                     color={
@@ -173,226 +198,273 @@ export const FilterActionConfigModal = () => {
               <IconButton
                 variant='ghost'
                 color='gray'
-                onClick={() => setSearchText('')}
+                onClick={() => {
+                  setSearchText('');
+                  textFieldRef.current?.focus();
+                }}
                 css={{ margin: 0 }}
               >
                 <Cross1Icon />
               </IconButton>
             </TextField.Slot>
           </TextField.Root>
-          <ScrollArea
-            scrollbars='vertical'
-            css={{
-              height: '100%',
-              maxWidth: 'min(550px, 85vw)',
-            }}
-          >
-            {!!spotifySearchQuery.data?.playlists?.items.length &&
-              (selectedType === 'playlist' || selectedType === undefined) && (
-                <>
-                  <Flex
-                    align='center'
-                    justify={selectedType === undefined ? 'between' : 'start'}
-                    mb='1'
-                    gap='2'
-                  >
-                    {selectedType === 'playlist' && (
-                      <IconButton
-                        variant='ghost'
-                        css={{ margin: 0 }}
-                        onClick={() => setSelectedType(undefined)}
-                      >
-                        <ArrowLeftIcon />
-                      </IconButton>
-                    )}
-                    <Text as='p' weight='bold'>
-                      Playlists
-                    </Text>
-                    {selectedType === undefined && (
-                      <Button
-                        css={{ margin: 0 }}
-                        variant='ghost'
-                        onClick={() => setSelectedType('playlist')}
-                      >
-                        See All
-                      </Button>
-                    )}
-                  </Flex>
-                  <Grid columns='2' gap='2' mb='2'>
-                    {spotifySearchQuery.data?.playlists.items
-                      .filter(Boolean)
-                      .slice(0, selectedType === 'playlist' ? undefined : 6)
-                      .map((playlist) => {
-                        if (!playlist) return null;
-                        const owners = playlist.owner.display_name ?? undefined;
-                        return (
-                          <FilterConfigModalSourceButton
-                            key={playlist.id}
-                            imageSrc={playlist.images[0]?.url ?? ''}
-                            title={playlist.name}
-                            subtitle={owners}
-                          />
-                        );
-                      })}
-                  </Grid>
-                </>
+          {!totalSearchedSources || showOnlyLoader ? (
+            <div
+              css={{
+                paddingTop: '45%',
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              {showLoader ? (
+                <Spinner size='3' />
+              ) : (
+                <Text as='p' color='gray'>
+                  No search results to display
+                </Text>
               )}
-            {!!spotifySearchQuery.data?.artists?.items.length &&
-              (selectedType === 'artist' || selectedType === undefined) && (
-                <>
-                  <Flex
-                    align='center'
-                    justify={selectedType === undefined ? 'between' : 'start'}
-                    mb='1'
-                    gap='2'
-                  >
-                    {selectedType === 'artist' && (
-                      <IconButton
-                        variant='ghost'
-                        css={{ margin: 0 }}
-                        onClick={() => setSelectedType(undefined)}
-                      >
-                        <ArrowLeftIcon />
-                      </IconButton>
-                    )}
-                    <Text as='p' weight='bold'>
-                      Artists
-                    </Text>
-                    {selectedType === undefined && (
-                      <Button
-                        css={{ margin: 0 }}
-                        variant='ghost'
-                        onClick={() => setSelectedType('artist')}
-                      >
-                        See All
-                      </Button>
-                    )}
-                  </Flex>
-                  <Grid columns='2' gap='2' mb='2'>
-                    {spotifySearchQuery.data?.artists.items
-                      .filter(Boolean)
-                      .slice(0, selectedType === 'artist' ? undefined : 6)
-                      .map((artist) => {
-                        if (!artist) return null;
+            </div>
+          ) : (
+            <ScrollArea
+              scrollbars='vertical'
+              css={{
+                height: '100%',
+                maxWidth: 'min(550px, 85vw)',
+                position: 'relative',
+              }}
+            >
+              {!!spotifySearchQuery.data?.playlists?.items.length &&
+                (selectedType === 'playlist' || selectedType === undefined) && (
+                  <>
+                    <Flex
+                      align='center'
+                      justify={selectedType === undefined ? 'between' : 'start'}
+                      mb='1'
+                      gap='2'
+                    >
+                      {selectedType === 'playlist' && (
+                        <IconButton
+                          variant='ghost'
+                          css={{ margin: 0 }}
+                          onClick={() => setSelectedType(undefined)}
+                        >
+                          <ArrowLeftIcon />
+                        </IconButton>
+                      )}
+                      <Text as='p' weight='bold'>
+                        Playlists
+                      </Text>
+                      {selectedType === undefined && (
+                        <Button
+                          css={{ margin: 0 }}
+                          variant='ghost'
+                          onClick={() => setSelectedType('playlist')}
+                        >
+                          See All
+                        </Button>
+                      )}
+                    </Flex>
+                    <Grid columns='2' gap='2' mb='2'>
+                      {spotifySearchQuery.data?.playlists.items
+                        .filter(Boolean)
+                        .slice(0, selectedType === 'playlist' ? undefined : 6)
+                        .map((playlist) => {
+                          if (!playlist) return null;
+                          const owners =
+                            playlist.owner.display_name ?? undefined;
+                          return (
+                            <FilterConfigModalSourceButton
+                              key={playlist.id}
+                              imageSrc={playlist.images[0]?.url ?? ''}
+                              title={playlist.name}
+                              subtitle={owners}
+                            />
+                          );
+                        })}
+                    </Grid>
+                  </>
+                )}
+              {!!spotifySearchQuery.data?.artists?.items.length &&
+                (selectedType === 'artist' || selectedType === undefined) && (
+                  <>
+                    <Flex
+                      align='center'
+                      justify={selectedType === undefined ? 'between' : 'start'}
+                      mb='1'
+                      gap='2'
+                    >
+                      {selectedType === 'artist' && (
+                        <IconButton
+                          variant='ghost'
+                          css={{ margin: 0 }}
+                          onClick={() => setSelectedType(undefined)}
+                        >
+                          <ArrowLeftIcon />
+                        </IconButton>
+                      )}
+                      <Text as='p' weight='bold'>
+                        Artists
+                      </Text>
+                      {selectedType === undefined && (
+                        <Button
+                          css={{ margin: 0 }}
+                          variant='ghost'
+                          onClick={() => setSelectedType('artist')}
+                        >
+                          See All
+                        </Button>
+                      )}
+                    </Flex>
+                    <Grid columns='2' gap='2' mb='2'>
+                      {spotifySearchQuery.data?.artists.items
+                        .filter(Boolean)
+                        .slice(0, selectedType === 'artist' ? undefined : 6)
+                        .map((artist) => {
+                          if (!artist) return null;
 
-                        return (
-                          <FilterConfigModalSourceButton
-                            key={artist.id}
-                            imageSrc={artist.images[0]?.url ?? ''}
-                            title={artist.name}
-                            subtitle={`${artist.followers.total.toLocaleString()} Followers`}
-                          />
-                        );
-                      })}
-                  </Grid>
-                </>
-              )}
+                          return (
+                            <FilterConfigModalSourceButton
+                              key={artist.id}
+                              imageSrc={artist.images[0]?.url ?? ''}
+                              title={artist.name}
+                              subtitle={`${artist.followers.total.toLocaleString()} Followers`}
+                            />
+                          );
+                        })}
+                    </Grid>
+                  </>
+                )}
 
-            {!!spotifySearchQuery.data?.albums?.items.length &&
-              (selectedType === 'album' || selectedType === undefined) && (
-                <>
-                  <Flex
-                    align='center'
-                    justify={selectedType === undefined ? 'between' : 'start'}
-                    mb='1'
-                    gap='2'
+              {!!spotifySearchQuery.data?.albums?.items.length &&
+                (selectedType === 'album' || selectedType === undefined) && (
+                  <>
+                    <Flex
+                      align='center'
+                      justify={selectedType === undefined ? 'between' : 'start'}
+                      mb='1'
+                      gap='2'
+                    >
+                      {selectedType === 'album' && (
+                        <IconButton
+                          variant='ghost'
+                          css={{ margin: 0 }}
+                          onClick={() => setSelectedType(undefined)}
+                        >
+                          <ArrowLeftIcon />
+                        </IconButton>
+                      )}
+                      <Text as='p' weight='bold'>
+                        Albums
+                      </Text>
+                      {selectedType === undefined && (
+                        <Button
+                          css={{ margin: 0 }}
+                          variant='ghost'
+                          onClick={() => setSelectedType('album')}
+                        >
+                          See All
+                        </Button>
+                      )}
+                    </Flex>
+                    <Grid columns='2' gap='2' mb='2'>
+                      {spotifySearchQuery.data?.albums.items
+                        .filter(Boolean)
+                        .slice(0, selectedType === 'album' ? undefined : 6)
+                        .map((album) => {
+                          if (!album) return null;
+                          const artists = album.artists
+                            .map((artist) => artist.name)
+                            .join(', ');
+                          return (
+                            <FilterConfigModalSourceButton
+                              key={album.id}
+                              imageSrc={album.images[0]?.url}
+                              title={album.name}
+                              subtitle={artists}
+                            />
+                          );
+                        })}
+                    </Grid>
+                  </>
+                )}
+              {!!spotifySearchQuery.data?.tracks?.items.length &&
+                (selectedType === 'track' || selectedType === undefined) && (
+                  <>
+                    <Flex
+                      align='center'
+                      justify={selectedType === undefined ? 'between' : 'start'}
+                      mb='1'
+                      gap='2'
+                    >
+                      {selectedType === 'track' && (
+                        <IconButton
+                          variant='ghost'
+                          css={{ margin: 0 }}
+                          onClick={() => setSelectedType(undefined)}
+                        >
+                          <ArrowLeftIcon />
+                        </IconButton>
+                      )}
+                      <Text as='p' weight='bold'>
+                        Tracks
+                      </Text>
+                      {selectedType === undefined && (
+                        <Button
+                          css={{ margin: 0 }}
+                          variant='ghost'
+                          onClick={() => setSelectedType('track')}
+                        >
+                          See All
+                        </Button>
+                      )}
+                    </Flex>
+                    <Grid columns='2' gap='2' mb='2'>
+                      {spotifySearchQuery.data?.tracks.items
+                        .filter(Boolean)
+                        .slice(0, selectedType === 'track' ? undefined : 6)
+                        .map((track) => {
+                          if (!track) return null;
+                          const artists = track.artists
+                            .map((artist) => artist.name)
+                            .join(', ');
+                          return (
+                            <FilterConfigModalSourceButton
+                              key={track.id}
+                              imageSrc={track.album.images[0]?.url}
+                              title={track.name}
+                              subtitle={artists}
+                            />
+                          );
+                        })}
+                    </Grid>
+                  </>
+                )}
+              <AnimatePresence>
+                {showLoader && (
+                  <motion.div
+                    css={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: colors.grayA.grayA10,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'progress',
+                    }}
+                    initial={{ opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                   >
-                    {selectedType === 'album' && (
-                      <IconButton
-                        variant='ghost'
-                        css={{ margin: 0 }}
-                        onClick={() => setSelectedType(undefined)}
-                      >
-                        <ArrowLeftIcon />
-                      </IconButton>
-                    )}
-                    <Text as='p' weight='bold'>
-                      Albums
-                    </Text>
-                    {selectedType === undefined && (
-                      <Button
-                        css={{ margin: 0 }}
-                        variant='ghost'
-                        onClick={() => setSelectedType('album')}
-                      >
-                        See All
-                      </Button>
-                    )}
-                  </Flex>
-                  <Grid columns='2' gap='2' mb='2'>
-                    {spotifySearchQuery.data?.albums.items
-                      .filter(Boolean)
-                      .slice(0, selectedType === 'album' ? undefined : 6)
-                      .map((album) => {
-                        if (!album) return null;
-                        const artists = album.artists
-                          .map((artist) => artist.name)
-                          .join(', ');
-                        return (
-                          <FilterConfigModalSourceButton
-                            key={album.id}
-                            imageSrc={album.images[0]?.url}
-                            title={album.name}
-                            subtitle={artists}
-                          />
-                        );
-                      })}
-                  </Grid>
-                </>
-              )}
-            {!!spotifySearchQuery.data?.tracks?.items.length &&
-              (selectedType === 'track' || selectedType === undefined) && (
-                <>
-                  <Flex
-                    align='center'
-                    justify={selectedType === undefined ? 'between' : 'start'}
-                    mb='1'
-                    gap='2'
-                  >
-                    {selectedType === 'track' && (
-                      <IconButton
-                        variant='ghost'
-                        css={{ margin: 0 }}
-                        onClick={() => setSelectedType(undefined)}
-                      >
-                        <ArrowLeftIcon />
-                      </IconButton>
-                    )}
-                    <Text as='p' weight='bold'>
-                      Tracks
-                    </Text>
-                    {selectedType === undefined && (
-                      <Button
-                        css={{ margin: 0 }}
-                        variant='ghost'
-                        onClick={() => setSelectedType('track')}
-                      >
-                        See All
-                      </Button>
-                    )}
-                  </Flex>
-                  <Grid columns='2' gap='2' mb='2'>
-                    {spotifySearchQuery.data?.tracks.items
-                      .filter(Boolean)
-                      .slice(0, selectedType === 'track' ? undefined : 6)
-                      .map((track) => {
-                        if (!track) return null;
-                        const artists = track.artists
-                          .map((artist) => artist.name)
-                          .join(', ');
-                        return (
-                          <FilterConfigModalSourceButton
-                            key={track.id}
-                            imageSrc={track.album.images[0]?.url}
-                            title={track.name}
-                            subtitle={artists}
-                          />
-                        );
-                      })}
-                  </Grid>
-                </>
-              )}
-          </ScrollArea>
+                    <Spinner size='3' />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </ScrollArea>
+          )}
         </div>
         <AnimatePresence>
           {!!selectedSources.length && (
@@ -444,6 +516,6 @@ export const FilterActionConfigModal = () => {
           )}
         </AnimatePresence>
       </Flex>
-    </Dialog.Content>
+    </MotionDialogContent>
   );
 };
