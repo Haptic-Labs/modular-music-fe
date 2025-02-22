@@ -1,26 +1,28 @@
 import { QuestionMarkIcon } from '@radix-ui/react-icons';
-import { Avatar, Button, ButtonProps, Flex, Text } from '@radix-ui/themes';
+import { Avatar, Card, CardProps, Flex, Text } from '@radix-ui/themes';
 import { ReactNode } from 'react';
 import { colors } from '../../../theme/colors';
 
-type FilterConfigModalSourceButtonProps = {
+type FilterActionSelectedSourceCardProps = {
   imageSrc: string | ReactNode;
   title: string;
   subtitle?: string;
-} & Omit<ButtonProps, 'title' | 'subtitle' | 'imageSrc'>;
+  onRemove: () => void;
+} & CardProps;
 
-export const FilterConfigModalSourceButton = ({
+export const FilterActionSelectedSourceCard = ({
   imageSrc,
   title,
   subtitle,
+  onRemove,
   ...rest
-}: FilterConfigModalSourceButtonProps) => {
+}: FilterActionSelectedSourceCardProps) => {
   const combinedTitle = `${title}${subtitle ? ` - ${subtitle}` : ''}`;
   const isUsingIcon = typeof imageSrc !== 'string';
   const icon = (isUsingIcon ? imageSrc : undefined) ?? <QuestionMarkIcon />;
 
   return (
-    <Button
+    <Card
       css={{
         display: 'flex',
         alignItems: 'center',
@@ -29,8 +31,6 @@ export const FilterConfigModalSourceButton = ({
         minHeight: 50,
       }}
       size='3'
-      variant='soft'
-      color='gray'
       {...rest}
       title={combinedTitle}
     >
@@ -66,6 +66,6 @@ export const FilterConfigModalSourceButton = ({
           </Text>
         )}
       </Flex>
-    </Button>
+    </Card>
   );
 };

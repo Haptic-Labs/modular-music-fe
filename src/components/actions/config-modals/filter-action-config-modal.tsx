@@ -30,6 +30,7 @@ import { titleCase } from '../../../utils';
 import { colors } from '../../../theme/colors';
 import { AnimatePresence, motion } from 'motion/react';
 import { keepPreviousData } from '@tanstack/react-query';
+import { FilterActionSelectedSourceCard } from './filter-action-selected-source-card';
 
 const MotionDialogContent = motion(Dialog.Content);
 
@@ -491,7 +492,7 @@ export const FilterActionConfigModal = () => {
               </Text>
               <Flex direction='column' gap='2'>
                 {selectedSources.map((source) => (
-                  <FilterConfigModalSourceButton
+                  <FilterActionSelectedSourceCard
                     key={source.id}
                     title={source.title ?? ''}
                     imageSrc={
@@ -509,6 +510,7 @@ export const FilterActionConfigModal = () => {
                         source.image_url
                       )
                     }
+                    onRemove={() => {}}
                   />
                 ))}
               </Flex>
