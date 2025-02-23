@@ -1,14 +1,25 @@
-import { QuestionMarkIcon } from '@radix-ui/react-icons';
-import { Avatar, Card, CardProps, Flex, Text } from '@radix-ui/themes';
+import { Cross1Icon, QuestionMarkIcon } from '@radix-ui/react-icons';
+import {
+  Avatar,
+  Card,
+  CardProps,
+  Flex,
+  IconButton,
+  Text,
+} from '@radix-ui/themes';
 import { ReactNode } from 'react';
 import { colors } from '../../../theme/colors';
+import { motion, MotionProps } from 'motion/react';
+
+const MotionCard = motion(Card);
 
 type FilterActionSelectedSourceCardProps = {
   imageSrc: string | ReactNode;
   title: string;
   subtitle?: string;
   onRemove: () => void;
-} & CardProps;
+} & CardProps &
+  MotionProps;
 
 export const FilterActionSelectedSourceCard = ({
   imageSrc,
@@ -22,15 +33,16 @@ export const FilterActionSelectedSourceCard = ({
   const icon = (isUsingIcon ? imageSrc : undefined) ?? <QuestionMarkIcon />;
 
   return (
-    <Card
+    <MotionCard
       css={{
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'space-between',
         padding: '4px 8px',
         height: 'fit-content',
         minHeight: 50,
+        gap: 12,
       }}
-      size='3'
       {...rest}
       title={combinedTitle}
     >
@@ -50,13 +62,13 @@ export const FilterActionSelectedSourceCard = ({
         align='start'
         css={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}
       >
-        <Text wrap='nowrap' css={{ maxWidth: '100%' }} truncate>
+        <Text wrap='nowrap' css={{ maxWidth: '100%' }} truncate size='2'>
           {title}
         </Text>
         {!!subtitle && (
           <Text
             color='gray'
-            size='2'
+            size='1'
             wrap='nowrap'
             css={{ maxWidth: '100%' }}
             truncate
@@ -66,6 +78,14 @@ export const FilterActionSelectedSourceCard = ({
           </Text>
         )}
       </Flex>
-    </Card>
+      <IconButton
+        onClick={onRemove}
+        variant='ghost'
+        color='gray'
+        data-override='fix-margin'
+      >
+        <Cross1Icon />
+      </IconButton>
+    </MotionCard>
   );
 };

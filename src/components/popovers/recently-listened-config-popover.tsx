@@ -1,5 +1,5 @@
-import { PopoverContentOwnProps } from "@radix-ui/themes/props";
-import { Database, RecentlyListenedConfig } from "../../types";
+import { PopoverContentOwnProps } from '@radix-ui/themes/props';
+import { Database, RecentlyListenedConfig } from '../../types';
 import {
   Text,
   Flex,
@@ -7,9 +7,9 @@ import {
   TextField,
   Button,
   Select,
-} from "@radix-ui/themes";
-import { Form, useForm } from "@mantine/form";
-import { useEffect } from "react";
+} from '@radix-ui/themes';
+import { Form, useForm } from '@mantine/form';
+import { useEffect } from 'react';
 
 type RecentlyListenedConfigPopoverProps = {
   initialConfig?: Partial<RecentlyListenedConfig>;
@@ -22,7 +22,7 @@ export const RecentlyListenedConfigPopover = ({
   ...rest
 }: RecentlyListenedConfigPopoverProps) => {
   const minMaxQuantityMap: Record<
-    Database["public"]["Enums"]["RECENTLY_PLAYED_INTERVAL"],
+    Database['public']['Enums']['RECENTLY_PLAYED_INTERVAL'],
     { min: number; max: number }
   > = {
     DAYS: {
@@ -42,7 +42,7 @@ export const RecentlyListenedConfigPopover = ({
   const form = useForm({
     initialValues: {
       quantity: initialConfig?.quantity,
-      interval: initialConfig?.interval ?? "DAYS",
+      interval: initialConfig?.interval ?? 'DAYS',
     },
     validate: {
       quantity: (number, { interval }) =>
@@ -64,12 +64,13 @@ export const RecentlyListenedConfigPopover = ({
   }, [JSON.stringify(initialConfig)]);
 
   useEffect(() => {
-    form.validateField("quantity");
+    form.validateField('quantity');
   }, [form.values.interval]);
 
   return (
     <Popover.Content {...rest}>
       <Form
+        id='brayden-test'
         form={form}
         onSubmit={() => {
           if (form.values.quantity) {
@@ -80,54 +81,54 @@ export const RecentlyListenedConfigPopover = ({
           }
         }}
       >
-        <Flex direction="column">
-          <Text color="gray" size="2" mb="1">
+        <Flex direction='column'>
+          <Text color='gray' size='2' mb='1'>
             Quantity
           </Text>
           <TextField.Root
-            {...form.getInputProps("quantity")}
+            {...form.getInputProps('quantity')}
             placeholder={`Enter amount of ${form.values.interval.toLowerCase()}...`}
             color={
               form.errors.quantity && form.getTouched().quantity
-                ? "red"
+                ? 'red'
                 : undefined
             }
           />
-          <Text color="red" size="1" mt="1">
+          <Text color='red' size='1' mt='1'>
             {form.errors.quantity}
           </Text>
-          <Text color="gray" size="2" mt="2" mb="1">
+          <Text color='gray' size='2' mt='2' mb='1'>
             Interval
           </Text>
           <Select.Root
-            {...form.getInputProps("interval")}
+            {...form.getInputProps('interval')}
             onValueChange={(value) =>
               form.setFieldValue(
-                "interval",
-                value as Database["public"]["Enums"]["RECENTLY_PLAYED_INTERVAL"],
+                'interval',
+                value as Database['public']['Enums']['RECENTLY_PLAYED_INTERVAL'],
               )
             }
           >
             <Select.Trigger
               color={
                 form.errors.interval && form.getTouched().interval
-                  ? "red"
+                  ? 'red'
                   : undefined
               }
             />
-            <Select.Content position="popper">
-              <Select.Item value="DAYS">Days</Select.Item>
-              <Select.Item value="WEEKS">Weeks</Select.Item>
-              <Select.Item value="MONTHS">Months</Select.Item>
+            <Select.Content position='popper'>
+              <Select.Item value='DAYS'>Days</Select.Item>
+              <Select.Item value='WEEKS'>Weeks</Select.Item>
+              <Select.Item value='MONTHS'>Months</Select.Item>
             </Select.Content>
           </Select.Root>
           <Button
             disabled={
               !form.isValid() || !form.values.quantity || !valuesHaveChanges
             }
-            mt="3"
-            size="2"
-            type="submit"
+            mt='3'
+            size='2'
+            type='submit'
           >
             Save
           </Button>

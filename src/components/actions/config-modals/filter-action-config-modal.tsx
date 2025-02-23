@@ -12,6 +12,7 @@ import {
   Popover,
   CheckboxGroup,
   Spinner,
+  Portal,
 } from '@radix-ui/themes';
 import {
   ArrowLeftIcon,
@@ -31,20 +32,26 @@ import { colors } from '../../../theme/colors';
 import { AnimatePresence, motion } from 'motion/react';
 import { keepPreviousData } from '@tanstack/react-query';
 import { FilterActionSelectedSourceCard } from './filter-action-selected-source-card';
+import { RecentlyListenedConfigPopover } from '../../popovers';
 
 const MotionDialogContent = motion(Dialog.Content);
 
+type SelectedSource =
+  Database['public']['Functions']['UpsertModuleActionFilter']['Args']['sources'][number] & {
+    recentlyListenedConfig?: Pick<
+      Database['public']['Tables']['recently_played_source_configs']['Row'],
+      'interval' | 'quantity'
+    >;
+    subtitle?: string;
+  };
+
 type FilterActionConfigModalProps = {
-  onSave: (
-    sources: Database['public']['Functions']['UpsertModuleActionFilter']['Args']['sources'],
-  ) => void;
+  onSave: (sources: SelectedSource[]) => void;
 };
 
 export const FilterActionConfigModal = () => {
   const [lastResultCount, setLastResultCount] = useState(0);
-  const [selectedSources, setSelectedSources] = useState<
-    Database['public']['Functions']['UpsertModuleActionFilter']['Args']['sources']
-  >([]);
+  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
   const [searchText, setSearchText] = useState('');
   const [debouncedSearchText, cancelDebounce] = useDebouncedValue(
     searchText,
@@ -53,6 +60,8 @@ export const FilterActionConfigModal = () => {
   const [selectedType, setSelectedType] = useState<ItemType>();
   const [filteredTypes, setFilteredTypes] =
     useState<ItemType[]>(ALL_ITEM_TYPES);
+  const [recentlyListenedConfigIsOpen, setRecentlyListenedConfigIsOpen] =
+    useState(false);
 
   const textFieldRef = useRef<HTMLInputElement>(null);
 
@@ -69,6 +78,22 @@ export const FilterActionConfigModal = () => {
       enabled: !!debouncedSearchText,
       placeholderData:
         searchText && lastResultCount !== 0 ? keepPreviousData : undefined,
+      select: (data) => {
+        const entries = Object.entries(data);
+        const fixedEntries = entries.map(([key, value]) => [
+          key,
+          {
+            ...value,
+            items: value.items.filter(
+              (item) =>
+                item !== null &&
+                !selectedSources.some((source) => source.id === item.id),
+            ),
+          },
+        ]);
+
+        return Object.fromEntries(fixedEntries) as typeof data;
+      },
     },
   );
 
@@ -104,7 +129,7 @@ export const FilterActionConfigModal = () => {
       }}
     >
       <Flex height='100%'>
-        <div css={{ flexGrow: 1 }}>
+        <Flex css={{ flexGrow: 1 }} direction='column'>
           <Dialog.Title as='h3' size='4' css={{ height: 20 }}>
             Select Filter Sources:
           </Dialog.Title>
@@ -129,9 +154,9 @@ export const FilterActionConfigModal = () => {
                 setSelectedSources((prev) => [
                   ...prev,
                   {
-                    id: prev.length.toString(),
+                    id: 'LIKED_SONGS' + prev.length.toString(),
                     spotify_id: null,
-                    source_type: 'LIKED_SONGS' as const,
+                    source_type: 'LIKED_SONGS',
                     image_url: null,
                     limit: null,
                     action_id: null,
@@ -139,16 +164,49 @@ export const FilterActionConfigModal = () => {
                   },
                 ]);
               }}
+              disabled={selectedSources.some(
+                (source) => source.source_type === 'LIKED_SONGS',
+              )}
             />
-            <FilterConfigModalSourceButton
-              imageSrc={
-                <ClockIcon
-                  color='white'
-                  css={{ width: '65%', height: '65%' }}
+            <Popover.Root
+              open={recentlyListenedConfigIsOpen}
+              onOpenChange={(isOpen) => setRecentlyListenedConfigIsOpen(isOpen)}
+            >
+              <Popover.Trigger>
+                <FilterConfigModalSourceButton
+                  imageSrc={
+                    <ClockIcon
+                      color='white'
+                      css={{ width: '65%', height: '65%' }}
+                    />
+                  }
+                  title='My Recently Listened'
+                  disabled={selectedSources.some(
+                    (source) => source.source_type === 'RECENTLY_PLAYED',
+                  )}
                 />
-              }
-              title='My Recently Listened'
-            />
+              </Popover.Trigger>
+              <RecentlyListenedConfigPopover
+                onSave={(config) => {
+                  setSelectedSources((prev) => {
+                    return [
+                      ...prev,
+                      {
+                        id: 'RECENTLY_PLAYED' + prev.length.toString(),
+                        spotify_id: null,
+                        source_type: 'RECENTLY_PLAYED',
+                        image_url: null,
+                        limit: null,
+                        action_id: null,
+                        title: 'My Recently Listened',
+                        subtitle: `${config.quantity.toLocaleString()} ${titleCase(config.interval)}`,
+                      },
+                    ];
+                  });
+                  setRecentlyListenedConfigIsOpen(false);
+                }}
+              />
+            </Popover.Root>
           </Grid>
           <TextField.Root
             ref={textFieldRef}
@@ -230,9 +288,10 @@ export const FilterActionConfigModal = () => {
             <ScrollArea
               scrollbars='vertical'
               css={{
-                height: '100%',
                 maxWidth: 'min(550px, 85vw)',
                 position: 'relative',
+                flexGrow: 1,
+                height: 'auto',
               }}
             >
               {!!spotifySearchQuery.data?.playlists?.items.length &&
@@ -256,19 +315,21 @@ export const FilterActionConfigModal = () => {
                       <Text as='p' weight='bold'>
                         Playlists
                       </Text>
-                      {selectedType === undefined && (
-                        <Button
-                          css={{ margin: 0 }}
-                          variant='ghost'
-                          onClick={() => setSelectedType('playlist')}
-                        >
-                          See All
-                        </Button>
-                      )}
+                      {selectedType === undefined &&
+                        spotifySearchQuery.data?.playlists?.items.filter(
+                          Boolean,
+                        ).length > 6 && (
+                          <Button
+                            css={{ margin: 0 }}
+                            variant='ghost'
+                            onClick={() => setSelectedType('playlist')}
+                          >
+                            See All
+                          </Button>
+                        )}
                     </Flex>
                     <Grid columns='2' gap='2' mb='2'>
                       {spotifySearchQuery.data?.playlists.items
-                        .filter(Boolean)
                         .slice(0, selectedType === 'playlist' ? undefined : 6)
                         .map((playlist) => {
                           if (!playlist) return null;
@@ -280,6 +341,21 @@ export const FilterActionConfigModal = () => {
                               imageSrc={playlist.images[0]?.url ?? ''}
                               title={playlist.name}
                               subtitle={owners}
+                              onClick={() => {
+                                setSelectedSources((prev) => [
+                                  ...prev,
+                                  {
+                                    id: playlist.id,
+                                    source_type: 'PLAYLIST',
+                                    image_url: playlist.images[0]?.url ?? '',
+                                    title: playlist.name,
+                                    subtitle: owners,
+                                    action_id: null,
+                                    spotify_id: playlist.id,
+                                    limit: null,
+                                  },
+                                ]);
+                              }}
                             />
                           );
                         })}
@@ -307,29 +383,47 @@ export const FilterActionConfigModal = () => {
                       <Text as='p' weight='bold'>
                         Artists
                       </Text>
-                      {selectedType === undefined && (
-                        <Button
-                          css={{ margin: 0 }}
-                          variant='ghost'
-                          onClick={() => setSelectedType('artist')}
-                        >
-                          See All
-                        </Button>
-                      )}
+                      {selectedType === undefined &&
+                        spotifySearchQuery.data?.artists?.items.filter(Boolean)
+                          .length > 6 && (
+                          <Button
+                            css={{ margin: 0 }}
+                            variant='ghost'
+                            onClick={() => setSelectedType('artist')}
+                          >
+                            See All
+                          </Button>
+                        )}
                     </Flex>
                     <Grid columns='2' gap='2' mb='2'>
                       {spotifySearchQuery.data?.artists.items
-                        .filter(Boolean)
                         .slice(0, selectedType === 'artist' ? undefined : 6)
                         .map((artist) => {
                           if (!artist) return null;
+
+                          const subtitle = `${artist.followers.total.toLocaleString()} Followers`;
 
                           return (
                             <FilterConfigModalSourceButton
                               key={artist.id}
                               imageSrc={artist.images[0]?.url ?? ''}
                               title={artist.name}
-                              subtitle={`${artist.followers.total.toLocaleString()} Followers`}
+                              subtitle={subtitle}
+                              onClick={() => {
+                                setSelectedSources((prev) => [
+                                  ...prev,
+                                  {
+                                    id: artist.id,
+                                    source_type: 'ARTIST',
+                                    image_url: artist.images[0]?.url ?? '',
+                                    title: artist.name,
+                                    subtitle,
+                                    action_id: null,
+                                    spotify_id: artist.id,
+                                    limit: null,
+                                  },
+                                ]);
+                              }}
                             />
                           );
                         })}
@@ -358,19 +452,20 @@ export const FilterActionConfigModal = () => {
                       <Text as='p' weight='bold'>
                         Albums
                       </Text>
-                      {selectedType === undefined && (
-                        <Button
-                          css={{ margin: 0 }}
-                          variant='ghost'
-                          onClick={() => setSelectedType('album')}
-                        >
-                          See All
-                        </Button>
-                      )}
+                      {selectedType === undefined &&
+                        spotifySearchQuery.data?.albums?.items.filter(Boolean)
+                          .length > 6 && (
+                          <Button
+                            css={{ margin: 0 }}
+                            variant='ghost'
+                            onClick={() => setSelectedType('album')}
+                          >
+                            See All
+                          </Button>
+                        )}
                     </Flex>
                     <Grid columns='2' gap='2' mb='2'>
                       {spotifySearchQuery.data?.albums.items
-                        .filter(Boolean)
                         .slice(0, selectedType === 'album' ? undefined : 6)
                         .map((album) => {
                           if (!album) return null;
@@ -383,6 +478,21 @@ export const FilterActionConfigModal = () => {
                               imageSrc={album.images[0]?.url}
                               title={album.name}
                               subtitle={artists}
+                              onClick={() => {
+                                setSelectedSources((prev) => [
+                                  ...prev,
+                                  {
+                                    id: album.id,
+                                    source_type: 'ALBUM',
+                                    image_url: album.images[0]?.url ?? '',
+                                    title: album.name,
+                                    subtitle: artists,
+                                    action_id: null,
+                                    spotify_id: album.id,
+                                    limit: null,
+                                  },
+                                ]);
+                              }}
                             />
                           );
                         })}
@@ -410,19 +520,19 @@ export const FilterActionConfigModal = () => {
                       <Text as='p' weight='bold'>
                         Tracks
                       </Text>
-                      {selectedType === undefined && (
-                        <Button
-                          css={{ margin: 0 }}
-                          variant='ghost'
-                          onClick={() => setSelectedType('track')}
-                        >
-                          See All
-                        </Button>
-                      )}
+                      {selectedType === undefined &&
+                        spotifySearchQuery.data?.tracks.items.length > 6 && (
+                          <Button
+                            css={{ margin: 0 }}
+                            variant='ghost'
+                            onClick={() => setSelectedType('track')}
+                          >
+                            See All
+                          </Button>
+                        )}
                     </Flex>
                     <Grid columns='2' gap='2' mb='2'>
                       {spotifySearchQuery.data?.tracks.items
-                        .filter(Boolean)
                         .slice(0, selectedType === 'track' ? undefined : 6)
                         .map((track) => {
                           if (!track) return null;
@@ -435,6 +545,21 @@ export const FilterActionConfigModal = () => {
                               imageSrc={track.album.images[0]?.url}
                               title={track.name}
                               subtitle={artists}
+                              onClick={() => {
+                                setSelectedSources((prev) => [
+                                  ...prev,
+                                  {
+                                    id: track.id,
+                                    source_type: 'TRACK',
+                                    image_url: track.album.images[0]?.url ?? '',
+                                    title: track.name,
+                                    subtitle: artists,
+                                    action_id: null,
+                                    spotify_id: track.id,
+                                    limit: null,
+                                  },
+                                ]);
+                              }}
                             />
                           );
                         })}
@@ -466,16 +591,19 @@ export const FilterActionConfigModal = () => {
               </AnimatePresence>
             </ScrollArea>
           )}
-        </div>
+        </Flex>
         <AnimatePresence>
           {!!selectedSources.length && (
             <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: 'auto' }}
-              exit={{ width: 0 }}
-              css={{
+              initial={{ width: 0, marginLeft: 0, paddingLeft: 0, opacity: 1 }}
+              animate={{
+                width: 'auto',
                 marginLeft: 12,
                 paddingLeft: 12,
+                opacity: 1,
+              }}
+              exit={{ width: 0, marginLeft: 0, paddingLeft: 0, opacity: 0 }}
+              css={{
                 borderLeft: `solid 1px ${colors.grayDark.gray7}`,
                 overflow: 'hidden',
               }}
@@ -491,28 +619,41 @@ export const FilterActionConfigModal = () => {
                 Selected Sources:
               </Text>
               <Flex direction='column' gap='2'>
-                {selectedSources.map((source) => (
-                  <FilterActionSelectedSourceCard
-                    key={source.id}
-                    title={source.title ?? ''}
-                    imageSrc={
-                      source.source_type === 'LIKED_SONGS' ? (
-                        <HeartFilledIcon
-                          color='white'
-                          css={{ width: '65%', height: '65%' }}
-                        />
-                      ) : source.source_type === 'RECENTLY_PLAYED' ? (
-                        <ClockIcon
-                          color='white'
-                          css={{ width: '65%', height: '65%' }}
-                        />
-                      ) : (
-                        source.image_url
-                      )
-                    }
-                    onRemove={() => {}}
-                  />
-                ))}
+                <AnimatePresence>
+                  {selectedSources.map((source) => (
+                    <FilterActionSelectedSourceCard
+                      key={source.id}
+                      title={source.title ?? ''}
+                      subtitle={source.subtitle}
+                      imageSrc={
+                        source.source_type === 'LIKED_SONGS' ? (
+                          <HeartFilledIcon
+                            color='white'
+                            css={{ width: '65%', height: '65%' }}
+                          />
+                        ) : source.source_type === 'RECENTLY_PLAYED' ? (
+                          <ClockIcon
+                            color='white'
+                            css={{ width: '65%', height: '65%' }}
+                          />
+                        ) : (
+                          source.image_url
+                        )
+                      }
+                      onRemove={() => {
+                        setSelectedSources((prev) =>
+                          prev.filter(
+                            (selectedSource) => selectedSource.id !== source.id,
+                          ),
+                        );
+                      }}
+                      css={{
+                        width: 250,
+                      }}
+                      layout='position'
+                    />
+                  ))}
+                </AnimatePresence>
               </Flex>
             </motion.div>
           )}

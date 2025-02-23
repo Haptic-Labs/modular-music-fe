@@ -1,6 +1,6 @@
 import { QuestionMarkIcon } from '@radix-ui/react-icons';
 import { Avatar, Button, ButtonProps, Flex, Text } from '@radix-ui/themes';
-import { ReactNode } from 'react';
+import { forwardRef, ReactNode } from 'react';
 import { colors } from '../../../theme/colors';
 
 type FilterConfigModalSourceButtonProps = {
@@ -9,18 +9,17 @@ type FilterConfigModalSourceButtonProps = {
   subtitle?: string;
 } & Omit<ButtonProps, 'title' | 'subtitle' | 'imageSrc'>;
 
-export const FilterConfigModalSourceButton = ({
-  imageSrc,
-  title,
-  subtitle,
-  ...rest
-}: FilterConfigModalSourceButtonProps) => {
+export const FilterConfigModalSourceButton = forwardRef<
+  HTMLButtonElement,
+  FilterConfigModalSourceButtonProps
+>(({ imageSrc, title, subtitle, ...rest }, ref) => {
   const combinedTitle = `${title}${subtitle ? ` - ${subtitle}` : ''}`;
   const isUsingIcon = typeof imageSrc !== 'string';
   const icon = (isUsingIcon ? imageSrc : undefined) ?? <QuestionMarkIcon />;
 
   return (
     <Button
+      ref={ref}
       css={{
         display: 'flex',
         alignItems: 'center',
@@ -50,13 +49,13 @@ export const FilterConfigModalSourceButton = ({
         align='start'
         css={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}
       >
-        <Text wrap='nowrap' css={{ maxWidth: '100%' }} truncate>
+        <Text wrap='nowrap' css={{ maxWidth: '100%' }} truncate size='2'>
           {title}
         </Text>
         {!!subtitle && (
           <Text
             color='gray'
-            size='2'
+            size='1'
             wrap='nowrap'
             css={{ maxWidth: '100%' }}
             truncate
@@ -68,4 +67,4 @@ export const FilterConfigModalSourceButton = ({
       </Flex>
     </Button>
   );
-};
+});

@@ -321,6 +321,14 @@
   height: var(--base-button-height);
 }
 
+.rt-variant-ghost[data-override='fix-margin'] {
+  margin: 0;
+}
+
 .rt-ScrollAreaViewport > div {
   width: auto;
+}
+
+.rt-AvatarRoot:where(.rt-variant-soft) :where(.rt-AvatarFallback) {
+  background-color: transparent;
 }
