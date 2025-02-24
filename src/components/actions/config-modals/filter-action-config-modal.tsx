@@ -12,7 +12,6 @@ import {
   Popover,
   CheckboxGroup,
   Spinner,
-  Portal,
 } from '@radix-ui/themes';
 import {
   ArrowLeftIcon,
@@ -38,10 +37,6 @@ const MotionDialogContent = motion(Dialog.Content);
 
 type SelectedSource =
   Database['public']['Functions']['UpsertModuleActionFilter']['Args']['sources'][number] & {
-    recentlyListenedConfig?: Pick<
-      Database['public']['Tables']['recently_played_source_configs']['Row'],
-      'interval' | 'quantity'
-    >;
     subtitle?: string;
   };
 
@@ -49,7 +44,9 @@ type FilterActionConfigModalProps = {
   onSave: (sources: SelectedSource[]) => void;
 };
 
-export const FilterActionConfigModal = () => {
+export const FilterActionConfigModal = ({
+  onSave,
+}: FilterActionConfigModalProps) => {
   const [lastResultCount, setLastResultCount] = useState(0);
   const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
   const [searchText, setSearchText] = useState('');
@@ -161,6 +158,7 @@ export const FilterActionConfigModal = () => {
                     limit: null,
                     action_id: null,
                     title: 'My Liked Songs',
+                    recently_listened_config: null,
                   },
                 ]);
               }}
@@ -200,6 +198,10 @@ export const FilterActionConfigModal = () => {
                         action_id: null,
                         title: 'My Recently Listened',
                         subtitle: `${config.quantity.toLocaleString()} ${titleCase(config.interval)}`,
+                        recently_listened_config: {
+                          interval: config.interval,
+                          quantity: config.quantity,
+                        },
                       },
                     ];
                   });
@@ -353,6 +355,7 @@ export const FilterActionConfigModal = () => {
                                     action_id: null,
                                     spotify_id: playlist.id,
                                     limit: null,
+                                    recently_listened_config: null,
                                   },
                                 ]);
                               }}
@@ -421,6 +424,7 @@ export const FilterActionConfigModal = () => {
                                     action_id: null,
                                     spotify_id: artist.id,
                                     limit: null,
+                                    recently_listened_config: null,
                                   },
                                 ]);
                               }}
@@ -490,6 +494,7 @@ export const FilterActionConfigModal = () => {
                                     action_id: null,
                                     spotify_id: album.id,
                                     limit: null,
+                                    recently_listened_config: null,
                                   },
                                 ]);
                               }}
@@ -557,6 +562,7 @@ export const FilterActionConfigModal = () => {
                                     action_id: null,
                                     spotify_id: track.id,
                                     limit: null,
+                                    recently_listened_config: null,
                                   },
                                 ]);
                               }}
@@ -604,8 +610,12 @@ export const FilterActionConfigModal = () => {
               }}
               exit={{ width: 0, marginLeft: 0, paddingLeft: 0, opacity: 0 }}
               css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
                 borderLeft: `solid 1px ${colors.grayDark.gray7}`,
                 overflow: 'hidden',
+                height: '100%',
               }}
             >
               <Text
@@ -613,47 +623,63 @@ export const FilterActionConfigModal = () => {
                 wrap='nowrap'
                 size='4'
                 weight='bold'
-                mb='2'
                 css={{ lineHeight: '24px' }}
               >
                 Selected Sources:
               </Text>
-              <Flex direction='column' gap='2'>
-                <AnimatePresence>
-                  {selectedSources.map((source) => (
-                    <FilterActionSelectedSourceCard
-                      key={source.id}
-                      title={source.title ?? ''}
-                      subtitle={source.subtitle}
-                      imageSrc={
-                        source.source_type === 'LIKED_SONGS' ? (
-                          <HeartFilledIcon
-                            color='white'
-                            css={{ width: '65%', height: '65%' }}
-                          />
-                        ) : source.source_type === 'RECENTLY_PLAYED' ? (
-                          <ClockIcon
-                            color='white'
-                            css={{ width: '65%', height: '65%' }}
-                          />
-                        ) : (
-                          source.image_url
-                        )
-                      }
-                      onRemove={() => {
-                        setSelectedSources((prev) =>
-                          prev.filter(
-                            (selectedSource) => selectedSource.id !== source.id,
-                          ),
-                        );
-                      }}
-                      css={{
-                        width: 250,
-                      }}
-                      layout='position'
-                    />
-                  ))}
-                </AnimatePresence>
+              <Flex
+                direction='column'
+                gap='2'
+                justify='between'
+                css={{ flexGrow: 1 }}
+              >
+                <ScrollArea scrollbars='vertical' css={{ flexGrow: 1 }}>
+                  <AnimatePresence>
+                    {selectedSources.map((source) => (
+                      <FilterActionSelectedSourceCard
+                        key={source.id}
+                        title={source.title ?? ''}
+                        subtitle={source.subtitle}
+                        imageSrc={
+                          source.source_type === 'LIKED_SONGS' ? (
+                            <HeartFilledIcon
+                              color='white'
+                              css={{ width: '65%', height: '65%' }}
+                            />
+                          ) : source.source_type === 'RECENTLY_PLAYED' ? (
+                            <ClockIcon
+                              color='white'
+                              css={{ width: '65%', height: '65%' }}
+                            />
+                          ) : (
+                            source.image_url
+                          )
+                        }
+                        onRemove={() => {
+                          setSelectedSources((prev) =>
+                            prev.filter(
+                              (selectedSource) =>
+                                selectedSource.id !== source.id,
+                            ),
+                          );
+                        }}
+                        css={{
+                          width: 250,
+                        }}
+                        layout='position'
+                      />
+                    ))}
+                  </AnimatePresence>
+                </ScrollArea>
+                <Flex height='fit-content' minHeight='32px' justify='end'>
+                  <Button
+                    onClick={() => {
+                      onSave(selectedSources);
+                    }}
+                  >
+                    Save
+                  </Button>
+                </Flex>
               </Flex>
             </motion.div>
           )}

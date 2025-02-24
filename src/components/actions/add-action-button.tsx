@@ -89,7 +89,18 @@ export const AddActionButton = ({
                 </Dialog.Trigger>
               </Tooltip>
               <FilterActionConfigModal
-                onSave={() => {
+                onSave={(selectedSources) => {
+                  addFilterMutation.mutate({
+                    module_id: moduleId,
+                    order: currentActionCount,
+                    sources: selectedSources.map(
+                      ({ subtitle: _, id: __, ...source }) => ({
+                        ...source,
+                        id: null,
+                      }),
+                      // TODO: update RLS on recently_played_sources_configs to account for sources other than modules_sources table
+                    ),
+                  });
                   filterConfigFns.close();
                 }}
               />

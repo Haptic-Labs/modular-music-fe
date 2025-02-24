@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -363,15 +362,7 @@ export type Database = {
           quantity?: number
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "recently_played_source_configs_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "module_sources"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       shuffle_action_configs: {
         Row: {
@@ -460,7 +451,7 @@ export type Database = {
           module_id: string
           order: number
           sources: Database["public"]["CompositeTypes"]["FilterSourceUpsertRequest"][]
-          id?: string
+          action_id?: string
         }
         Returns: Database["public"]["CompositeTypes"]["ModuleAction:Filter"]
       }
@@ -525,6 +516,9 @@ export type Database = {
         limit: number | null
         title: string | null
         image_url: string | null
+        recently_listened_config:
+          | Database["public"]["CompositeTypes"]["RecentlyListenedConfig"]
+          | null
       }
       ModuleAction: {
         id: string | null
@@ -626,6 +620,10 @@ export type Database = {
         config_id: string | null
         config_created_at: string | null
         config_updated_at: string | null
+        quantity: number | null
+        interval: Database["public"]["Enums"]["RECENTLY_PLAYED_INTERVAL"] | null
+      }
+      RecentlyListenedConfig: {
         quantity: number | null
         interval: Database["public"]["Enums"]["RECENTLY_PLAYED_INTERVAL"] | null
       }
