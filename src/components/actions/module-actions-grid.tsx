@@ -1,9 +1,8 @@
 import { Grid } from '@radix-ui/themes';
 import { MODULE_GRID_CONFIG } from '../../constants';
 import { ModulesQueries } from '../../queries';
-import { ModuleActionCard } from './module-action-card';
 import { AddActionButton } from './add-action-button';
-import { ShuffleActionCard } from './action-cards';
+import { SimpleActionCard } from './module-actions/simple-action-card';
 
 type ModuleActionsGridProps = {
   moduleId: string;
@@ -17,17 +16,17 @@ export const ModuleActionsGrid = ({ moduleId }: ModuleActionsGridProps) => {
       {actions?.map((action) => {
         switch (action.type) {
           case 'SHUFFLE':
+          case 'LIMIT':
             return (
-              <ShuffleActionCard action={{ ...action, type: 'SHUFFLE' }} />
+              <SimpleActionCard
+                actionType={action.type}
+                subtitle={action.type === 'SHUFFLE' ? 'Random' : undefined}
+                onRemove={() => {}}
+              />
             );
+          default:
+            return null;
         }
-        return (
-          <ModuleActionCard
-            key={action.id}
-            action={action}
-            actionType={action.type}
-          />
-        );
       })}
       <AddActionButton
         moduleId={moduleId}
