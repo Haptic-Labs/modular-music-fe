@@ -52,50 +52,6 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           id: string
-          limit: number | null
-          source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
-          spotify_id: string
-          title: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          action_id: string
-          created_at?: string
-          deleted_at?: string | null
-          id?: string
-          limit?: number | null
-          source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
-          spotify_id: string
-          title?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          action_id?: string
-          created_at?: string
-          deleted_at?: string | null
-          id?: string
-          limit?: number | null
-          source_type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
-          spotify_id?: string
-          title?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "combine_action_sources_action_id_fkey"
-            columns: ["action_id"]
-            isOneToOne: false
-            referencedRelation: "module_actions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      filter_action_sources: {
-        Row: {
-          action_id: string
-          created_at: string
-          deleted_at: string | null
-          id: string
           image_url: string | null
           limit: number | null
           source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
@@ -124,6 +80,53 @@ export type Database = {
           limit?: number | null
           source_type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
           spotify_id?: string
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "combine_action_sources_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "module_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      filter_action_sources: {
+        Row: {
+          action_id: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          image_url: string | null
+          limit: number | null
+          source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
+          spotify_id: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_id: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          image_url?: string | null
+          limit?: number | null
+          source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
+          spotify_id?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          image_url?: string | null
+          limit?: number | null
+          source_type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
+          spotify_id?: string | null
           title?: string | null
           updated_at?: string | null
         }
