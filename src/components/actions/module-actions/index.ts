@@ -1,1 +1,1 @@
-export * from './simple-action-card';
+export * from './action-card';
