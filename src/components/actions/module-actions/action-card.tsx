@@ -2,7 +2,11 @@ import { Avatar, Button, Card, Flex, IconButton, Text } from '@radix-ui/themes';
 import { Database } from '../../../types';
 import { ModuleActionIcon } from '../module-action-icon';
 import { titleCase } from '../../../utils';
-import { CornerBottomLeftIcon, Cross1Icon } from '@radix-ui/react-icons';
+import {
+  CornerBottomLeftIcon,
+  Cross1Icon,
+  Pencil2Icon,
+} from '@radix-ui/react-icons';
 import { colors } from '../../../theme/colors';
 import { useModuleActionData } from './use-module-action-data';
 import { LikedSongsIcon, RecentlyListenedIcon } from '../../../ui';
@@ -142,6 +146,15 @@ export const ActionCard = ({ action, onRemove }: SimpleActionCardProps) => {
                   </Flex>
                 </Flex>
               ))}
+            <IconButton
+              variant='ghost'
+              css={{ marginLeft: 16 }}
+              title='Edit Filter Sources'
+              onClick={() => {}}
+            >
+              {/* TODO: implement */}
+              <Pencil2Icon />
+            </IconButton>
           </MotionFlex>
         )}
       </AnimatePresence>
