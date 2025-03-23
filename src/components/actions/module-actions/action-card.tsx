@@ -1,4 +1,12 @@
-import { Avatar, Button, Card, Flex, IconButton, Text } from '@radix-ui/themes';
+import {
+  Avatar,
+  Button,
+  Card,
+  Dialog,
+  Flex,
+  IconButton,
+  Text,
+} from '@radix-ui/themes';
 import { Database } from '../../../types';
 import { ModuleActionIcon } from '../module-action-icon';
 import { titleCase } from '../../../utils';
@@ -12,6 +20,9 @@ import { useModuleActionData } from './use-module-action-data';
 import { LikedSongsIcon, RecentlyListenedIcon } from '../../../ui';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { FilterActionConfigModal } from '../config-modals';
+import { ModulesQueries } from '../../../queries';
+import { useDisclosure } from '@mantine/hooks';
 
 const ACTION_TYPES_WITH_SOURCES: Database['public']['Enums']['MODULE_ACTION_TYPE'][] =
   ['FILTER', 'COMBINE'];
@@ -29,6 +40,10 @@ export const ActionCard = ({ action, onRemove }: SimpleActionCardProps) => {
     actionId: action.id,
     actionType: action.type,
   });
+  const [editSourcesIsOpen, editSourcesFns] = useDisclosure(false);
+
+  const { mutateAsync: replaceSources, isPending: isSaving } =
+    ModulesQueries.useReplaceModuleFilterSources();
 
   return (
     <Card>
@@ -146,15 +161,93 @@ export const ActionCard = ({ action, onRemove }: SimpleActionCardProps) => {
                   </Flex>
                 </Flex>
               ))}
-            <IconButton
-              variant='ghost'
-              css={{ marginLeft: 16 }}
-              title='Edit Filter Sources'
-              onClick={() => {}}
+            <Dialog.Root
+              open={editSourcesIsOpen}
+              onOpenChange={(open) =>
+                open ? editSourcesFns.open() : editSourcesFns.close()
+              }
             >
-              {/* TODO: implement */}
-              <Pencil2Icon />
-            </IconButton>
+              <Dialog.Trigger>
+                <IconButton
+                  variant='ghost'
+                  css={{ marginLeft: 16 }}
+                  title='Edit Filter Sources'
+                  onClick={() => {}}
+                >
+                  {/* TODO: implement */}
+                  <Pencil2Icon />
+                </IconButton>
+              </Dialog.Trigger>
+              <FilterActionConfigModal
+                isSaving={isSaving}
+                onSave={(selectedSources) => {
+                  const newSources = selectedSources.filter(
+                    (source) =>
+                      !sources.some(
+                        (existingSource) => existingSource.id === source.id,
+                      ),
+                  );
+
+                  const newRecentlyListenedConfig = newSources.find(
+                    (source) => source.source_type === 'RECENTLY_PLAYED',
+                  )?.recently_listened_config;
+
+                  replaceSources(
+                    {
+                      actionId: action.id,
+                      newSources: newSources.reduce<
+                        Database['public']['Tables']['filter_action_sources']['Insert'][]
+                      >(
+                        (
+                          acc,
+                          {
+                            source_type,
+                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                            id,
+                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                            action_id,
+                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                            recently_listened_config,
+                            ...rest
+                          },
+                        ) => {
+                          if (source_type) {
+                            acc.push({
+                              ...rest,
+                              action_id: action.id,
+                              id: undefined,
+                              source_type,
+                            });
+                          }
+                          return acc;
+                        },
+                        [],
+                      ),
+                      recentlyPlayedConfig:
+                        newRecentlyListenedConfig?.quantity &&
+                        newRecentlyListenedConfig?.interval
+                          ? {
+                              quantity: newRecentlyListenedConfig.quantity,
+                              interval: newRecentlyListenedConfig.interval,
+                            }
+                          : undefined,
+                    },
+                    {
+                      onSuccess: () => {
+                        editSourcesFns.close();
+                      },
+                    },
+                  );
+                }}
+                initialSelectedSources={sources.map((source) => ({
+                  ...source,
+                  recently_listened_config:
+                    source.source_type === 'RECENTLY_PLAYED'
+                      ? (recentlyListenedConfig ?? null)
+                      : null,
+                }))}
+              />
+            </Dialog.Root>
           </MotionFlex>
         )}
       </AnimatePresence>

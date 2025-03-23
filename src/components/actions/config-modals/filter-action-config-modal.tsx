@@ -41,19 +41,22 @@ type SelectedSource =
   };
 
 type FilterActionConfigModalProps = {
+  initialSelectedSources?: SelectedSource[];
   onSave: (sources: SelectedSource[]) => void;
+  isSaving?: boolean;
 };
 
 export const FilterActionConfigModal = ({
+  initialSelectedSources,
   onSave,
+  isSaving,
 }: FilterActionConfigModalProps) => {
   const [lastResultCount, setLastResultCount] = useState(0);
-  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
-  const [searchText, setSearchText] = useState('');
-  const [debouncedSearchText, cancelDebounce] = useDebouncedValue(
-    searchText,
-    300,
+  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>(
+    initialSelectedSources ?? [],
   );
+  const [searchText, setSearchText] = useState('');
+  const [debouncedSearchText] = useDebouncedValue(searchText, 300);
   const [selectedType, setSelectedType] = useState<ItemType>();
   const [filteredTypes, setFilteredTypes] =
     useState<ItemType[]>(ALL_ITEM_TYPES);
@@ -601,7 +604,16 @@ export const FilterActionConfigModal = ({
         <AnimatePresence>
           {!!selectedSources.length && (
             <motion.div
-              initial={{ width: 0, marginLeft: 0, paddingLeft: 0, opacity: 1 }}
+              initial={
+                initialSelectedSources?.length
+                  ? {
+                      width: 'auto',
+                      marginLeft: 12,
+                      paddingLeft: 12,
+                      opacity: 1,
+                    }
+                  : { width: 0, marginLeft: 0, paddingLeft: 0, opacity: 1 }
+              }
               animate={{
                 width: 'auto',
                 marginLeft: 12,
@@ -631,9 +643,16 @@ export const FilterActionConfigModal = ({
                 direction='column'
                 gap='2'
                 justify='between'
-                css={{ flexGrow: 1 }}
+                css={{
+                  flexGrow: 1,
+                }}
               >
-                <ScrollArea scrollbars='vertical' css={{ flexGrow: 1 }}>
+                <ScrollArea
+                  scrollbars='vertical'
+                  css={{
+                    flexGrow: 1,
+                  }}
+                >
                   <AnimatePresence>
                     {selectedSources.map((source) => (
                       <FilterActionSelectedSourceCard
@@ -665,6 +684,7 @@ export const FilterActionConfigModal = ({
                         }}
                         css={{
                           width: 250,
+                          marginBottom: 8,
                         }}
                         layout='position'
                       />
@@ -673,6 +693,7 @@ export const FilterActionConfigModal = ({
                 </ScrollArea>
                 <Flex height='fit-content' minHeight='32px' justify='end'>
                   <Button
+                    loading={isSaving}
                     onClick={() => {
                       onSave(selectedSources);
                     }}

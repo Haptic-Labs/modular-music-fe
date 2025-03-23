@@ -1,30 +1,31 @@
-import { Database } from "../../types";
-import { FilterActionSourcesRequest } from "./use-filter-action-sources";
-import { ModuleActionsRequest } from "./use-module-actions";
-import { ModuleSourcesRequest } from "./use-module-sources";
+import { Database } from '../../types';
+import { useAddRecentlyListenedConfigs } from './use-add-recently-listened_configs';
+import { FilterActionSourcesRequest } from './use-filter-action-sources';
+import { ModuleActionsRequest } from './use-module-actions';
+import { ModuleSourcesRequest } from './use-module-sources';
 import {
   UseMultipleRecentlyListenedConfigsRequest,
   UseRecentlyListenedConfigRequest,
-} from "./use-recently-listened-config";
-import { UserModulesRequest } from "./use-user-modules";
+} from './use-recently-listened-config';
+import { UserModulesRequest } from './use-user-modules';
 
 export const modulesQueryKeys = {
   userModules: (request?: UserModulesRequest) => {
-    const key: (string | UserModulesRequest)[] = ["user-modules"];
+    const key: (string | UserModulesRequest)[] = ['user-modules'];
     if (request) {
       key.push(request);
     }
     return key;
   },
   moduleSources: (request?: ModuleSourcesRequest) => {
-    const key: (string | ModuleSourcesRequest)[] = ["module-sources"];
+    const key: (string | ModuleSourcesRequest)[] = ['module-sources'];
     if (request) {
       key.push(request);
     }
     return key;
   },
   moduleActions: (request?: ModuleActionsRequest) => {
-    const key: (string | ModuleActionsRequest)[] = ["module-actions"];
+    const key: (string | ModuleActionsRequest)[] = ['module-actions'];
     if (request) {
       key.push(request);
     }
@@ -32,7 +33,7 @@ export const modulesQueryKeys = {
   },
   recentlyListenedConfig: (request?: UseRecentlyListenedConfigRequest) => {
     const key: (string | UseRecentlyListenedConfigRequest)[] = [
-      "recently-listened-config",
+      'recently-listened-config',
     ];
     if (request) {
       key.push(request);
@@ -43,7 +44,7 @@ export const modulesQueryKeys = {
     request?: UseMultipleRecentlyListenedConfigsRequest,
   ) => {
     const key: (string | UseMultipleRecentlyListenedConfigsRequest)[] = [
-      "recently-listened-config",
+      'recently-listened-config',
     ];
     if (request) {
       key.push(request);
@@ -51,7 +52,7 @@ export const modulesQueryKeys = {
     return key;
   },
   filterActionSources: (request?: FilterActionSourcesRequest) => {
-    const baseKey = ["filter-action-sources"] as const;
+    const baseKey = ['filter-action-sources'] as const;
     if (request) return [...baseKey, request] as const;
     return baseKey;
   },
@@ -59,11 +60,13 @@ export const modulesQueryKeys = {
 
 export const modulesMutationKeys = {
   addModuleSource: (
-    type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"],
-  ) => (type ? ["module-sources", "add", type] : ["module-sources", "add"]),
-  removeModuleSource: ["module-sources", "remove"],
+    type?: Database['public']['Enums']['SPOTIFY_SOURCE_TYPE'],
+  ) => (type ? ['module-sources', 'add', type] : ['module-sources', 'add']),
+  removeModuleSource: ['module-sources', 'remove'],
   addModuleAction: (
-    type?: Database["public"]["Enums"]["MODULE_ACTION_TYPE"],
-  ) => (type ? ["module-actions", "add", type] : ["module-actions", "add"]),
-  removeModuleAction: ["module-actions", "remove"],
+    type?: Database['public']['Enums']['MODULE_ACTION_TYPE'],
+  ) => (type ? ['module-actions', 'add', type] : ['module-actions', 'add']),
+  removeModuleAction: ['module-actions', 'remove'],
+  addFilterSources: ['filter-sources', 'add'],
+  addRecentlyListenedConfigs: ['recently-listened-configs', 'add'],
 };
