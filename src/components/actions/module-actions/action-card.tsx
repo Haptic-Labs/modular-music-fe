@@ -211,14 +211,13 @@ export const ActionCard = ({ action, onRemove }: SimpleActionCardProps) => {
                             ...rest
                           },
                         ) => {
-                          if (source_type) {
+                          if (source_type)
                             acc.push({
                               ...rest,
                               action_id: action.id,
                               id: undefined,
                               source_type,
                             });
-                          }
                           return acc;
                         },
                         [],

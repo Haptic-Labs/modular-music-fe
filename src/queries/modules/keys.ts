@@ -69,4 +69,5 @@ export const modulesMutationKeys = {
   removeModuleAction: ['module-actions', 'remove'],
   addFilterSources: ['filter-sources', 'add'],
   addRecentlyListenedConfigs: ['recently-listened-configs', 'add'],
+  addModule: ['module', 'add'],
 };

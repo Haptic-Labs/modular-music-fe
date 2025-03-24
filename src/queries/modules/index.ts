@@ -14,3 +14,4 @@ export * from './use-filter-action-sources';
 export * from './use-remove-module-action';
 export * from './use-add-module-filter-sources';
 export * from './use-replace-module-filter-sources';
+export * from './use-add-module-mutation';

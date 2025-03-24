@@ -1,4 +1,5 @@
 import {
+  QueryKey,
   useMutation,
   UseMutationOptions,
   useQueryClient,
@@ -24,12 +25,13 @@ type UseReplaceModuleFilterSourcesResponse = {
   newRecentlyPlayedConfig?: Database['public']['Tables']['recently_played_source_configs']['Row'];
 };
 
-export const useReplaceModuleFilterSources = <E = unknown>(
-  options?: UseMutationOptions<
+export const useReplaceModuleFilterSources = <E = unknown, C = unknown>(
+  options: UseMutationOptions<
     UseReplaceModuleFilterSourcesResponse,
     E,
-    UseReplaceModuleFilterSourcesRequest
-  >,
+    UseReplaceModuleFilterSourcesRequest,
+    C
+  > = {},
 ) => {
   const queryClient = useQueryClient();
   const { supabaseClient } = useAuth();
@@ -39,7 +41,8 @@ export const useReplaceModuleFilterSources = <E = unknown>(
   return useMutation<
     UseReplaceModuleFilterSourcesResponse,
     E,
-    UseReplaceModuleFilterSourcesRequest
+    UseReplaceModuleFilterSourcesRequest,
+    { externalContext: C; internalContext: { revert: () => void } }
   >({
     mutationKey: modulesMutationKeys.addFilterSources,
     mutationFn: async ({ recentlyPlayedConfig, ...request }) => {
@@ -66,7 +69,16 @@ export const useReplaceModuleFilterSources = <E = unknown>(
       const addedSources = await supabaseClient
         .schema('public')
         .from('filter_action_sources')
-        .insert(request.newSources)
+        .insert(
+          request.newSources.map((source) => {
+            if (source.id) {
+              return source;
+            }
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { id, ...sourceWithoutId } = source;
+            return sourceWithoutId;
+          }),
+        )
         .select('*')
         .throwOnError();
       const newRecentlyPlayedSource = addedSources.data?.find(
@@ -90,36 +102,54 @@ export const useReplaceModuleFilterSources = <E = unknown>(
       return response;
     },
     ...options,
-    onMutate: (request, ...rest) => {
+    onMutate: async (request, ...rest) => {
+      const previousDatas: {
+        data: FilterActionSourcesResponse;
+        queryKey: QueryKey;
+      }[] = [];
       queryClient.setQueriesData<FilterActionSourcesResponse>(
         {
           queryKey: modulesQueryKeys.filterActionSources({
             actionId: request.actionId,
           }),
           exact: true,
+          predicate: ({ queryKey, state }) => {
+            if (state.data) previousDatas.push({ data: state.data, queryKey });
+            return true;
+          },
         },
         (oldData) => {
           if (!oldData) return oldData;
-          return oldData.concat(
-            request.newSources.map<(typeof oldData)[number]>((source) => ({
-              action_id: source.action_id,
-              created_at: source.created_at || new Date().toISOString(),
-              deleted_at: source.deleted_at || null,
-              updated_at: source.updated_at || new Date().toISOString(),
-              id: source.id || '',
-              image_url: source.image_url || '',
-              limit: source.limit || null,
-              spotify_id: source.spotify_id || null,
-              source_type: source.source_type || '',
-              title: source.title || null,
-            })),
-          );
+          return request.newSources.map<(typeof oldData)[number]>((source) => ({
+            action_id: source.action_id,
+            created_at: source.created_at || new Date().toISOString(),
+            deleted_at: source.deleted_at || null,
+            updated_at: source.updated_at || new Date().toISOString(),
+            id: source.id || '',
+            image_url: source.image_url || '',
+            limit: source.limit || null,
+            spotify_id: source.spotify_id || null,
+            source_type: source.source_type || '',
+            title: source.title || null,
+          }));
         },
       );
 
-      return options?.onMutate?.(request, ...rest);
+      return {
+        externalContext: (await options?.onMutate?.(
+          request,
+          ...rest,
+        )) as unknown as C,
+        internalContext: {
+          revert: () => {
+            previousDatas.forEach(({ data, queryKey }) => {
+              queryClient.setQueryData(queryKey, data);
+            });
+          },
+        },
+      };
     },
-    onSuccess: (response, request, ...rest) => {
+    onSuccess: (response, request, { externalContext }) => {
       queryClient.setQueriesData<FilterActionSourcesResponse>(
         {
           queryKey: modulesQueryKeys.filterActionSources({
@@ -179,30 +209,19 @@ export const useReplaceModuleFilterSources = <E = unknown>(
         },
       );
 
-      return options?.onSuccess?.(response, request, ...rest);
+      return options?.onSuccess?.(response, request, externalContext);
     },
-    onError: (err, request, ...rest) => {
-      queryClient.setQueriesData<FilterActionSourcesResponse>(
-        {
-          queryKey: modulesQueryKeys.filterActionSources({
-            actionId: request.actionId,
-          }),
-          exact: true,
-        },
-        (oldData) => {
-          if (!oldData) return oldData;
-          return oldData.filter(
-            (oldSource) =>
-              !request.newSources.some(
-                (source) =>
-                  source.spotify_id === oldSource.spotify_id &&
-                  source.source_type === oldSource.source_type,
-              ),
-          );
-        },
+    onError: (err, request, context) => {
+      context?.internalContext.revert();
+      return options?.onError?.(err, request, context?.externalContext);
+    },
+    onSettled: (response, err, request, context) => {
+      return options?.onSettled?.(
+        response,
+        err,
+        request,
+        context?.externalContext,
       );
-
-      return options?.onError?.(err, request, ...rest);
     },
   });
 };

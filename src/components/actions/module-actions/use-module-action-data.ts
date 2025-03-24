@@ -39,16 +39,21 @@ export const useModuleActionData = ({
     },
   );
 
+  const sourcesLength = filterSources.data?.length;
+
   const subtitle = useMemo<UseModuleActionDataReturn['subtitle']>(() => {
     switch (actionType) {
       case 'SHUFFLE':
         return shuffleConfig.data?.shuffle_type
           ? titleCase(shuffleConfig.data?.shuffle_type)
           : undefined;
+      case 'FILTER':
+      case 'COMBINE':
+        return `${sourcesLength?.toLocaleString()} sources`;
       default:
         return undefined;
     }
-  }, [actionType, shuffleConfig.data?.shuffle_type]);
+  }, [actionType, shuffleConfig.data?.shuffle_type, sourcesLength]);
 
   const sources = filterSources.data;
 

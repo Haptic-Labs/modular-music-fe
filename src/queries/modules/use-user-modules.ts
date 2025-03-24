@@ -1,14 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-import { Database, LimitedQueryOptions } from "../../types";
-import { modulesQueryKeys } from "./keys";
-import { useAuth } from "../../providers";
+import { useQuery } from '@tanstack/react-query';
+import { Database, LimitedQueryOptions } from '../../types';
+import { modulesQueryKeys } from './keys';
+import { useAuth } from '../../providers';
 
 export type UserModulesRequest = {
   userId: string;
   includeDeleted?: boolean;
 };
 
-type UserModulesResponse = Database["public"]["Tables"]["modules"]["Row"][];
+export type UserModulesResponse =
+  Database['public']['Tables']['modules']['Row'][];
 
 export const useUserModulesQuery = <E = unknown, D = UserModulesResponse>(
   request: UserModulesRequest,
@@ -19,13 +20,13 @@ export const useUserModulesQuery = <E = unknown, D = UserModulesResponse>(
     queryKey: modulesQueryKeys.userModules(request),
     queryFn: async () => {
       const query = supabaseClient
-        .schema("public")
-        .from("modules")
-        .select("*")
-        .eq("user_id", request.userId)
+        .schema('public')
+        .from('modules')
+        .select('*')
+        .eq('user_id', request.userId)
         .throwOnError();
       if (!request.includeDeleted) {
-        query.is("deleted_at", null);
+        query.is('deleted_at', null);
       }
       const { data: res } = await query;
 
