@@ -7,8 +7,8 @@ import {
 import { Database } from '../../types';
 import { modulesMutationKeys, modulesQueryKeys } from './keys';
 import { useAuth } from '../../providers';
-import { FilterActionSourcesResponse } from './use-filter-action-sources';
 import { useAddRecentlyListenedConfigs } from './use-add-recently-listened_configs';
+import { FilterActionSourcesResponse } from './use-filter-action-sources';
 
 type UseReplaceModuleFilterSourcesRequest = {
   actionId: string;
@@ -74,9 +74,18 @@ export const useReplaceModuleFilterSources = <E = unknown, C = unknown>(
             if (source.id) {
               return source;
             }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { id, ...sourceWithoutId } = source;
-            return sourceWithoutId;
+            const {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              id,
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              created_at,
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              deleted_at,
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              updated_at,
+              ...minimalSourceInsert
+            } = source;
+            return minimalSourceInsert;
           }),
         )
         .select('*')
@@ -159,53 +168,8 @@ export const useReplaceModuleFilterSources = <E = unknown, C = unknown>(
         },
         (oldData) => {
           if (!oldData) return oldData;
-          const { successfulRequestSources, failedRequestSources } =
-            request.newSources.reduce<{
-              successfulRequestSources: {
-                requestSource: (typeof request.newSources)[number];
-                successfulSource: (typeof response.addedSources)[number];
-              }[];
-              failedRequestSources: typeof request.newSources;
-            }>(
-              (acc, requestSource) => {
-                const successfulSource = response.addedSources.find(
-                  (source) =>
-                    source.spotify_id === requestSource.spotify_id &&
-                    source.source_type === requestSource.spotify_id,
-                );
-                if (successfulSource) {
-                  acc.successfulRequestSources.push({
-                    requestSource,
-                    successfulSource,
-                  });
-                } else {
-                  acc.failedRequestSources.push(requestSource);
-                }
-                return acc;
-              },
-              {
-                successfulRequestSources: [],
-                failedRequestSources: [],
-              },
-            );
 
-          return oldData
-            .map(
-              (oldSource) =>
-                successfulRequestSources.find(
-                  ({ requestSource }) =>
-                    oldSource.spotify_id === requestSource.spotify_id &&
-                    oldSource.source_type === requestSource.spotify_id,
-                )?.successfulSource ?? oldSource,
-            )
-            .filter(
-              (oldSource) =>
-                !failedRequestSources.some(
-                  (failedSource) =>
-                    failedSource.spotify_id === oldSource.spotify_id &&
-                    failedSource.source_type === oldSource.source_type,
-                ),
-            );
+          return response.addedSources;
         },
       );
 

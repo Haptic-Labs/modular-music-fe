@@ -44,7 +44,7 @@ export const modulesQueryKeys = {
     request?: UseMultipleRecentlyListenedConfigsRequest,
   ) => {
     const key: (string | UseMultipleRecentlyListenedConfigsRequest)[] = [
-      'recently-listened-config',
+      'multiple-recently-listened-config',
     ];
     if (request) {
       key.push(request);

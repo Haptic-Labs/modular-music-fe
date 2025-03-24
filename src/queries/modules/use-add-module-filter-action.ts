@@ -42,13 +42,15 @@ export const useAddModuleFilterActionMutation = <E = unknown, C = unknown>(
       const { sources: _, ...action } = res;
       const filteredAction = removeNullishFromObject(action);
 
-      if (!filteredAction.id) return options?.onSuccess?.(res, ...rest);
+      if (!filteredAction.module_id) return options?.onSuccess?.(res, ...rest);
+
+      const key = modulesQueryKeys.moduleActions({
+        moduleId: filteredAction.module_id,
+      });
 
       queryClient.setQueriesData<ModuleActionsResponse>(
         {
-          queryKey: modulesQueryKeys.moduleActions({
-            moduleId: filteredAction?.id,
-          }),
+          queryKey: key,
           exact: false,
         },
         (data) => {

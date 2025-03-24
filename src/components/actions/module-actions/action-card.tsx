@@ -114,7 +114,7 @@ export const ActionCard = ({ action, onRemove }: SimpleActionCardProps) => {
             {!!sourcesExpanded &&
               sources.map((source, i) => (
                 <Flex
-                  key={source.id}
+                  key={source.id + i}
                   align='center'
                   css={
                     i !== sources.length - 1
@@ -126,6 +126,12 @@ export const ActionCard = ({ action, onRemove }: SimpleActionCardProps) => {
                           marginLeft: 8,
                           gap: 10,
                         }
+                  }
+                  gap={
+                    source.source_type !== 'LIKED_SONGS' &&
+                    source.source_type !== 'RECENTLY_PLAYED'
+                      ? '2'
+                      : undefined
                   }
                 >
                   <Avatar
@@ -174,54 +180,47 @@ export const ActionCard = ({ action, onRemove }: SimpleActionCardProps) => {
                   title='Edit Filter Sources'
                   onClick={() => {}}
                 >
-                  {/* TODO: implement */}
                   <Pencil2Icon />
                 </IconButton>
               </Dialog.Trigger>
               <FilterActionConfigModal
                 isSaving={isSaving}
                 onSave={(selectedSources) => {
-                  const newSources = selectedSources.filter(
-                    (source) =>
-                      !sources.some(
-                        (existingSource) => existingSource.id === source.id,
-                      ),
-                  );
-
-                  const newRecentlyListenedConfig = newSources.find(
+                  const newRecentlyListenedConfig = selectedSources.find(
                     (source) => source.source_type === 'RECENTLY_PLAYED',
                   )?.recently_listened_config;
+
+                  const newSources = selectedSources.reduce<
+                    Database['public']['Tables']['filter_action_sources']['Insert'][]
+                  >(
+                    (
+                      acc,
+                      {
+                        source_type,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        id,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        action_id,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        recently_listened_config,
+                        ...rest
+                      },
+                    ) => {
+                      if (source_type)
+                        acc.push({
+                          ...rest,
+                          action_id: action.id,
+                          source_type,
+                        });
+                      return acc;
+                    },
+                    [],
+                  );
 
                   replaceSources(
                     {
                       actionId: action.id,
-                      newSources: newSources.reduce<
-                        Database['public']['Tables']['filter_action_sources']['Insert'][]
-                      >(
-                        (
-                          acc,
-                          {
-                            source_type,
-                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                            id,
-                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                            action_id,
-                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                            recently_listened_config,
-                            ...rest
-                          },
-                        ) => {
-                          if (source_type)
-                            acc.push({
-                              ...rest,
-                              action_id: action.id,
-                              id: undefined,
-                              source_type,
-                            });
-                          return acc;
-                        },
-                        [],
-                      ),
+                      newSources,
                       recentlyPlayedConfig:
                         newRecentlyListenedConfig?.quantity &&
                         newRecentlyListenedConfig?.interval
