@@ -627,7 +627,6 @@ export const FilterActionConfigModal = ({
                 gap: 8,
                 borderLeft: `solid 1px ${colors.grayDark.gray7}`,
                 overflow: 'hidden',
-                height: '100%',
               }}
             >
               <Text
