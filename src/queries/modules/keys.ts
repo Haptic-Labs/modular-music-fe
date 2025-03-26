@@ -1,5 +1,4 @@
 import { Database } from '../../types';
-import { useAddRecentlyListenedConfigs } from './use-add-recently-listened_configs';
 import { FilterActionSourcesRequest } from './use-filter-action-sources';
 import { ModuleActionsRequest } from './use-module-actions';
 import { ModuleSourcesRequest } from './use-module-sources';
@@ -70,4 +69,5 @@ export const modulesMutationKeys = {
   addFilterSources: ['filter-sources', 'add'],
   addRecentlyListenedConfigs: ['recently-listened-configs', 'add'],
   addModule: ['module', 'add'],
+  reorderModuleActions: ['module-actions', 'reorder'],
 };

@@ -440,6 +440,12 @@ export type Database = {
         }
         Returns: Database["public"]["CompositeTypes"]["RemoveModuleActionResponse"]
       }
+      ReorderActions: {
+        Args: {
+          action_ids: string[]
+        }
+        Returns: Database["public"]["Tables"]["module_actions"]["Row"][]
+      }
       UpsertModuleActionCombine: {
         Args: {
           module_id: string
