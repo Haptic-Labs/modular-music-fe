@@ -68,18 +68,19 @@ export const useReorderModuleActionsMutation = <E = unknown, C = unknown>(
         (oldData) => {
           if (!oldData) return oldData;
 
-          return request.action_ids.reduce<ModuleActionsResponse>(
+          const newData = request.action_ids.reduce<ModuleActionsResponse>(
             (acc, actionId) => {
               const matchingAction = oldData.find(
                 (action) => actionId === action.id,
               );
               if (matchingAction) {
-                acc.push(matchingAction);
+                acc.push({ ...matchingAction, order: acc.length });
               }
               return acc;
             },
             [],
           );
+          return newData;
         },
       );
 
@@ -98,13 +99,13 @@ export const useReorderModuleActionsMutation = <E = unknown, C = unknown>(
       };
     },
     onSuccess: (response, request, { externalContext }) => {
-      const newOrder = [...response].sort((a, b) => a.order - b.order);
+      // const newOrder = [...response].sort((a, b) => a.order - b.order); // Not necessary anymore now that the response is ordered
       queryClient.setQueriesData<ModuleActionsResponse>(
         {
           queryKey: modulesQueryKeys.moduleActions({ moduleId }),
           exact: true,
         },
-        newOrder,
+        response,
       );
       return options?.onSuccess?.(response, request, externalContext);
     },
