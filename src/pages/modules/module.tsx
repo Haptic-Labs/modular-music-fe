@@ -1,7 +1,8 @@
 import { Navigate, useParams } from 'react-router-dom';
-import { Heading } from '@radix-ui/themes';
+import { Flex } from '@radix-ui/themes';
 import { ModuleSourcesGrid } from '../../components';
 import { ModuleActionsList } from '../../components/actions';
+import { ModuleOutputsGrid } from '../../components/outputs';
 
 export const ModulePage = () => {
   const { moduleId } = useParams();
@@ -9,15 +10,16 @@ export const ModulePage = () => {
   if (!moduleId) return <Navigate to='/404' />;
 
   return (
-    <div
+    <Flex
+      direction='column'
+      gap='4'
       css={{
         padding: 12,
       }}
     >
-      <Heading my='2'>Sources</Heading>
       <ModuleSourcesGrid moduleId={moduleId} />
-      <Heading my='2'>Actions</Heading>
       <ModuleActionsList moduleId={moduleId} />
-    </div>
+      <ModuleOutputsGrid moduleId={moduleId} />
+    </Flex>
   );
 };

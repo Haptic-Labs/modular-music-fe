@@ -5,16 +5,16 @@ import {
   Popover,
   Skeleton,
   Text,
-} from "@radix-ui/themes";
-import { ModulesQueries } from "../../queries";
-import { Database } from "../../types";
-import { SpotifyComponents } from "..";
-import { Cross1Icon, Pencil1Icon } from "@radix-ui/react-icons";
-import { RecentlyListenedConfigPopover } from "../popovers";
-import { useDisclosure } from "@mantine/hooks";
+} from '@radix-ui/themes';
+import { ModulesQueries, SpotifyQueries } from '../../queries';
+import { Database } from '../../types';
+import { SpotifyComponents } from '..';
+import { Cross1Icon, Pencil1Icon } from '@radix-ui/react-icons';
+import { RecentlyListenedConfigPopover } from '../popovers';
+import { useDisclosure } from '@mantine/hooks';
 
 type ModuleSourceCardProps = {
-  source: Database["public"]["Tables"]["module_sources"]["Row"];
+  source: Database['public']['Tables']['module_sources']['Row'];
 };
 
 export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
@@ -25,7 +25,7 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
     {
       sourceId: source.id,
     },
-    { enabled: source.type === "RECENTLY_PLAYED" },
+    { enabled: source.type === 'RECENTLY_PLAYED' },
   );
   const [editPopoverOpen, { open: openEditPopover, close: closeEditPopover }] =
     useDisclosure(false);
@@ -40,18 +40,23 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
   const { mutate: removeSource, isPending: isRemoving } =
     ModulesQueries.useRemoveModuleSourceMutation();
 
+  const { data: likedSongsLength, isLoading: likedSongsLengthIsLoading } =
+    SpotifyQueries.useLikedSongsLength({
+      enabled: source.type === 'LIKED_SONGS',
+    });
+
   return (
     <Card
       key={source.id}
       css={{
-        display: "flex",
+        display: 'flex',
         gap: 8,
-        alignItems: "center",
-        justifyContent: "space-between",
+        alignItems: 'center',
+        justifyContent: 'space-between',
         opacity: isRemoving || isUpdatingRecentlyListened ? 0.5 : 1,
       }}
     >
-      <Flex gap="2" align="center">
+      <Flex gap='2' align='center'>
         <SpotifyComponents.SourceImage
           src={source.image_url}
           sourceType={source.type}
@@ -61,18 +66,31 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
             padding: 4,
           }}
         />
-        <Flex direction="column">
+        <Flex direction='column'>
           <Text>{source.title}</Text>
-          {source.type === "RECENTLY_PLAYED" && (
-            <Skeleton loading={isLoadingRecentlyListenedConfig}>
-              <Text color="gray" size="2">
+          {source.type === 'RECENTLY_PLAYED' ? (
+            <Skeleton
+              loading={isLoadingRecentlyListenedConfig}
+              css={{ opacity: 0.5 }}
+            >
+              <Text color='gray' size='2'>
                 {`Last ${recentlyListenedConfig?.quantity.toLocaleString()} ${recentlyListenedConfig?.interval.slice(0, recentlyListenedConfig.quantity === 1 ? -1 : undefined).toLowerCase()}`}
               </Text>
             </Skeleton>
-          )}
+          ) : source.type === 'LIKED_SONGS' ? (
+            <Skeleton
+              loading={likedSongsLengthIsLoading}
+              css={{ opacity: 0.5 }}
+            >
+              <Text
+                color='gray'
+                size='2'
+              >{`${likedSongsLength?.toLocaleString()} songs`}</Text>
+            </Skeleton>
+          ) : null}
         </Flex>
       </Flex>
-      <Flex gap="4" mr="2" align="center">
+      <Flex gap='4' mr='2' align='center'>
         {!!recentlyListenedConfig && (
           <Popover.Root
             open={editPopoverOpen}
@@ -82,8 +100,8 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
           >
             <Popover.Trigger>
               <IconButton
-                color="gray"
-                variant="ghost"
+                color='gray'
+                variant='ghost'
                 loading={isUpdatingRecentlyListened}
               >
                 <Pencil1Icon />
@@ -103,8 +121,8 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
           </Popover.Root>
         )}
         <IconButton
-          color="gray"
-          variant="ghost"
+          color='gray'
+          variant='ghost'
           onClick={() => {
             removeSource({ sourceId: source.id });
           }}

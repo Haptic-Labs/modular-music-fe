@@ -1,6 +1,7 @@
 import { Database } from '../../types';
 import { FilterActionSourcesRequest } from './use-filter-action-sources';
 import { ModuleActionsRequest } from './use-module-actions';
+import { UseModuleOutputsQueryRequest } from './use-module-outputs';
 import { ModuleSourcesRequest } from './use-module-sources';
 import {
   UseMultipleRecentlyListenedConfigsRequest,
@@ -52,6 +53,11 @@ export const modulesQueryKeys = {
   },
   filterActionSources: (request?: FilterActionSourcesRequest) => {
     const baseKey = ['filter-action-sources'] as const;
+    if (request) return [...baseKey, request] as const;
+    return baseKey;
+  },
+  moduleOutputs: (request?: UseModuleOutputsQueryRequest) => {
+    const baseKey = ['module-outputs'] as const;
     if (request) return [...baseKey, request] as const;
     return baseKey;
   },
