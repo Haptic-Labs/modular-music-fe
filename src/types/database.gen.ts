@@ -218,11 +218,13 @@ export type Database = {
           created_at: string
           de_dupe: boolean
           deleted_at: string | null
-          id: number
+          id: string
+          image_url: string
           limit: number | null
           mode: Database["public"]["Enums"]["MODULE_OUTPUT_MODE"]
           module_id: string
           spotify_id: string
+          title: string
           type: Database["public"]["Enums"]["SPOTIFY_OUTPUT_TYPE"]
           updated_at: string | null
         }
@@ -230,11 +232,13 @@ export type Database = {
           created_at?: string
           de_dupe: boolean
           deleted_at?: string | null
-          id?: number
+          id?: string
+          image_url: string
           limit?: number | null
           mode: Database["public"]["Enums"]["MODULE_OUTPUT_MODE"]
           module_id: string
           spotify_id: string
+          title: string
           type: Database["public"]["Enums"]["SPOTIFY_OUTPUT_TYPE"]
           updated_at?: string | null
         }
@@ -242,11 +246,13 @@ export type Database = {
           created_at?: string
           de_dupe?: boolean
           deleted_at?: string | null
-          id?: number
+          id?: string
+          image_url?: string
           limit?: number | null
           mode?: Database["public"]["Enums"]["MODULE_OUTPUT_MODE"]
           module_id?: string
           spotify_id?: string
+          title?: string
           type?: Database["public"]["Enums"]["SPOTIFY_OUTPUT_TYPE"]
           updated_at?: string | null
         }

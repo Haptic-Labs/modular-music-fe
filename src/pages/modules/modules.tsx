@@ -30,7 +30,6 @@ export const ModulesPage = () => {
 
   const { mutateAsync: createModule, isPending: isCreatingModule } =
     ModulesQueries.useAddModuleMutation();
-
   const moduleCreationForm = useForm({
     name: 'module-creation-form',
     initialValues: {
@@ -43,7 +42,7 @@ export const ModulesPage = () => {
       <Heading size='8'>Modules</Heading>
       <Flex py='2'>
         {modules.map((module) => (
-          <Box maxWidth='250px' minWidth='250px'>
+          <Box maxWidth='250px' minWidth='250px' key={module.id}>
             <Card asChild>
               <Link to={`/modules/${module.id}`}>
                 <Text weight='bold' size='4'>

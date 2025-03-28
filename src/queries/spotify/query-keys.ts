@@ -7,4 +7,5 @@ export const queryKeys = {
     request: SearchRequest<T>,
   ) => ['spotify', 'search', request],
   likedSongsLength: ['spotify', 'liked-songs', 'length'],
+  userPlaylists: ['spotify', 'user-playlists'],
 };

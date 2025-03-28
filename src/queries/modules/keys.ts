@@ -76,4 +76,5 @@ export const modulesMutationKeys = {
   addRecentlyListenedConfigs: ['recently-listened-configs', 'add'],
   addModule: ['module', 'add'],
   reorderModuleActions: ['module-actions', 'reorder'],
+  addModuleOutput: ['module-outputs', 'add'],
 };

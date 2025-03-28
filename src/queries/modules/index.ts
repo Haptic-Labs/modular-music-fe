@@ -17,3 +17,4 @@ export * from './use-replace-module-filter-sources';
 export * from './use-add-module-mutation';
 export * from './use-reorder-module-actions-mutation';
 export * from './use-module-outputs';
+export * from './use-add-module-output';

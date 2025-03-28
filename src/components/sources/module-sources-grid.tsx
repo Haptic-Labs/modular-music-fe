@@ -18,7 +18,7 @@ export const ModuleSourcesGrid = ({ moduleId }: ModuleSourcesGridProps) => {
       <Heading my='2'>Sources</Heading>
       <Grid columns={MODULE_GRID_CONFIG} gap='2'>
         {sources.map((source) => (
-          <ModuleSourceCard source={source} />
+          <ModuleSourceCard key={source.id} source={source} />
         ))}
         <AddSourceButton moduleId={moduleId} />
       </Grid>

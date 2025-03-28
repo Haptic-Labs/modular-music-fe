@@ -47,7 +47,6 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
 
   return (
     <Card
-      key={source.id}
       css={{
         display: 'flex',
         gap: 8,
