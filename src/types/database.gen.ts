@@ -219,7 +219,7 @@ export type Database = {
           de_dupe: boolean
           deleted_at: string | null
           id: string
-          image_url: string
+          image_url: string | null
           limit: number | null
           mode: Database["public"]["Enums"]["MODULE_OUTPUT_MODE"]
           module_id: string
@@ -233,7 +233,7 @@ export type Database = {
           de_dupe: boolean
           deleted_at?: string | null
           id?: string
-          image_url: string
+          image_url?: string | null
           limit?: number | null
           mode: Database["public"]["Enums"]["MODULE_OUTPUT_MODE"]
           module_id: string
@@ -247,7 +247,7 @@ export type Database = {
           de_dupe?: boolean
           deleted_at?: string | null
           id?: string
-          image_url?: string
+          image_url?: string | null
           limit?: number | null
           mode?: Database["public"]["Enums"]["MODULE_OUTPUT_MODE"]
           module_id?: string

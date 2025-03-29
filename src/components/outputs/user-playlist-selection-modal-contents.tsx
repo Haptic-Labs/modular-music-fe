@@ -19,17 +19,25 @@ import { Database } from '../../types';
 import { PlusIcon } from '@radix-ui/react-icons';
 import { PlaylistCreationPopoverContent } from './playlist-creation-popover-content';
 import { useDisclosure } from '@mantine/hooks';
+import { SimplifiedPlaylist } from '@soundify/web-api';
 
 type UserPlaylistSelectionModalContentsProps = {
   hideCreation?: boolean;
   enableQuery?: boolean;
+  onSave: (
+    playlist: SimplifiedPlaylist,
+    mode: Database['public']['Enums']['MODULE_OUTPUT_MODE'],
+  ) => void;
+  isSaving: boolean;
 };
 
 export const UserPlaylistSelectionModalContents = ({
   hideCreation,
   enableQuery,
+  onSave,
+  isSaving,
 }: UserPlaylistSelectionModalContentsProps) => {
-  const [selectedOutput, setSelectedOutput] = useState<string>();
+  const [selectedOutput, setSelectedOutput] = useState<SimplifiedPlaylist>();
   const [selectedMode, setSelectedMode] =
     useState<Database['public']['Enums']['MODULE_OUTPUT_MODE']>();
   const [searchText, setSearchText] = useState('');
@@ -46,11 +54,11 @@ export const UserPlaylistSelectionModalContents = ({
     },
   });
 
-  const handleOutputSelect = (id?: string) => {
-    if (id) {
+  const handleOutputSelect = (playlist?: SimplifiedPlaylist) => {
+    if (playlist) {
       modeSelectRef.current?.click();
     }
-    setSelectedOutput(id);
+    setSelectedOutput(playlist);
   };
 
   return (
@@ -92,7 +100,7 @@ export const UserPlaylistSelectionModalContents = ({
             </Popover.Trigger>
             <PlaylistCreationPopoverContent
               onSave={(playlist) => {
-                handleOutputSelect(playlist.id);
+                handleOutputSelect(playlist);
                 playlistCreationFns.close();
               }}
             />
@@ -104,8 +112,8 @@ export const UserPlaylistSelectionModalContents = ({
           {playlists.map((playlist) => {
             return (
               <Button
-                variant={selectedOutput === playlist.id ? 'solid' : 'soft'}
-                color={selectedOutput === playlist.id ? 'green' : 'gray'}
+                variant={selectedOutput?.id === playlist.id ? 'solid' : 'soft'}
+                color={selectedOutput?.id === playlist.id ? 'green' : 'gray'}
                 key={playlist.id}
                 size='3'
                 css={{
@@ -118,7 +126,7 @@ export const UserPlaylistSelectionModalContents = ({
                   minHeight: 50,
                 }}
                 title={playlist.name}
-                onClick={() => handleOutputSelect(playlist.id)}
+                onClick={() => handleOutputSelect(playlist)}
               >
                 <Avatar
                   src={playlist.images?.[0]?.url}
@@ -164,8 +172,17 @@ export const UserPlaylistSelectionModalContents = ({
             </Select.Item>
           </Select.Content>
         </Select.Root>
-        {/* TODO: implement saving the output and test image upload when creating playlist */}
-        <Button disabled={!selectedOutput || !selectedMode}>Save</Button>
+        <Button
+          disabled={!selectedOutput || !selectedMode}
+          onClick={() => {
+            if (selectedOutput && selectedMode) {
+              onSave(selectedOutput, selectedMode);
+            }
+          }}
+          loading={isSaving}
+        >
+          Save
+        </Button>
       </Flex>
     </Dialog.Content>
   );

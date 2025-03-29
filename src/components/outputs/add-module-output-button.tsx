@@ -26,7 +26,6 @@ export const AddModuleOutputButton = ({ moduleId }: { moduleId: string }) => {
             justifyContent: 'start',
           }}
           radius='large'
-          loading={isSaving}
         >
           <PlusIcon width={25} height={25} />
           <Text size='3' weight='regular'>
@@ -34,7 +33,28 @@ export const AddModuleOutputButton = ({ moduleId }: { moduleId: string }) => {
           </Text>
         </Button>
       </Dialog.Trigger>
-      <UserPlaylistSelectionModalContents enableQuery={isOpen} />
+      <UserPlaylistSelectionModalContents
+        enableQuery={isOpen}
+        onSave={(playlist, mode) => {
+          mutate(
+            {
+              module_id: moduleId,
+              title: playlist.name,
+              image_url: playlist.images?.[0]?.url || null,
+              de_dupe: true,
+              mode,
+              spotify_id: playlist.id,
+              type: 'PLAYLIST',
+            },
+            {
+              onSuccess: () => {
+                close();
+              },
+            },
+          );
+        }}
+        isSaving={isSaving}
+      />
     </Dialog.Root>
   );
 };
