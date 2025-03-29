@@ -60,7 +60,7 @@ export const AddActionButton = ({
             </Text>
           </Button>
         </Popover.Trigger>
-        <Popover.Content width='fit-content'>
+        <Popover.Content width='fit-content' minWidth='unset'>
           <Flex gap='1' width='min-content'>
             <Dialog.Root
               open={filterConfigIsOpen}

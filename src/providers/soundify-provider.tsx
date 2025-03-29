@@ -1,14 +1,14 @@
 /* eslint-disable react-refresh/only-export-components */
-import { SpotifyClient } from "@soundify/web-api";
+import { SpotifyClient } from '@soundify/web-api';
 import {
   createContext,
   ReactNode,
   useContext,
   useEffect,
   useState,
-} from "react";
-import { useAuth } from "./supabase-provider";
-import { Database } from "../types";
+} from 'react';
+import { useAuth } from './supabase-provider';
+import { Database } from '../types';
 
 type SoundifyContext = {
   spotifyClient?: SpotifyClient;
@@ -31,24 +31,32 @@ export const SoundifyProvider = ({ children }: SoundifyProviderProps) => {
     }
 
     const initialToken = await supabaseClient.functions.invoke<
-      Database["spotify_auth"]["Tables"]["provider_session_data"]["Row"]
-    >(`spotify/auth/refresh-token/${user.id}`, { method: "POST" });
+      Database['spotify_auth']['Tables']['provider_session_data']['Row']
+    >(`spotify/auth/refresh-token/${user.id}`, { method: 'POST' });
 
     const newClient = new SpotifyClient(initialToken.data?.access ?? null, {
       refresher: async () => {
         const { data: newTokensResponse, error } =
           await supabaseClient.functions.invoke<
-            Database["spotify_auth"]["Tables"]["provider_session_data"]["Row"]
+            Database['spotify_auth']['Tables']['provider_session_data']['Row']
           >(`spotify/auth/refresh-token/${user.id}`, {
-            method: "POST",
+            method: 'POST',
           });
         if (error || !newTokensResponse) {
-          console.error("Error fetching spotify tokens for soundify", error);
-          throw new Error("Error fetching spotify tokens for soundify");
+          console.error('Error fetching spotify tokens for soundify', error);
+          throw new Error('Error fetching spotify tokens for soundify');
         }
 
         return newTokensResponse.access;
       },
+      middlewares: [
+        // (next) => (url, options) => {
+        //   if (url.href.includes('images') && options.method === 'PUT') {
+        //     options.headers.set('Access-Control-Allow-Origin', '*');
+        //   }
+        //   return next(url, options);
+        // },
+      ],
     });
     setSpotifyClient(newClient);
   };
@@ -68,7 +76,7 @@ export const useSoundify = () => {
   const value = useContext(SoundifyContext);
 
   if (!value) {
-    throw new Error("useSoundify must be used inside of SoundifyProvider");
+    throw new Error('useSoundify must be used inside of SoundifyProvider');
   }
 
   return value;

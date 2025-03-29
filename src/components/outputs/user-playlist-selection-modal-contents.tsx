@@ -26,7 +26,7 @@ type UserPlaylistSelectionModalContentsProps = {
 };
 
 export const UserPlaylistSelectionModalContents = ({
-  hideCreation, // TODO: add creation
+  hideCreation,
   enableQuery,
 }: UserPlaylistSelectionModalContentsProps) => {
   const [selectedOutput, setSelectedOutput] = useState<string>();

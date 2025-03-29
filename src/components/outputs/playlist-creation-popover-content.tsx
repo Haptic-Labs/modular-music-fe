@@ -12,6 +12,10 @@ import { useFileDialog } from '@mantine/hooks';
 import { useMemo, useState } from 'react';
 import { Playlist } from '@soundify/web-api';
 import { SpotifyQueries } from '../../queries';
+import imageCompression from 'browser-image-compression';
+import { convertImageToJpeg } from '../../utils';
+
+const MAX_IMAGE_BYTES = 250 * 1000; // 256 KB with headroom
 
 type PlaylistCreationPopoverContentProps = {
   onSave?: (playlist: Playlist) => void;
@@ -38,21 +42,58 @@ export const PlaylistCreationPopoverContent = ({
     });
 
   const handleSave = async () => {
-    console.log('brayden-test', 'save');
     const selectedFile = fileDialog.files?.item(0);
     if (selectedFile) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result;
-        if (typeof result !== 'string') throw new Error('Invalid image format');
-        createPlaylist({
-          name,
-          description,
-          public: false,
-          collaborative: false,
-          imageBase64: result,
+      try {
+        // First convert to JPEG
+        const jpegFile = selectedFile.type.includes('jpeg')
+          ? selectedFile
+          : await convertImageToJpeg(selectedFile);
+
+        // Then compress the image
+        let compressedFile = await imageCompression(jpegFile, {
+          maxSizeMB: 0.25,
+          maxWidthOrHeight: 480,
+          useWebWorker: true,
+          fileType: 'image/jpeg',
+          alwaysKeepResolution: false,
         });
-      };
+
+        if (compressedFile.size > MAX_IMAGE_BYTES) {
+          compressedFile = await imageCompression(jpegFile, {
+            maxSizeMB: 0.2,
+            maxWidthOrHeight: 300,
+            useWebWorker: true,
+            fileType: 'image/jpeg',
+            alwaysKeepResolution: false,
+          });
+        }
+
+        console.log('brayden-test', { compressedFile });
+        // return;
+
+        // Convert the compressed image to base64
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result;
+          if (typeof result !== 'string')
+            throw new Error('Invalid image format');
+
+          const resultWithoutPrefix = result.split(',')[1]; // Remove the data URL prefix
+
+          createPlaylist({
+            name,
+            description,
+            public: false,
+            collaborative: false,
+            imageBase64: resultWithoutPrefix,
+          });
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error('Error processing image:', error);
+        // Fallback to uncompressed image or show error
+      }
     } else {
       createPlaylist({
         name,
@@ -82,6 +123,7 @@ export const PlaylistCreationPopoverContent = ({
             css={{
               height: 150,
               width: 150,
+              padding: 0,
             }}
             onClick={() => {
               fileDialog.open();
