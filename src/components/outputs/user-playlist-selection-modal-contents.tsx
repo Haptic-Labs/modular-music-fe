@@ -4,6 +4,8 @@ import {
   Dialog,
   Flex,
   Grid,
+  IconButton,
+  Popover,
   ScrollArea,
   Select,
   Text,
@@ -14,6 +16,9 @@ import { IconPlaylist, IconSearch } from '@tabler/icons-react';
 import { colors } from '../../theme/colors';
 import { useRef, useState } from 'react';
 import { Database } from '../../types';
+import { PlusIcon } from '@radix-ui/react-icons';
+import { PlaylistCreationPopoverContent } from './playlist-creation-popover-content';
+import { useDisclosure } from '@mantine/hooks';
 
 type UserPlaylistSelectionModalContentsProps = {
   hideCreation?: boolean;
@@ -29,6 +34,8 @@ export const UserPlaylistSelectionModalContents = ({
     useState<Database['public']['Enums']['MODULE_OUTPUT_MODE']>();
   const [searchText, setSearchText] = useState('');
   const modeSelectRef = useRef<HTMLButtonElement>(null);
+
+  const [playlistCreationIsOpen, playlistCreationFns] = useDisclosure(false);
 
   const { data: playlists = [] } = SpotifyQueries.useUserPlaylists({
     enabled: enableQuery,
@@ -60,16 +67,38 @@ export const UserPlaylistSelectionModalContents = ({
       <Dialog.Title css={{ flexShrink: 0, marginBottom: 0 }}>
         Select an Output:
       </Dialog.Title>
-      <TextField.Root
-        placeholder='Search your playlists...'
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        css={{ flexShrink: 0 }}
-      >
-        <TextField.Slot>
-          <IconSearch />
-        </TextField.Slot>
-      </TextField.Root>
+      <Flex css={{ flexShrink: 0, width: '100%' }} gap='2'>
+        <TextField.Root
+          placeholder='Search your playlists...'
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          css={{ flexGrow: 1 }}
+        >
+          <TextField.Slot>
+            <IconSearch />
+          </TextField.Slot>
+        </TextField.Root>
+        {!hideCreation && (
+          <Popover.Root
+            open={playlistCreationIsOpen}
+            onOpenChange={(open) =>
+              open ? playlistCreationFns.open() : playlistCreationFns.close()
+            }
+          >
+            <Popover.Trigger>
+              <IconButton title='Create a new playlist'>
+                <PlusIcon />
+              </IconButton>
+            </Popover.Trigger>
+            <PlaylistCreationPopoverContent
+              onSave={(playlist) => {
+                handleOutputSelect(playlist.id);
+                playlistCreationFns.close();
+              }}
+            />
+          </Popover.Root>
+        )}
+      </Flex>
       <ScrollArea css={{ flexGrow: 1 }}>
         <Grid columns='2' gap='2'>
           {playlists.map((playlist) => {
@@ -135,6 +164,7 @@ export const UserPlaylistSelectionModalContents = ({
             </Select.Item>
           </Select.Content>
         </Select.Root>
+        {/* TODO: implement saving the output and test image upload when creating playlist */}
         <Button disabled={!selectedOutput || !selectedMode}>Save</Button>
       </Flex>
     </Dialog.Content>

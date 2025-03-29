@@ -9,3 +9,7 @@ export const queryKeys = {
   likedSongsLength: ['spotify', 'liked-songs', 'length'],
   userPlaylists: ['spotify', 'user-playlists'],
 };
+
+export const mutationKeys = {
+  createPlaylist: ['spotify', 'create-playlist'],
+};

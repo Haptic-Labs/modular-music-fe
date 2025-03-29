@@ -8,7 +8,13 @@ import {
 import { PageIterator } from '@soundify/web-api/pagination';
 import { LimitedQueryOptions } from '../../types';
 
-export const useUserPlaylists = <E = unknown, D = SimplifiedPlaylist[]>(
+export type UseUserPlaylistsResponse = SimplifiedPlaylist[];
+
+export const useUserPlaylists = <
+  UseUserPlaylistsResponse,
+  E = unknown,
+  D = UseUserPlaylistsResponse,
+>(
   options?: LimitedQueryOptions<SimplifiedPlaylist[], E, D>,
 ) => {
   const { spotifyClient } = useSoundify();
