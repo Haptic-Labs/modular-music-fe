@@ -45,8 +45,8 @@ export const useRemoveModuleOutputMutation = <E = unknown, C = unknown>(
       return res.data;
     },
     ...options,
-    onMutate: (request) => {
-      const originalQueryData: [QueryKey, UseModuleOutputsQueryResponse] = [];
+    onMutate: async (request) => {
+      const originalQueryData: [QueryKey, UseModuleOutputsQueryResponse][] = [];
       if (request.moduleId) {
         queryClient.setQueriesData<UseModuleOutputsQueryResponse>(
           {
@@ -75,7 +75,39 @@ export const useRemoveModuleOutputMutation = <E = unknown, C = unknown>(
             });
           },
         },
+        externalContext: (await options?.onMutate?.(request)) as C,
       };
+    },
+    onSuccess: (response, request, context) => {
+      if (response) {
+        queryClient.setQueriesData<UseModuleOutputsQueryResponse>(
+          {
+            queryKey: modulesQueryKeys.moduleOutputs({
+              moduleId: response.module_id,
+            }),
+            exact: true,
+          },
+          (oldData) => {
+            if (!oldData) return oldData;
+
+            return oldData.filter((output) => output.id !== request.outputId);
+          },
+        );
+      }
+
+      return options?.onSuccess?.(response, request, context.externalContext);
+    },
+    onError: (error, request, context) => {
+      context?.internalContext?.revert?.();
+      return options?.onError?.(error, request, context?.externalContext);
+    },
+    onSettled: (response, error, request, context) => {
+      return options?.onSettled?.(
+        response,
+        error,
+        request,
+        context?.externalContext,
+      );
     },
   });
 };
