@@ -27,6 +27,7 @@ export const useModuleOutputsQuery = <
         .from('module_outputs')
         .select('*')
         .eq('module_id', request.moduleId)
+        .is('deleted_at', null)
         .throwOnError();
 
       if (!res.data) throw new Error('No data returned from query');

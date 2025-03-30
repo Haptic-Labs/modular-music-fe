@@ -77,4 +77,5 @@ export const modulesMutationKeys = {
   addModule: ['module', 'add'],
   reorderModuleActions: ['module-actions', 'reorder'],
   addModuleOutput: ['module-outputs', 'add'],
+  removeModuleOutput: ['module-outputs', 'remove'],
 };

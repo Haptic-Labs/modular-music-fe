@@ -22,12 +22,13 @@ export const ModuleOutputCard = ({ output }: ModuleOutputCardProps) => {
     >
       <Flex gap='2' align='center'>
         <SpotifyComponents.SourceImage
-          src={output.image_url}
+          src={output.image_url ?? undefined}
           sourceType='PLAYLIST'
           css={{
-            width: 20,
-            height: 20,
+            width: 40,
+            height: 40,
             padding: 4,
+            borderRadius: 8,
           }}
         />
         <Text>{output.title}</Text>

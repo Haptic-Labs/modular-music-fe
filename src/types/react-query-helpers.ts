@@ -1,9 +1,8 @@
 import {
-  MutationKey,
   QueryKey,
   UseMutationOptions,
   UseQueryOptions,
-} from "@tanstack/react-query";
+} from '@tanstack/react-query';
 
 export type LimitedQueryOptions<
   ResponseData = unknown,
@@ -12,7 +11,7 @@ export type LimitedQueryOptions<
   Key extends QueryKey = QueryKey,
 > = Omit<
   UseQueryOptions<ResponseData, Error, TransformedData, Key>,
-  "queryKey" | "queryFn"
+  'queryKey' | 'queryFn'
 >;
 
 export type LimitedMutationOptions<
@@ -22,5 +21,13 @@ export type LimitedMutationOptions<
   Context = unknown,
 > = Omit<
   UseMutationOptions<ResponseData, Error, Request, Context>,
-  "mutationFn" | "mutationKey"
+  'mutationFn' | 'mutationKey'
 >;
+
+export type WrappedContext<
+  ExternalContext,
+  InternalContext = { revert: () => void },
+> = {
+  internalContext?: InternalContext;
+  externalContext: ExternalContext;
+};
