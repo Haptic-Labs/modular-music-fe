@@ -73,6 +73,7 @@ export const useAddModuleOutputMutation = <E = unknown, C = unknown>(
             id: request.id ?? '',
             limit: request.limit ?? null,
             updated_at: request.updated_at || new Date().toISOString(),
+            image_url: request.image_url || null,
           };
 
           return [...oldData, newRow];
@@ -104,11 +105,21 @@ export const useAddModuleOutputMutation = <E = unknown, C = unknown>(
         (oldData) => {
           if (!oldData) return oldData;
 
-          return oldData.map((row) =>
-            row.id === (request.id ?? '') && row.spotify_id === response.id
-              ? response
-              : row,
-          );
+          let hasMatch = false;
+          const newRows = oldData.map((row) => {
+            const isMatch =
+              row.id === (request.id ?? '') &&
+              row.spotify_id === response.spotify_id;
+
+            if (!hasMatch) hasMatch = isMatch;
+
+            return isMatch ? response : row;
+          });
+          if (!hasMatch) {
+            newRows.push(response);
+          }
+
+          return newRows;
         },
       );
 

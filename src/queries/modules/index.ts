@@ -18,3 +18,4 @@ export * from './use-add-module-mutation';
 export * from './use-reorder-module-actions-mutation';
 export * from './use-module-outputs';
 export * from './use-add-module-output';
+export * from './use-remove-module-output-mutation';
