@@ -271,10 +271,10 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           id: string
-          image_url: string
+          image_url: string | null
           limit: number | null
           module_id: string
-          spotify_id: string
+          spotify_id: string | null
           title: string
           type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
           updated_at: string | null
@@ -283,10 +283,10 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           id?: string
-          image_url: string
+          image_url?: string | null
           limit?: number | null
           module_id: string
-          spotify_id: string
+          spotify_id?: string | null
           title: string
           type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
           updated_at?: string | null
@@ -295,10 +295,10 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           id?: string
-          image_url?: string
+          image_url?: string | null
           limit?: number | null
           module_id?: string
-          spotify_id?: string
+          spotify_id?: string | null
           title?: string
           type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
           updated_at?: string | null

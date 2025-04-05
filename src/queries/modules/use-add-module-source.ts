@@ -1,17 +1,17 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Database, LimitedMutationOptions } from "../../types";
-import { useAuth } from "../../providers";
-import { modulesMutationKeys, modulesQueryKeys } from "./keys";
-import { ModuleSourcesResponse } from "./use-module-sources";
-import { Compulsory } from "ts-toolbelt/out/Object/Compulsory";
-import { Optional } from "ts-toolbelt/out/Object/Optional";
-import { UseRecentlyListenedConfigResponse } from "./use-recently-listened-config";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Database, LimitedMutationOptions } from '../../types';
+import { useAuth } from '../../providers';
+import { modulesMutationKeys, modulesQueryKeys } from './keys';
+import { ModuleSourcesResponse } from './use-module-sources';
+import { Compulsory } from 'ts-toolbelt/out/Object/Compulsory';
+import { Optional } from 'ts-toolbelt/out/Object/Optional';
+import { UseRecentlyListenedConfigResponse } from './use-recently-listened-config';
 
 type AddBasicSourceRequest =
-  Database["public"]["Tables"]["module_sources"]["Insert"];
+  Database['public']['Tables']['module_sources']['Insert'][];
 
 type AddBasicSourceResponse =
-  Database["public"]["Tables"]["module_sources"]["Row"];
+  Database['public']['Tables']['module_sources']['Row'][];
 
 export const useAddBasicModuleSourceMutation = <E = unknown, C = unknown>(
   options?: LimitedMutationOptions<
@@ -28,29 +28,30 @@ export const useAddBasicModuleSourceMutation = <E = unknown, C = unknown>(
     mutationKey: modulesMutationKeys.addModuleSource(),
     mutationFn: async (req) => {
       const query = supabaseClient
-        .schema("public")
-        .from("module_sources")
+        .schema('public')
+        .from('module_sources')
         .insert(req)
-        .select("*")
-        .throwOnError()
-        .single();
+        .select('*')
+        .throwOnError();
 
       const { data: res } = await query;
 
-      if (!res) throw new Error("Error adding new source");
+      if (!res) throw new Error('Error adding new source');
 
       return res;
     },
     ...options,
     onSuccess: (res, ...rest) => {
+      const moduleId = res.find((item) => !!item.module_id)?.module_id;
+      if (!moduleId) return options?.onSuccess?.(res, ...rest);
       queryClient.setQueriesData<ModuleSourcesResponse>(
         {
-          queryKey: modulesQueryKeys.moduleSources({ moduleId: res.module_id }),
+          queryKey: modulesQueryKeys.moduleSources({ moduleId }),
           exact: false,
         },
         (data) => {
-          if (!data) return [res];
-          return [...data, res];
+          if (!data) return res;
+          return [...data, ...res];
         },
       );
       return options?.onSuccess?.(res, ...rest);
@@ -61,8 +62,8 @@ export const useAddBasicModuleSourceMutation = <E = unknown, C = unknown>(
 const parseAddRecentlyListenedResponse = (
   response: AddRecentlyListenedResponse,
 ): {
-  source: Database["public"]["Tables"]["module_sources"]["Row"];
-  config: Database["public"]["Tables"]["recently_played_source_configs"]["Row"];
+  source: Database['public']['Tables']['module_sources']['Row'];
+  config: Database['public']['Tables']['recently_played_source_configs']['Row'];
 } => ({
   source: {
     id: response.source_id,
@@ -87,11 +88,11 @@ const parseAddRecentlyListenedResponse = (
 });
 
 type AddRecentlyListenedIO =
-  Database["public"]["Functions"]["UpsertModuleSource:RecentlyListened"];
-type AddRecentlyListenedRequest = AddRecentlyListenedIO["Args"];
+  Database['public']['Functions']['UpsertModuleSource:RecentlyListened'];
+type AddRecentlyListenedRequest = AddRecentlyListenedIO['Args'];
 type AddRecentlyListenedResponse = Optional<
-  Compulsory<AddRecentlyListenedIO["Returns"]>,
-  "deleted_at" | "updated_at" | "limit" | "config_updated_at"
+  Compulsory<AddRecentlyListenedIO['Returns']>,
+  'deleted_at' | 'updated_at' | 'limit' | 'config_updated_at'
 >;
 
 export const useAddRecentlyListenedSource = <E = unknown, C = unknown>(
@@ -106,16 +107,16 @@ export const useAddRecentlyListenedSource = <E = unknown, C = unknown>(
   const { supabaseClient } = useAuth();
 
   return useMutation({
-    mutationKey: modulesMutationKeys.addModuleSource("RECENTLY_PLAYED"),
+    mutationKey: modulesMutationKeys.addModuleSource('RECENTLY_PLAYED'),
     mutationFn: async (req) => {
       const query = supabaseClient
-        .schema("public")
-        .rpc("UpsertModuleSource:RecentlyListened", req)
+        .schema('public')
+        .rpc('UpsertModuleSource:RecentlyListened', req)
         .throwOnError();
 
       const { data: res } = await query;
 
-      if (!res) throw new Error("Error adding recently listened source");
+      if (!res) throw new Error('Error adding recently listened source');
 
       return res as AddRecentlyListenedResponse;
     },

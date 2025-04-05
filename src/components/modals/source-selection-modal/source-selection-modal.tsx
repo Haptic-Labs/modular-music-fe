@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { Database } from '../../../types';
 import {
   Dialog,
   Grid,
@@ -22,35 +21,61 @@ import {
   MixerHorizontalIcon,
 } from '@radix-ui/react-icons';
 import { useDebouncedValue } from '@mantine/hooks';
-import { useSearchQuery } from '../../../queries/spotify';
-import { FilterConfigModalSourceButton } from './filter-config-modal-source-button';
 import { ItemType } from '@soundify/web-api';
-import { ALL_ITEM_TYPES } from '../../../queries/spotify/constants';
-import { titleCase } from '../../../utils';
-import { colors } from '../../../theme/colors';
 import { AnimatePresence, motion } from 'motion/react';
 import { keepPreviousData } from '@tanstack/react-query';
-import { FilterActionSelectedSourceCard } from './filter-action-selected-source-card';
+import { ALL_ITEM_TYPES } from '../../../queries/spotify/constants';
+import { useSearchQuery } from '../../../queries/spotify';
+import { colors } from '../../../theme/colors';
 import { RecentlyListenedConfigPopover } from '../../popovers';
+import { titleCase } from '../../../utils';
+import { FilterActionSelectedSourceCard } from '../../actions/config-modals/filter-action-selected-source-card';
+import { Database, RecentlyListenedConfig } from '../../../types';
+import { SpotifyQueries } from '../../../queries';
+import { SpotifySourceButton } from './spotify-source-button';
 
 const MotionDialogContent = motion(Dialog.Content);
 
-type SelectedSource =
-  Database['public']['Functions']['UpsertModuleActionFilter']['Args']['sources'][number] & {
-    subtitle?: string;
-  };
-
-type FilterActionConfigModalProps = {
-  initialSelectedSources?: SelectedSource[];
-  onSave: (sources: SelectedSource[]) => void;
-  isSaving?: boolean;
+type BaseSelectedSource = {
+  spotify_id?: string;
+  image_url?: string;
+  title: string;
+  // limit?: number; // TODO: implement limit later, because noone cares right now
+  subtitle?: string;
 };
 
-export const FilterActionConfigModal = ({
+export type SelectedSource = BaseSelectedSource &
+  (
+    | {
+        source_type: 'RECENTLY_PLAYED';
+        recently_listened_config: RecentlyListenedConfig;
+      }
+    | {
+        source_type: Exclude<
+          Database['public']['Enums']['SPOTIFY_SOURCE_TYPE'],
+          'RECENTLY_PLAYED'
+        >;
+        recently_listened_config?: never;
+      }
+  );
+
+type SourceSelectionModalProps = {
+  initialSelectedSources?: SelectedSource[];
+  onSave: (sources: SelectedSource[]) => void;
+  onCancel: () => void;
+  isSaving?: boolean;
+  title?: string;
+  isOpen: boolean;
+};
+
+export const SourceSelectionModal = ({
   initialSelectedSources,
   onSave,
+  onCancel,
   isSaving,
-}: FilterActionConfigModalProps) => {
+  title = 'Select Sources',
+  isOpen,
+}: SourceSelectionModalProps) => {
   const [lastResultCount, setLastResultCount] = useState(0);
   const [selectedSources, setSelectedSources] = useState<SelectedSource[]>(
     initialSelectedSources ?? [],
@@ -58,21 +83,24 @@ export const FilterActionConfigModal = ({
   const [searchText, setSearchText] = useState('');
   const [debouncedSearchText] = useDebouncedValue(searchText, 300);
   const [selectedType, setSelectedType] = useState<ItemType>();
-  const [filteredTypes, setFilteredTypes] =
+  const [filteredSourceTypes, setFilteredSourceTypes] =
     useState<ItemType[]>(ALL_ITEM_TYPES);
   const [recentlyListenedConfigIsOpen, setRecentlyListenedConfigIsOpen] =
     useState(false);
 
   const textFieldRef = useRef<HTMLInputElement>(null);
 
+  const { data: likedSongsLength, isLoading: likedSongsLengthIsLoading } =
+    SpotifyQueries.useLikedSongsLength();
+
   const spotifySearchQuery = useSearchQuery(
     {
       query: debouncedSearchText,
       type:
-        filteredTypes.length === 0 ||
-        filteredTypes.length === ALL_ITEM_TYPES.length
+        filteredSourceTypes.length === 0 ||
+        filteredSourceTypes.length === ALL_ITEM_TYPES.length
           ? undefined
-          : filteredTypes,
+          : filteredSourceTypes,
     },
     {
       enabled: !!debouncedSearchText,
@@ -87,7 +115,9 @@ export const FilterActionConfigModal = ({
             items: value.items.filter(
               (item) =>
                 item !== null &&
-                !selectedSources.some((source) => source.id === item.id),
+                !selectedSources.some(
+                  (source) => source.spotify_id === item.id,
+                ),
             ),
           },
         ]);
@@ -106,6 +136,16 @@ export const FilterActionConfigModal = ({
   useEffect(() => {
     setLastResultCount(totalSearchedSources ?? 0);
   }, [totalSearchedSources]);
+
+  useEffect(() => {
+    setSelectedSources(initialSelectedSources ?? []);
+  }, [JSON.stringify(initialSelectedSources)]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchText('');
+    }
+  }, [isOpen]);
 
   return (
     <MotionDialogContent
@@ -131,7 +171,7 @@ export const FilterActionConfigModal = ({
       <Flex height='100%'>
         <Flex css={{ flexGrow: 1 }} direction='column'>
           <Dialog.Title as='h3' size='4' css={{ height: 20 }}>
-            Select Filter Sources:
+            {title}
           </Dialog.Title>
           <Grid
             columns='2'
@@ -142,7 +182,7 @@ export const FilterActionConfigModal = ({
               borderBottom: `solid 1px ${colors.grayDark.gray6}`,
             }}
           >
-            <FilterConfigModalSourceButton
+            <SpotifySourceButton
               imageSrc={
                 <HeartFilledIcon
                   color='white'
@@ -150,18 +190,21 @@ export const FilterActionConfigModal = ({
                 />
               }
               title='My Liked Songs'
+              subtitle={
+                likedSongsLength
+                  ? `${likedSongsLength.toLocaleString()} Songs`
+                  : undefined
+              }
               onClick={() => {
                 setSelectedSources((prev) => [
                   ...prev,
                   {
-                    id: 'LIKED_SONGS' + prev.length.toString(),
-                    spotify_id: null,
                     source_type: 'LIKED_SONGS',
-                    image_url: null,
-                    limit: null,
-                    action_id: null,
                     title: 'My Liked Songs',
-                    recently_listened_config: null,
+                    subtitle:
+                      likedSongsLength === undefined
+                        ? undefined
+                        : `${likedSongsLength.toLocaleString()} Songs`,
                   },
                 ]);
               }}
@@ -174,7 +217,7 @@ export const FilterActionConfigModal = ({
               onOpenChange={(isOpen) => setRecentlyListenedConfigIsOpen(isOpen)}
             >
               <Popover.Trigger>
-                <FilterConfigModalSourceButton
+                <SpotifySourceButton
                   imageSrc={
                     <ClockIcon
                       color='white'
@@ -193,12 +236,7 @@ export const FilterActionConfigModal = ({
                     return [
                       ...prev,
                       {
-                        id: 'RECENTLY_PLAYED' + prev.length.toString(),
-                        spotify_id: null,
                         source_type: 'RECENTLY_PLAYED',
-                        image_url: null,
-                        limit: null,
-                        action_id: null,
                         title: 'My Recently Listened',
                         subtitle: `${config.quantity.toLocaleString()} ${titleCase(config.interval)}`,
                         recently_listened_config: {
@@ -231,8 +269,8 @@ export const FilterActionConfigModal = ({
                     size='1'
                     css={{ margin: 0 }}
                     color={
-                      filteredTypes.length === 0 ||
-                      filteredTypes.length === ALL_ITEM_TYPES.length
+                      filteredSourceTypes.length === 0 ||
+                      filteredSourceTypes.length === ALL_ITEM_TYPES.length
                         ? 'gray'
                         : undefined
                     }
@@ -243,9 +281,9 @@ export const FilterActionConfigModal = ({
                 <Popover.Content>
                   <Flex direction='column'>
                     <CheckboxGroup.Root
-                      value={filteredTypes}
+                      value={filteredSourceTypes}
                       onValueChange={(newVal) =>
-                        setFilteredTypes(newVal as ItemType[])
+                        setFilteredSourceTypes(newVal as ItemType[])
                       }
                     >
                       {ALL_ITEM_TYPES.map((type) => (
@@ -341,7 +379,7 @@ export const FilterActionConfigModal = ({
                           const owners =
                             playlist.owner.display_name ?? undefined;
                           return (
-                            <FilterConfigModalSourceButton
+                            <SpotifySourceButton
                               key={playlist.id}
                               imageSrc={playlist.images[0]?.url ?? ''}
                               title={playlist.name}
@@ -358,7 +396,6 @@ export const FilterActionConfigModal = ({
                                     action_id: null,
                                     spotify_id: playlist.id,
                                     limit: null,
-                                    recently_listened_config: null,
                                   },
                                 ]);
                               }}
@@ -410,7 +447,7 @@ export const FilterActionConfigModal = ({
                           const subtitle = `${artist.followers.total.toLocaleString()} Followers`;
 
                           return (
-                            <FilterConfigModalSourceButton
+                            <SpotifySourceButton
                               key={artist.id}
                               imageSrc={artist.images[0]?.url ?? ''}
                               title={artist.name}
@@ -427,7 +464,6 @@ export const FilterActionConfigModal = ({
                                     action_id: null,
                                     spotify_id: artist.id,
                                     limit: null,
-                                    recently_listened_config: null,
                                   },
                                 ]);
                               }}
@@ -480,7 +516,7 @@ export const FilterActionConfigModal = ({
                             .map((artist) => artist.name)
                             .join(', ');
                           return (
-                            <FilterConfigModalSourceButton
+                            <SpotifySourceButton
                               key={album.id}
                               imageSrc={album.images[0]?.url}
                               title={album.name}
@@ -497,7 +533,6 @@ export const FilterActionConfigModal = ({
                                     action_id: null,
                                     spotify_id: album.id,
                                     limit: null,
-                                    recently_listened_config: null,
                                   },
                                 ]);
                               }}
@@ -548,7 +583,7 @@ export const FilterActionConfigModal = ({
                             .map((artist) => artist.name)
                             .join(', ');
                           return (
-                            <FilterConfigModalSourceButton
+                            <SpotifySourceButton
                               key={track.id}
                               imageSrc={track.album.images[0]?.url}
                               title={track.name}
@@ -565,7 +600,6 @@ export const FilterActionConfigModal = ({
                                     action_id: null,
                                     spotify_id: track.id,
                                     limit: null,
-                                    recently_listened_config: null,
                                   },
                                 ]);
                               }}
@@ -654,8 +688,8 @@ export const FilterActionConfigModal = ({
                 >
                   <AnimatePresence>
                     {selectedSources.map((source) => (
-                      <FilterActionSelectedSourceCard
-                        key={source.id}
+                      <FilterActionSelectedSourceCard // TODO: also make this card generic
+                        key={`${source.source_type}-${source.spotify_id ?? ''}`}
                         title={source.title ?? ''}
                         subtitle={source.subtitle}
                         imageSrc={
@@ -677,7 +711,12 @@ export const FilterActionConfigModal = ({
                           setSelectedSources((prev) =>
                             prev.filter(
                               (selectedSource) =>
-                                selectedSource.id !== source.id,
+                                !(
+                                  selectedSource.spotify_id ===
+                                    source.spotify_id &&
+                                  selectedSource.source_type ===
+                                    source.source_type
+                                ),
                             ),
                           );
                         }}
@@ -691,7 +730,21 @@ export const FilterActionConfigModal = ({
                   </AnimatePresence>
                 </ScrollArea>
                 <Flex height='fit-content' minHeight='32px' justify='end'>
+                  <Button variant='outline' color='gray' onClick={onCancel}>
+                    Cancel
+                  </Button>
                   <Button
+                    disabled={
+                      selectedSources.length === 0 ||
+                      (initialSelectedSources &&
+                        selectedSources.every((source) =>
+                          initialSelectedSources?.some(
+                            (initialSource) =>
+                              initialSource.spotify_id === source.spotify_id &&
+                              initialSource.source_type === source.source_type,
+                          ),
+                        ))
+                    }
                     loading={isSaving}
                     onClick={() => {
                       onSave(selectedSources);

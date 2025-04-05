@@ -1,48 +1,38 @@
-import { Cross1Icon, QuestionMarkIcon } from '@radix-ui/react-icons';
-import {
-  Avatar,
-  Card,
-  CardProps,
-  Flex,
-  IconButton,
-  Text,
-} from '@radix-ui/themes';
-import { ReactNode } from 'react';
+import { QuestionMarkIcon } from '@radix-ui/react-icons';
+import { Avatar, Button, ButtonProps, Flex, Text } from '@radix-ui/themes';
+import { forwardRef, ReactNode } from 'react';
 import { colors } from '../../../theme/colors';
-import { motion, MotionProps } from 'motion/react';
 
-const MotionCard = motion(Card);
-
-type FilterActionSelectedSourceCardProps = {
+type SpotifySourceButtonProps = {
   imageSrc: string | ReactNode;
   title: string;
   subtitle?: string;
-  onRemove: () => void;
-} & CardProps &
-  MotionProps;
+  isSelected?: boolean;
+  removable?: boolean;
+} & Omit<ButtonProps, 'title' | 'subtitle' | 'imageSrc'>;
 
-export const FilterActionSelectedSourceCard = ({
-  imageSrc,
-  title,
-  subtitle,
-  onRemove,
-  ...rest
-}: FilterActionSelectedSourceCardProps) => {
+export const SpotifySourceButton = forwardRef<
+  HTMLButtonElement,
+  SpotifySourceButtonProps
+>(({ imageSrc, title, subtitle, isSelected, removable, ...rest }, ref) => {
+  // TODO: implement removable
   const combinedTitle = `${title}${subtitle ? ` - ${subtitle}` : ''}`;
   const isUsingIcon = typeof imageSrc !== 'string';
   const icon = (isUsingIcon ? imageSrc : undefined) ?? <QuestionMarkIcon />;
 
   return (
-    <MotionCard
+    <Button
+      ref={ref}
       css={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
         padding: '4px 8px',
         height: 'fit-content',
         minHeight: 50,
-        gap: 12,
       }}
+      size='3'
+      variant={isSelected ? 'solid' : 'soft'}
+      color={isSelected ? 'green' : 'gray'}
       {...rest}
       title={combinedTitle}
     >
@@ -78,14 +68,6 @@ export const FilterActionSelectedSourceCard = ({
           </Text>
         )}
       </Flex>
-      <IconButton
-        onClick={onRemove}
-        variant='ghost'
-        color='gray'
-        data-override='fix-margin'
-      >
-        <Cross1Icon />
-      </IconButton>
-    </MotionCard>
+    </Button>
   );
-};
+});

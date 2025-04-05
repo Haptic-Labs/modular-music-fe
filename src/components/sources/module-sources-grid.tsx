@@ -1,8 +1,9 @@
 import { Grid, Heading } from '@radix-ui/themes';
 import { ModulesQueries } from '../../queries';
 import { ModuleSourceCard } from './module-source-card';
-import { AddSourceButton } from './add-source-button';
+import { EditModuleSourcesButton } from './add-source-button';
 import { MODULE_GRID_CONFIG } from '../../constants';
+import { convertModuleSourcesToSelectedSources } from '../../utils';
 
 type ModuleSourcesGridProps = {
   moduleId: string;
@@ -12,6 +13,18 @@ export const ModuleSourcesGrid = ({ moduleId }: ModuleSourcesGridProps) => {
   const { data: sources = [] } = ModulesQueries.useModuleSourcesQuery({
     moduleId,
   });
+  const recentlyListenedSource = sources.find(
+    (source) => source.type === 'RECENTLY_PLAYED',
+  );
+
+  const recentlyListenedConfig = ModulesQueries.useRecentlyListenedConfigQuery(
+    {
+      sourceId: recentlyListenedSource?.id ?? '',
+    },
+    {
+      enabled: !!recentlyListenedSource,
+    },
+  );
 
   return (
     <section>
@@ -20,7 +33,13 @@ export const ModuleSourcesGrid = ({ moduleId }: ModuleSourcesGridProps) => {
         {sources.map((source) => (
           <ModuleSourceCard key={source.id} source={source} />
         ))}
-        <AddSourceButton moduleId={moduleId} />
+        <EditModuleSourcesButton
+          currentSources={convertModuleSourcesToSelectedSources(
+            sources,
+            recentlyListenedConfig.data ?? undefined,
+          )}
+          moduleId={moduleId}
+        />
       </Grid>
     </section>
   );
