@@ -12,7 +12,7 @@ import { PlusIcon } from '@radix-ui/react-icons';
 import { ModuleActionIcon } from './module-action-icon';
 import { colors } from '../../theme/colors';
 import { useDisclosure } from '@mantine/hooks';
-import { FilterActionConfigModal } from './config-modals';
+import { SourceSelectionModal } from '../modals';
 
 type AddActionButtonProps = {
   moduleId: string;
@@ -88,21 +88,31 @@ export const AddActionButton = ({
                   </IconButton>
                 </Dialog.Trigger>
               </Tooltip>
-              <FilterActionConfigModal
+              <SourceSelectionModal
                 onSave={(selectedSources) => {
                   addFilterMutation.mutate({
                     module_id: moduleId,
                     order: currentActionCount,
                     sources: selectedSources.map(
-                      ({ subtitle: _, id: __, ...source }) => ({
+                      (source) => ({
                         ...source,
+                        limit: null,
+                        action_id: null,
                         id: null,
+                        recently_listened_config:
+                          source.source_type === 'RECENTLY_PLAYED'
+                            ? source.recently_listened_config
+                            : null,
+                        spotify_id: source.spotify_id ?? null,
+                        image_url: source.image_url ?? null,
                       }),
-                      // TODO: update RLS on recently_played_sources_configs to account for sources other than modules_sources table
+                      // TODO: update RLS on recently_played_sources_configs to account for sources other than modules_sources table (is this still applicable?)
                     ),
                   });
                   filterConfigFns.close();
                 }}
+                isOpen={filterConfigIsOpen}
+                onCancel={filterConfigFns.close}
               />
             </Dialog.Root>
             <Tooltip content='Shuffle'>

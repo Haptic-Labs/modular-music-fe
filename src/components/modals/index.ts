@@ -1,2 +1,2 @@
-export * from "./spotify-source-selection-modal";
-export * from "./modal-action-selection-modal";
+export * from './modal-action-selection-modal';
+export * from './source-selection-modal';
