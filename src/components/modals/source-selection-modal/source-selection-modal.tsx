@@ -29,12 +29,12 @@ import { useSearchQuery } from '../../../queries/spotify';
 import { colors } from '../../../theme/colors';
 import { RecentlyListenedConfigPopover } from '../../popovers';
 import { titleCase } from '../../../utils';
-import { FilterActionSelectedSourceCard } from '../../actions/config-modals/filter-action-selected-source-card';
 import { Database, RecentlyListenedConfig } from '../../../types';
 import { SpotifyQueries } from '../../../queries';
 import { SpotifySourceButton } from './spotify-source-button';
 
 const MotionDialogContent = motion(Dialog.Content);
+const MotionSpotifySourceButton = motion(SpotifySourceButton);
 
 type BaseSelectedSource = {
   spotify_id?: string;
@@ -638,16 +638,7 @@ export const SourceSelectionModal = ({
         <AnimatePresence>
           {!!selectedSources.length && (
             <motion.div
-              initial={
-                initialSelectedSources?.length
-                  ? {
-                      width: 'auto',
-                      marginLeft: 12,
-                      paddingLeft: 12,
-                      opacity: 1,
-                    }
-                  : { width: 0, marginLeft: 0, paddingLeft: 0, opacity: 1 }
-              }
+              initial={{ width: 0, marginLeft: 0, paddingLeft: 0, opacity: 1 }}
               animate={{
                 width: 'auto',
                 marginLeft: 12,
@@ -688,7 +679,7 @@ export const SourceSelectionModal = ({
                 >
                   <AnimatePresence>
                     {selectedSources.map((source) => (
-                      <FilterActionSelectedSourceCard // TODO: also make this card generic
+                      <MotionSpotifySourceButton
                         key={`${source.source_type}-${source.spotify_id ?? ''}`}
                         title={source.title ?? ''}
                         subtitle={source.subtitle}
@@ -729,7 +720,12 @@ export const SourceSelectionModal = ({
                     ))}
                   </AnimatePresence>
                 </ScrollArea>
-                <Flex height='fit-content' minHeight='32px' justify='end'>
+                <Flex
+                  height='fit-content'
+                  minHeight='32px'
+                  justify='end'
+                  gap='2'
+                >
                   <Button variant='outline' color='gray' onClick={onCancel}>
                     Cancel
                   </Button>
