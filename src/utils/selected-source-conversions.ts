@@ -1,5 +1,7 @@
 import { SelectedSource } from '../components/modals';
+import { ModulesQueries } from '../queries';
 import { Database, RecentlyListenedConfig } from '../types';
+import { titleCase } from './casing-utils';
 
 export const convertSelectedSourcesToModuleSourceInserts = (
   selectedSources: SelectedSource[],
@@ -50,8 +52,42 @@ export const convertModuleSourcesToSelectedSources = (
         spotify_id: source.spotify_id ?? undefined,
         source_type: source.type,
         title: source.title,
+        image_url: source.image_url,
         recently_listened_config:
           source.type === 'RECENTLY_PLAYED' && recentlyListenedConfig
+            ? {
+                interval: recentlyListenedConfig.interval,
+                quantity: recentlyListenedConfig.quantity,
+              }
+            : undefined,
+      }) as SelectedSource,
+  );
+};
+
+export const convertFilterActionSourcesToSelectedSources = <
+  R extends {
+    interval: Database['public']['Enums']['RECENTLY_PLAYED_INTERVAL'];
+    quantity: number;
+  },
+>(
+  filterActionSources: ModulesQueries.FilterActionSourcesResponse,
+  recentlyListenedConfig?: R,
+): SelectedSource[] => {
+  return filterActionSources.map<SelectedSource>(
+    (source) =>
+      ({
+        spotify_id: source.spotify_id ?? undefined,
+        source_type: source.source_type ?? undefined,
+        title: source.title ?? '',
+        image_url: source.image_url ?? undefined,
+        subtitle:
+          source.source_type === 'RECENTLY_PLAYED' && recentlyListenedConfig
+            ? `Last ${recentlyListenedConfig.quantity.toLocaleString()} ${titleCase(recentlyListenedConfig.interval)}`
+            : source.source_type !== 'LIKED_SONGS'
+              ? titleCase(source.source_type.replace('_', ' '))
+              : undefined,
+        recently_listened_config:
+          source.source_type === 'RECENTLY_PLAYED' && recentlyListenedConfig
             ? {
                 interval: recentlyListenedConfig.interval,
                 quantity: recentlyListenedConfig.quantity,

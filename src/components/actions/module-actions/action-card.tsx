@@ -9,7 +9,10 @@ import {
 } from '@radix-ui/themes';
 import { Database } from '../../../types';
 import { ModuleActionIcon } from '../module-action-icon';
-import { titleCase } from '../../../utils';
+import {
+  convertFilterActionSourcesToSelectedSources,
+  titleCase,
+} from '../../../utils';
 import {
   CornerBottomLeftIcon,
   Cross1Icon,
@@ -21,9 +24,9 @@ import { useModuleActionData } from './use-module-action-data';
 import { LikedSongsIcon, RecentlyListenedIcon } from '../../../ui';
 import { ComponentProps, forwardRef, HTMLAttributes, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { FilterActionConfigModal } from '../config-modals';
 import { ModulesQueries } from '../../../queries';
 import { useDisclosure } from '@mantine/hooks';
+import { SourceSelectionModal } from '../..';
 
 const ACTION_TYPES_WITH_SOURCES: Database['public']['Enums']['MODULE_ACTION_TYPE'][] =
   ['FILTER', 'COMBINE'];
@@ -194,7 +197,7 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
                     <Pencil2Icon />
                   </IconButton>
                 </Dialog.Trigger>
-                <FilterActionConfigModal
+                <SourceSelectionModal
                   isSaving={isSaving}
                   onSave={(selectedSources) => {
                     const newRecentlyListenedConfig = selectedSources.find(
@@ -208,10 +211,6 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
                         acc,
                         {
                           source_type,
-                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                          id,
-                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                          action_id,
                           // eslint-disable-next-line @typescript-eslint/no-unused-vars
                           recently_listened_config,
                           ...rest
@@ -248,13 +247,13 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
                       },
                     );
                   }}
-                  initialSelectedSources={sources.map((source) => ({
-                    ...source,
-                    recently_listened_config:
-                      source.source_type === 'RECENTLY_PLAYED'
-                        ? (recentlyListenedConfig ?? null)
-                        : null,
-                  }))}
+                  initialSelectedSources={convertFilterActionSourcesToSelectedSources(
+                    sources,
+                    recentlyListenedConfig ?? undefined,
+                  )}
+                  isOpen={editSourcesIsOpen}
+                  onCancel={editSourcesFns.close}
+                  title='Select Filter Sources:'
                 />
               </Dialog.Root>
             </MotionFlex>

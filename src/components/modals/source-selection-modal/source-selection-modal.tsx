@@ -733,6 +733,8 @@ export const SourceSelectionModal = ({
                     disabled={
                       selectedSources.length === 0 ||
                       (initialSelectedSources &&
+                        initialSelectedSources.length ===
+                          selectedSources.length &&
                         selectedSources.every((source) =>
                           initialSelectedSources?.some(
                             (initialSource) =>
