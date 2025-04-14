@@ -3,6 +3,7 @@ import { Database } from '../../types';
 import { SpotifyComponents } from '..';
 import { Cross1Icon } from '@radix-ui/react-icons';
 import { ModulesQueries } from '../../queries';
+import { titleCase } from '../../utils';
 
 type ModuleOutputCardProps = {
   output: Database['public']['Tables']['module_outputs']['Row'];
@@ -33,7 +34,12 @@ export const ModuleOutputCard = ({ output }: ModuleOutputCardProps) => {
             borderRadius: 8,
           }}
         />
-        <Text>{output.title}</Text>
+        <Flex direction='column'>
+          <Text>{output.title}</Text>
+          <Text size='2' color='gray'>
+            {`Mode: ${titleCase(output.mode)}`}
+          </Text>
+        </Flex>
       </Flex>
       <IconButton
         variant='ghost'
