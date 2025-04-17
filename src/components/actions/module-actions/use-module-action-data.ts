@@ -15,6 +15,7 @@ type UseModuleActionDataReturn = {
     | Database['public']['Tables']['combine_action_sources']['Row']
   )[];
   recentlyListenedConfig?: Database['public']['Tables']['recently_played_source_configs']['Row'];
+  limitConfig?: Database['public']['Tables']['limit_action_configs']['Row'];
 };
 
 export const useModuleActionData = ({
@@ -39,6 +40,10 @@ export const useModuleActionData = ({
     },
   );
 
+  const { data: limitConfig } = ModulesQueries.useLimitConfigQuery({
+    actionId,
+  });
+
   const sourcesLength = filterSources.data?.length;
 
   const subtitle = useMemo<UseModuleActionDataReturn['subtitle']>(() => {
@@ -50,10 +55,17 @@ export const useModuleActionData = ({
       case 'FILTER':
       case 'COMBINE':
         return `${sourcesLength?.toLocaleString()} sources`;
+      case 'LIMIT':
+        return `${limitConfig?.limit.toLocaleString()} items`;
       default:
         return undefined;
     }
-  }, [actionType, shuffleConfig.data?.shuffle_type, sourcesLength]);
+  }, [
+    actionType,
+    shuffleConfig.data?.shuffle_type,
+    sourcesLength,
+    limitConfig?.limit,
+  ]);
 
   const sources = filterSources.data;
 

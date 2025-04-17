@@ -20,7 +20,7 @@ export const ModuleOutputsGrid = ({ moduleId }: ModuleOutputsGridProps) => {
       <Heading my='2'>Outputs</Heading>
       <Grid columns={MODULE_GRID_CONFIG} gap='2'>
         {outputs.map((output) => (
-          <ModuleOutputCard output={output} />
+          <ModuleOutputCard key={output.id} output={output} />
         ))}
         <AddModuleOutputButton moduleId={moduleId} />
       </Grid>
