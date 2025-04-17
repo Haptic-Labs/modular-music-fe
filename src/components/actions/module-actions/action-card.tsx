@@ -17,6 +17,7 @@ import {
   CornerBottomLeftIcon,
   Cross1Icon,
   DragHandleDots2Icon,
+  Pencil1Icon,
   Pencil2Icon,
 } from '@radix-ui/react-icons';
 import { colors } from '../../../theme/colors';
@@ -38,10 +39,11 @@ type SimpleActionCardProps = {
   onRemove: () => void;
   handle?: boolean;
   handleProps?: HTMLAttributes<HTMLDivElement>;
+  onEdit?: () => void;
 } & Omit<ComponentProps<typeof Card>, 'ref' | 'children'>;
 
 export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
-  ({ action, onRemove, handle, handleProps, ...rest }, ref) => {
+  ({ action, onRemove, handle, handleProps, onEdit, ...rest }, ref) => {
     const [sourcesExpanded, setSourcesExpanded] = useState(false);
     const { subtitle, sources, recentlyListenedConfig } = useModuleActionData({
       actionId: action.id,
@@ -84,6 +86,17 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
                 {sourcesExpanded ? 'Hide Sources' : 'View Sources'}
               </Button>
             )}
+            {!!onEdit && (
+              <IconButton
+                onClick={onEdit}
+                variant='ghost'
+                data-override='fix-margin'
+                color='gray'
+              >
+                <Pencil1Icon />
+              </IconButton>
+            )}
+
             <IconButton
               onClick={onRemove}
               variant='ghost'

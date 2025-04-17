@@ -12,7 +12,7 @@ import { PlusIcon } from '@radix-ui/react-icons';
 import { ModuleActionIcon } from './module-action-icon';
 import { colors } from '../../theme/colors';
 import { useDisclosure } from '@mantine/hooks';
-import { SourceSelectionModal } from '../modals';
+import { LimitConfigModal, SourceSelectionModal } from '../modals';
 
 type AddActionButtonProps = {
   moduleId: string;
@@ -25,12 +25,13 @@ export const AddActionButton = ({
 }: AddActionButtonProps) => {
   const {
     addShuffleMutation,
-    addLimitMutation,
+    upsertLimitMutation,
     addCombineMutation,
     addFilterMutation,
   } = ModulesQueries.useAddModuleActionMutations();
 
   const [filterConfigIsOpen, filterConfigFns] = useDisclosure(false);
+  const [limitConfigIsOpen, limitConfigFns] = useDisclosure(false);
   const [popoverIsOpen, popoverFns] = useDisclosure(false);
 
   return (
@@ -135,16 +136,46 @@ export const AddActionButton = ({
                 </IconButton>
               </Popover.Close>
             </Tooltip>
-            <Tooltip content='Limit'>
-              <Popover.Close>
-                <IconButton color='gray' variant='soft' size='4'>
-                  <ModuleActionIcon
-                    type='LIMIT'
-                    color={colors.greenDark.green9}
-                  />
-                </IconButton>
-              </Popover.Close>
-            </Tooltip>
+            <Dialog.Root
+              open={limitConfigIsOpen}
+              onOpenChange={(newOpen) =>
+                newOpen ? limitConfigFns.open() : limitConfigFns.close()
+              }
+            >
+              <Tooltip content='Limit'>
+                <Dialog.Trigger>
+                  <IconButton
+                    color='gray'
+                    variant='soft'
+                    size='4'
+                    loading={upsertLimitMutation.isPending}
+                  >
+                    <ModuleActionIcon
+                      type='LIMIT'
+                      color={colors.greenDark.green9}
+                    />
+                  </IconButton>
+                </Dialog.Trigger>
+              </Tooltip>
+              <LimitConfigModal
+                onSave={(maxItems) => {
+                  upsertLimitMutation.mutate(
+                    {
+                      module_id: moduleId,
+                      order: currentActionCount,
+                      limit: maxItems,
+                    },
+                    {
+                      onSuccess: () => {
+                        popoverFns.close();
+                      },
+                    },
+                  );
+                }}
+                isOpen={limitConfigIsOpen}
+              />
+            </Dialog.Root>
+
             <Tooltip content='Add Sources'>
               <Popover.Close>
                 <IconButton color='gray' variant='soft' size='4'>

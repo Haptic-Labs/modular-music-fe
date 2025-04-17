@@ -1,5 +1,6 @@
 import { Database } from '../../types';
 import { FilterActionSourcesRequest } from './use-filter-action-sources';
+import { UseLimitConfigQueryRequest } from './use-limit-config-query';
 import { ModuleActionsRequest } from './use-module-actions';
 import { UseModuleOutputsQueryRequest } from './use-module-outputs';
 import { ModuleSourcesRequest } from './use-module-sources';
@@ -58,6 +59,11 @@ export const modulesQueryKeys = {
   },
   moduleOutputs: (request?: UseModuleOutputsQueryRequest) => {
     const baseKey = ['module-outputs'] as const;
+    if (request) return [...baseKey, request] as const;
+    return baseKey;
+  },
+  limitConfig: (request?: UseLimitConfigQueryRequest) => {
+    const baseKey = ['limit-config'] as const;
     if (request) return [...baseKey, request] as const;
     return baseKey;
   },
