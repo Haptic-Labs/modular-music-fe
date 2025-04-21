@@ -1,15 +1,15 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Database, LimitedMutationOptions } from "../../types";
-import { useAuth } from "../../providers";
-import { modulesMutationKeys, modulesQueryKeys } from "./keys";
-import { ModuleActionsResponse } from "./use-module-actions";
-import { arrayUpsert } from "../../utils";
-import { removeNullishFromObject } from "../../utils/remove-nullish-from-object";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Database, LimitedMutationOptions } from '../../types';
+import { useAuth } from '../../providers';
+import { modulesMutationKeys, modulesQueryKeys } from './keys';
+import { ModuleActionsResponse } from './use-module-actions';
+import { arrayUpsert } from '../../utils';
+import { removeNullishFromObject } from '../../utils/remove-nullish-from-object';
 
 type AddCombineActionRequest =
-  Database["public"]["Functions"]["UpsertModuleActionCombine"]["Args"];
+  Database['public']['Functions']['UpsertModuleActionCombine']['Args'];
 type AddCombineActionResponse =
-  Database["public"]["Functions"]["UpsertModuleActionCombine"]["Returns"];
+  Database['public']['Functions']['UpsertModuleActionCombine']['Returns'];
 
 export const useAddModuleCombineActionMutation = <E = unknown, C = unknown>(
   options?: LimitedMutationOptions<
@@ -23,16 +23,16 @@ export const useAddModuleCombineActionMutation = <E = unknown, C = unknown>(
   const { supabaseClient } = useAuth();
 
   return useMutation({
-    mutationKey: modulesMutationKeys.addModuleAction("COMBINE"),
+    mutationKey: modulesMutationKeys.addModuleAction('COMBINE'),
     mutationFn: async (req) => {
       const query = supabaseClient
-        .schema("public")
-        .rpc("UpsertModuleActionCombine", req)
+        .schema('public')
+        .rpc('UpsertModuleActionCombine', req)
         .throwOnError();
 
       const { data: res } = await query;
 
-      if (!res) throw new Error("Error adding new combine action");
+      if (!res) throw new Error('Error adding new combine action');
 
       return res;
     },
@@ -42,12 +42,12 @@ export const useAddModuleCombineActionMutation = <E = unknown, C = unknown>(
       const { sources: _, ...action } = res;
       const filteredAction = removeNullishFromObject(action);
 
-      if (!filteredAction.id) return options?.onSuccess?.(res, ...rest);
+      if (!filteredAction.module_id) return options?.onSuccess?.(res, ...rest);
 
       queryClient.setQueriesData<ModuleActionsResponse>(
         {
           queryKey: modulesQueryKeys.moduleActions({
-            moduleId: filteredAction?.id,
+            moduleId: filteredAction.module_id,
           }),
           exact: false,
         },

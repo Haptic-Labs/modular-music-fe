@@ -32,6 +32,7 @@ export const AddActionButton = ({
 
   const [filterConfigIsOpen, filterConfigFns] = useDisclosure(false);
   const [limitConfigIsOpen, limitConfigFns] = useDisclosure(false);
+  const [combineConfigIsOpen, combineConfigFns] = useDisclosure(false);
   const [popoverIsOpen, popoverFns] = useDisclosure(false);
 
   return (
@@ -76,12 +77,7 @@ export const AddActionButton = ({
             >
               <Tooltip content='Filter'>
                 <Dialog.Trigger>
-                  <IconButton
-                    color='gray'
-                    variant='soft'
-                    size='4'
-                    onClick={filterConfigFns.open}
-                  >
+                  <IconButton color='gray' variant='soft' size='4'>
                     <ModuleActionIcon
                       type='FILTER'
                       color={colors.greenDark.green9}
@@ -91,26 +87,34 @@ export const AddActionButton = ({
               </Tooltip>
               <SourceSelectionModal
                 onSave={(selectedSources) => {
-                  addFilterMutation.mutate({
-                    module_id: moduleId,
-                    order: currentActionCount,
-                    sources: selectedSources.map(
-                      (source) => ({
-                        ...source,
-                        limit: null,
-                        action_id: null,
-                        id: null,
-                        recently_listened_config:
-                          source.source_type === 'RECENTLY_PLAYED'
-                            ? source.recently_listened_config
-                            : null,
-                        spotify_id: source.spotify_id ?? null,
-                        image_url: source.image_url ?? null,
-                      }),
-                      // TODO: update RLS on recently_played_sources_configs to account for sources other than modules_sources table (is this still applicable?)
-                    ),
-                  });
-                  filterConfigFns.close();
+                  addFilterMutation.mutate(
+                    {
+                      module_id: moduleId,
+                      order: currentActionCount,
+                      sources: selectedSources.map(
+                        (source) => ({
+                          limit: null,
+                          action_id: null,
+                          id: null,
+                          recently_listened_config:
+                            source.source_type === 'RECENTLY_PLAYED'
+                              ? source.recently_listened_config
+                              : null,
+                          spotify_id: source.spotify_id ?? null,
+                          image_url: source.image_url ?? null,
+                          source_type: source.source_type,
+                          title: source.title,
+                        }),
+                        // TODO: update RLS on recently_played_sources_configs to account for sources other than modules_sources table (is this still applicable?)
+                      ),
+                    },
+                    {
+                      onSuccess: () => {
+                        filterConfigFns.close();
+                        popoverFns.close();
+                      },
+                    },
+                  );
                 }}
                 isOpen={filterConfigIsOpen}
                 onCancel={filterConfigFns.close}
@@ -123,10 +127,17 @@ export const AddActionButton = ({
                   variant='soft'
                   size='4'
                   onClick={() => {
-                    addShuffleMutation.mutate({
-                      moduleId,
-                      newOrder: currentActionCount,
-                    });
+                    addShuffleMutation.mutate(
+                      {
+                        moduleId,
+                        newOrder: currentActionCount,
+                      },
+                      {
+                        onSuccess: () => {
+                          popoverFns.close();
+                        },
+                      },
+                    );
                   }}
                 >
                   <ModuleActionIcon
@@ -175,17 +186,58 @@ export const AddActionButton = ({
                 isOpen={limitConfigIsOpen}
               />
             </Dialog.Root>
-
-            <Tooltip content='Add Sources'>
-              <Popover.Close>
-                <IconButton color='gray' variant='soft' size='4'>
-                  <ModuleActionIcon
-                    type='COMBINE'
-                    color={colors.greenDark.green9}
-                  />
-                </IconButton>
-              </Popover.Close>
-            </Tooltip>
+            <Dialog.Root
+              open={combineConfigIsOpen}
+              onOpenChange={(isOpen) => {
+                if (isOpen) {
+                  combineConfigFns.open();
+                } else {
+                  combineConfigFns.close();
+                }
+              }}
+            >
+              <Tooltip content='Add Sources'>
+                <Dialog.Trigger>
+                  <IconButton color='gray' variant='soft' size='4'>
+                    <ModuleActionIcon
+                      type='COMBINE'
+                      color={colors.greenDark.green9}
+                    />
+                  </IconButton>
+                </Dialog.Trigger>
+              </Tooltip>
+              <SourceSelectionModal
+                onSave={(selectedSources) => {
+                  addCombineMutation.mutate(
+                    {
+                      module_id: moduleId,
+                      order: currentActionCount,
+                      sources: selectedSources.map((source) => ({
+                        limit: null,
+                        action_id: null,
+                        id: null,
+                        recently_listened_config:
+                          source.source_type === 'RECENTLY_PLAYED'
+                            ? source.recently_listened_config
+                            : null,
+                        spotify_id: source.spotify_id ?? null,
+                        image_url: source.image_url ?? null,
+                        source_type: source.source_type,
+                        title: source.title,
+                      })),
+                    },
+                    {
+                      onSuccess: () => {
+                        combineConfigFns.close();
+                        popoverFns.close();
+                      },
+                    },
+                  );
+                }}
+                isOpen={combineConfigIsOpen}
+                onCancel={combineConfigFns.close}
+              />
+            </Dialog.Root>
           </Flex>
         </Popover.Content>
       </Popover.Root>

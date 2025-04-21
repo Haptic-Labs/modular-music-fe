@@ -3,28 +3,28 @@ import { useAuth } from '../../providers';
 import { Database, LimitedQueryOptions } from '../../types';
 import { modulesQueryKeys } from './keys';
 
-export type FilterActionSourcesRequest = {
+export type CombineActionSourcesRequest = {
   actionId: string;
 };
 
-export type FilterActionSourcesResponse =
-  Database['public']['Tables']['filter_action_sources']['Row'][];
+export type CombineActionSourcesResponse =
+  Database['public']['Tables']['combine_action_sources']['Row'][];
 
-export const useFilterActionSourcesQuery = <
+export const useCombineActionSources = <
   E = unknown,
-  D = FilterActionSourcesResponse,
+  D = CombineActionSourcesResponse,
 >(
-  request: FilterActionSourcesRequest,
-  options?: LimitedQueryOptions<FilterActionSourcesResponse, E, D>,
+  request: CombineActionSourcesRequest,
+  options?: LimitedQueryOptions<CombineActionSourcesResponse, E, D>,
 ) => {
   const { supabaseClient } = useAuth();
 
   return useQuery({
-    queryKey: modulesQueryKeys.filterActionSources(request),
+    queryKey: modulesQueryKeys.combineActionSources(request),
     queryFn: async () => {
       const query = supabaseClient
         .schema('public')
-        .from('filter_action_sources')
+        .from('combine_action_sources')
         .select('*')
         .eq('action_id', request.actionId)
         .is('deleted_at', null)
@@ -32,7 +32,7 @@ export const useFilterActionSourcesQuery = <
 
       const { data } = await query;
 
-      if (!data) throw new Error('Error fetching filter action sources');
+      if (!data) throw new Error('Error fetching combine action sources');
 
       return data;
     },

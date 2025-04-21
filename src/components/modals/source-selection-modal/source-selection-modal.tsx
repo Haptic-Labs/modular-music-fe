@@ -388,7 +388,6 @@ export const SourceSelectionModal = ({
                                 setSelectedSources((prev) => [
                                   ...prev,
                                   {
-                                    id: playlist.id,
                                     source_type: 'PLAYLIST',
                                     image_url: playlist.images[0]?.url ?? '',
                                     title: playlist.name,

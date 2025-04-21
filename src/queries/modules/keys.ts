@@ -1,4 +1,5 @@
 import { Database } from '../../types';
+import { CombineActionSourcesRequest } from './use-combine-action-sources';
 import { FilterActionSourcesRequest } from './use-filter-action-sources';
 import { UseLimitConfigQueryRequest } from './use-limit-config-query';
 import { ModuleActionsRequest } from './use-module-actions';
@@ -64,6 +65,11 @@ export const modulesQueryKeys = {
   },
   limitConfig: (request?: UseLimitConfigQueryRequest) => {
     const baseKey = ['limit-config'] as const;
+    if (request) return [...baseKey, request] as const;
+    return baseKey;
+  },
+  combineActionSources: (request?: CombineActionSourcesRequest) => {
+    const baseKey = ['combine-action-sources'] as const;
     if (request) return [...baseKey, request] as const;
     return baseKey;
   },

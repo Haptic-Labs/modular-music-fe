@@ -54,6 +54,8 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
     const { mutateAsync: replaceSources, isPending: isSaving } =
       ModulesQueries.useReplaceModuleFilterSources();
 
+    // TODO: add replaceCombinSources mutation
+
     return (
       <Card {...rest} ref={ref}>
         <Flex align='center' justify='between' gap='1'>
@@ -218,7 +220,7 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
                     )?.recently_listened_config;
 
                     const newSources = selectedSources.reduce<
-                      Database['public']['Tables']['filter_action_sources']['Insert'][]
+                      Parameters<typeof replaceSources>[0]['newSources']
                     >(
                       (
                         acc,
@@ -226,6 +228,8 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
                           source_type,
                           // eslint-disable-next-line @typescript-eslint/no-unused-vars
                           recently_listened_config,
+                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                          subtitle,
                           ...rest
                         },
                       ) => {
@@ -242,6 +246,7 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
 
                     replaceSources(
                       {
+                        actionType: action.type,
                         actionId: action.id,
                         newSources,
                         recentlyPlayedConfig:
