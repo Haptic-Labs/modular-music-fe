@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Dialog,
   Grid,
@@ -127,7 +127,12 @@ export const SourceSelectionModal = ({
     },
   );
 
-  const totalSearchedSources = spotifySearchQuery.data?.playlists?.items.length;
+  const totalSearchedSources = useMemo(() => {
+    return Object.values(spotifySearchQuery.data ?? {}).reduce(
+      (acc, curr) => acc + curr.items.length,
+      0,
+    );
+  }, [spotifySearchQuery.data]);
   const showLoader =
     (searchText !== debouncedSearchText && !!searchText) ||
     spotifySearchQuery.isFetching;
