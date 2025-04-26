@@ -13,8 +13,7 @@ import { useAuth } from '../../providers';
 import { ModulesQueries } from '../../queries';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusIcon } from '@radix-ui/react-icons';
-import { useDisclosure } from '@mantine/hooks';
-import { Form, useForm } from '@mantine/form';
+import { useForm } from '@mantine/form';
 
 export const ModulesPage = () => {
   const { user } = useAuth();
@@ -24,9 +23,6 @@ export const ModulesPage = () => {
     { userId: user?.id ?? '' },
     { enabled: !!user },
   );
-
-  const [moduleCreationModalIsOpen, moduleCreationModalFns] =
-    useDisclosure(false);
 
   const { mutateAsync: createModule, isPending: isCreatingModule } =
     ModulesQueries.useAddModuleMutation();

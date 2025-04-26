@@ -90,8 +90,10 @@ export const SourceSelectionModal = ({
 
   const textFieldRef = useRef<HTMLInputElement>(null);
 
-  const { data: likedSongsLength, isLoading: likedSongsLengthIsLoading } =
-    SpotifyQueries.useLikedSongsLength();
+  const {
+    data: likedSongsLength,
+    // isLoading: likedSongsLengthIsLoading
+  } = SpotifyQueries.useLikedSongsLength();
 
   const spotifySearchQuery = useSearchQuery(
     {
