@@ -39,12 +39,19 @@ export const useModuleActionData = ({
       enabled: actionType === 'FILTER',
     },
   );
+  const combineSources = ModulesQueries.useCombineActionSources(
+    { actionId },
+    {
+      enabled: actionType === 'COMBINE',
+    },
+  );
 
   const { data: limitConfig } = ModulesQueries.useLimitConfigQuery({
     actionId,
   });
 
-  const sourcesLength = filterSources.data?.length;
+  const sourcesLength =
+    filterSources.data?.length ?? combineSources.data?.length;
 
   const subtitle = useMemo<UseModuleActionDataReturn['subtitle']>(() => {
     switch (actionType) {
@@ -54,7 +61,7 @@ export const useModuleActionData = ({
           : undefined;
       case 'FILTER':
       case 'COMBINE':
-        return `${sourcesLength?.toLocaleString()} sources`;
+        return `${sourcesLength?.toLocaleString()} source${sourcesLength === 1 ? '' : 's'}`;
       case 'LIMIT':
         return `${limitConfig?.limit.toLocaleString()} items`;
       default:
@@ -83,7 +90,7 @@ export const useModuleActionData = ({
 
   return {
     subtitle,
-    sources: filterSources.data,
+    sources: filterSources.data ?? combineSources.data,
     recentlyListenedConfig: recentlyListenedConfig.data,
   };
 };

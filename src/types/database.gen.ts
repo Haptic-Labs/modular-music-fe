@@ -443,7 +443,7 @@ export type Database = {
           module_id: string
           order: number
           sources: Database["public"]["CompositeTypes"]["CombineSourceUpsertRequest"][]
-          id?: string
+          actionId?: string
         }
         Returns: Database["public"]["CompositeTypes"]["ModuleAction:Combine"]
       }

@@ -9,27 +9,37 @@ import { modulesMutationKeys, modulesQueryKeys } from './keys';
 import { useAuth } from '../../providers';
 import { useAddRecentlyListenedConfigs } from './use-add-recently-listened_configs';
 import { FilterActionSourcesResponse } from './use-filter-action-sources';
+import { CombineActionSourcesResponse } from './use-combine-action-sources';
 
-type UseReplaceModuleFilterSourcesRequest = {
+type UseReplaceModuleActionSourcesRequest<
+  T extends Database['public']['Enums']['MODULE_ACTION_TYPE'],
+> = {
   actionId: string;
-  newSources: Database['public']['Tables']['filter_action_sources']['Insert'][];
+  actionType: T;
+  newSources: Database['public']['Tables'][T extends 'FILTER'
+    ? 'filter_action_sources'
+    : 'combine_action_sources']['Insert'][];
   recentlyPlayedConfig?: Omit<
     Database['public']['Tables']['recently_played_source_configs']['Insert'],
     'id'
   >;
 };
 
-type UseReplaceModuleFilterSourcesResponse = {
+type UseReplaceModuleActionSourcesResponse = {
   deletedSources: Database['public']['Tables']['filter_action_sources']['Row'][];
   addedSources: Database['public']['Tables']['filter_action_sources']['Row'][];
   newRecentlyPlayedConfig?: Database['public']['Tables']['recently_played_source_configs']['Row'];
 };
 
-export const useReplaceModuleFilterSources = <E = unknown, C = unknown>(
+export const useReplaceModuleFilterSources = <
+  T extends Database['public']['Enums']['MODULE_ACTION_TYPE'],
+  E = unknown,
+  C = unknown,
+>(
   options: UseMutationOptions<
-    UseReplaceModuleFilterSourcesResponse,
+    UseReplaceModuleActionSourcesResponse,
     E,
-    UseReplaceModuleFilterSourcesRequest,
+    UseReplaceModuleActionSourcesRequest<T>,
     C
   > = {},
 ) => {
@@ -39,19 +49,19 @@ export const useReplaceModuleFilterSources = <E = unknown, C = unknown>(
   const { mutateAsync: addRecentlyListened } = useAddRecentlyListenedConfigs();
 
   return useMutation<
-    UseReplaceModuleFilterSourcesResponse,
+    UseReplaceModuleActionSourcesResponse,
     E,
-    UseReplaceModuleFilterSourcesRequest,
+    UseReplaceModuleActionSourcesRequest<T>,
     { externalContext: C; internalContext: { revert: () => void } }
   >({
     mutationKey: modulesMutationKeys.addFilterSources,
-    mutationFn: async ({ recentlyPlayedConfig, ...request }) => {
+    mutationFn: async ({ recentlyPlayedConfig, actionType, ...request }) => {
       const hasRecentlyPlayedSource = request.newSources.some(
         (source) => source.source_type === 'RECENTLY_PLAYED',
       );
       if (hasRecentlyPlayedSource && !recentlyPlayedConfig) {
         console.error(
-          'Error replacing filter sources due to missing `recentlyPlayedConfig`',
+          'Error replacing action sources due to missing `recentlyPlayedConfig`',
           { request },
         );
         throw new Error(
@@ -61,14 +71,22 @@ export const useReplaceModuleFilterSources = <E = unknown, C = unknown>(
 
       const deletedSources = await supabaseClient
         .schema('public')
-        .from('filter_action_sources')
+        .from(
+          actionType === 'FILTER'
+            ? 'filter_action_sources'
+            : 'combine_action_sources',
+        )
         .delete()
         .eq('action_id', request.actionId)
         .select('*')
         .throwOnError();
       const addedSources = await supabaseClient
         .schema('public')
-        .from('filter_action_sources')
+        .from(
+          actionType === 'FILTER'
+            ? 'filter_action_sources'
+            : 'combine_action_sources',
+        )
         .insert(
           request.newSources.map((source) => {
             if (source.id) {
@@ -94,7 +112,7 @@ export const useReplaceModuleFilterSources = <E = unknown, C = unknown>(
         (source) => source.source_type === 'RECENTLY_PLAYED',
       );
 
-      const response: UseReplaceModuleFilterSourcesResponse = {
+      const response: UseReplaceModuleActionSourcesResponse = {
         addedSources: addedSources.data ?? [],
         deletedSources: deletedSources.data ?? [],
       };
@@ -113,17 +131,29 @@ export const useReplaceModuleFilterSources = <E = unknown, C = unknown>(
     ...options,
     onMutate: async (request, ...rest) => {
       const previousDatas: {
-        data: FilterActionSourcesResponse;
+        data: T extends 'FILTER'
+          ? FilterActionSourcesResponse
+          : CombineActionSourcesResponse;
         queryKey: QueryKey;
       }[] = [];
       queryClient.setQueriesData<FilterActionSourcesResponse>(
         {
-          queryKey: modulesQueryKeys.filterActionSources({
+          queryKey: modulesQueryKeys[
+            request.actionType === 'FILTER'
+              ? 'filterActionSources'
+              : 'combineActionSources'
+          ]({
             actionId: request.actionId,
           }),
           exact: true,
           predicate: ({ queryKey, state }) => {
-            if (state.data) previousDatas.push({ data: state.data, queryKey });
+            if (state.data)
+              previousDatas.push({
+                data: state.data as T extends 'FILTER'
+                  ? FilterActionSourcesResponse
+                  : CombineActionSourcesResponse,
+                queryKey,
+              });
             return true;
           },
         },
@@ -161,7 +191,11 @@ export const useReplaceModuleFilterSources = <E = unknown, C = unknown>(
     onSuccess: (response, request, { externalContext }) => {
       queryClient.setQueriesData<FilterActionSourcesResponse>(
         {
-          queryKey: modulesQueryKeys.filterActionSources({
+          queryKey: modulesQueryKeys[
+            request.actionType === 'FILTER'
+              ? 'filterActionSources'
+              : 'combineActionSources'
+          ]({
             actionId: request.actionId,
           }),
           exact: true,
