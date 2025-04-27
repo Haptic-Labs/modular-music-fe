@@ -57,7 +57,7 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
     >
       <Flex gap='2' align='center'>
         <SpotifyComponents.SourceImage
-          src={source.image_url}
+          src={source.image_url ?? undefined}
           sourceType={source.type}
           css={{
             width: 20,

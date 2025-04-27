@@ -1,21 +1,20 @@
-import { HTMLAttributes } from "react";
-import { Database } from "../../types";
-import { LikedSongsIcon, RecentlyListenedIcon } from "../../ui/vectors";
-import { colors } from "../../theme/colors";
+import { HTMLAttributes } from 'react';
+import { Database } from '../../types';
+import { RecentlyListenedIcon } from '../../ui/vectors';
+import { colors } from '../../theme/colors';
 import {
-  IconHeart,
   IconHeartFilled,
   IconMusic,
   IconPlaylist,
   IconProps,
   IconUser,
   IconVinyl,
-} from "@tabler/icons-react";
+} from '@tabler/icons-react';
 
-type SVGType = "LIKED_SONGS" | "RECENTLY_PLAYED";
+type SVGType = 'LIKED_SONGS' | 'RECENTLY_PLAYED';
 
 type SourceImageProps<
-  T extends Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"] | undefined,
+  T extends Database['public']['Enums']['SPOTIFY_SOURCE_TYPE'] | undefined,
   Src extends string | undefined,
 > = {
   src?: Src;
@@ -26,7 +25,7 @@ type SourceImageProps<
   : IconProps);
 
 export const SourceImage = <
-  T extends Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"] | undefined,
+  T extends Database['public']['Enums']['SPOTIFY_SOURCE_TYPE'] | undefined,
   Src extends string | undefined,
 >({
   src,
@@ -34,10 +33,10 @@ export const SourceImage = <
   color = colors.greenDark.green9,
   ...rest
 }: SourceImageProps<T, Src>) => {
-  if (sourceType === "LIKED_SONGS") {
+  if (sourceType === 'LIKED_SONGS') {
     const typedRest = rest as HTMLAttributes<SVGElement>;
     return <IconHeartFilled color={color} {...typedRest} />;
-  } else if (sourceType === "RECENTLY_PLAYED") {
+  } else if (sourceType === 'RECENTLY_PLAYED') {
     const typedRest = rest as HTMLAttributes<SVGElement>;
     return <RecentlyListenedIcon color={color} {...typedRest} />;
   } else if (src) {
@@ -46,13 +45,13 @@ export const SourceImage = <
   } else {
     const typedRest = rest as IconProps;
     switch (sourceType) {
-      case "TRACK":
+      case 'TRACK':
         return <IconMusic color={color} {...typedRest} />;
-      case "ALBUM":
+      case 'ALBUM':
         return <IconVinyl color={color} {...typedRest} />;
-      case "ARTIST":
+      case 'ARTIST':
         return <IconUser color={color} {...typedRest} />;
-      case "PLAYLIST":
+      case 'PLAYLIST':
         return <IconPlaylist color={color} {...typedRest} />;
     }
   }
