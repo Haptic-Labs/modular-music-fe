@@ -1,13 +1,13 @@
-import { Button, ButtonProps, Flex, Text } from "@radix-ui/themes";
-import { forwardRef, HTMLAttributes, ReactNode } from "react";
-import { SourceImage } from "./source-image";
+import { forwardRef, HTMLAttributes, ReactNode } from 'react';
+import { SourceImage } from './source-image';
+import { Button, ButtonProps, Stack, Text } from '@mantine/core';
 
 type StaticSourceCardProps = {
-  type: "LIKED_SONGS" | "RECENTLY_PLAYED";
+  type: 'LIKED_SONGS' | 'RECENTLY_PLAYED';
   imageSize?: number;
   isSelected?: boolean;
   subtitle?: ReactNode;
-} & Pick<ButtonProps, "color" | "variant" | "onClick"> &
+} & Pick<ButtonProps, 'color' | 'variant'> &
   HTMLAttributes<HTMLButtonElement>;
 
 export const StaticSourceCard = forwardRef<
@@ -15,20 +15,20 @@ export const StaticSourceCard = forwardRef<
   StaticSourceCardProps
 >(({ type, imageSize = 24, isSelected = false, subtitle, ...rest }, ref) => {
   const title =
-    type === "LIKED_SONGS" ? "My Liked Songs" : "My Recently Played Songs";
+    type === 'LIKED_SONGS' ? 'My Liked Songs' : 'My Recently Played Songs';
 
   return (
     <Button
       ref={ref}
       title={title}
       css={{
-        justifyContent: "start",
-        height: "max-content",
+        justifyContent: 'start',
+        height: 'max-content',
         padding: 8,
         paddingRight: 24,
       }}
-      variant={isSelected ? "solid" : "soft"}
-      color={isSelected ? "green" : "gray"}
+      variant={isSelected ? 'solid' : 'soft'}
+      color={isSelected ? 'green' : 'gray'}
       {...rest}
     >
       <SourceImage
@@ -40,26 +40,23 @@ export const StaticSourceCard = forwardRef<
           minHeight: imageSize,
           borderRadius: 8,
         }}
-        color={isSelected ? "white" : undefined}
+        color={isSelected ? 'white' : undefined}
       />
-      <Flex direction="column" align="start">
+      <Stack align='start'>
         <Text
-          as="p"
           truncate
           css={{
-            maxWidth: "100%",
+            maxWidth: '100%',
           }}
         >
           {title}
         </Text>
-        {typeof subtitle === "string" ? (
-          <Text color="gray" size="1">
-            {subtitle}
-          </Text>
+        {typeof subtitle === 'string' ? (
+          <Text c='gray'>{subtitle}</Text>
         ) : (
           subtitle
         )}
-      </Flex>
+      </Stack>
     </Button>
   );
 });

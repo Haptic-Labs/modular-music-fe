@@ -1,4 +1,3 @@
-import { Dialog, Flex, Heading } from '@radix-ui/themes';
 import { ModulesQueries } from '../../queries';
 import { AddActionButton } from './add-action-button';
 import { SortableActionCard } from './module-actions';
@@ -11,6 +10,7 @@ import {
 import { Fragment } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { ExistingLimitConfigModal } from '../modals';
+import { Stack, Title } from '@mantine/core';
 
 type ModuleActionsGridProps = {
   moduleId: string;
@@ -33,8 +33,8 @@ export const ModuleActionsList = ({ moduleId }: ModuleActionsGridProps) => {
 
   return (
     <section>
-      <Heading my='2'>Actions</Heading>
-      <Flex gap='2' direction='column'>
+      <Title my='2'>Actions</Title>
+      <Stack gap='md'>
         <DndContext
           onDragEnd={({ active, over }) => {
             if (over && active.id !== over.id) {
@@ -66,35 +66,33 @@ export const ModuleActionsList = ({ moduleId }: ModuleActionsGridProps) => {
                       : undefined
                   }
                 />
-                <Dialog.Root
-                  open={editModalIsOpen}
-                  onOpenChange={(newOpen) =>
-                    newOpen ? editModalFns.open() : editModalFns.close()
-                  }
-                >
-                  {action.type === 'LIMIT' && (
-                    <ExistingLimitConfigModal
-                      title='Edit Limit Action'
-                      onSave={(maxItems) => {
-                        upsertLimitAction(
-                          {
-                            module_id: moduleId,
-                            actionId: action.id,
-                            limit: maxItems,
-                            order: action.order,
+                {action.type === 'LIMIT' && (
+                  <ExistingLimitConfigModal
+                    opened={editModalIsOpen}
+                    onClose={editModalFns.close}
+                    onChange={(newOpen) =>
+                      newOpen ? editModalFns.open() : editModalFns.close()
+                    }
+                    title='Edit Limit Action'
+                    onSave={(maxItems) => {
+                      upsertLimitAction(
+                        {
+                          module_id: moduleId,
+                          actionId: action.id,
+                          limit: maxItems,
+                          order: action.order,
+                        },
+                        {
+                          onSuccess: () => {
+                            editModalFns.close();
                           },
-                          {
-                            onSuccess: () => {
-                              editModalFns.close();
-                            },
-                          },
-                        );
-                      }}
-                      actionId={action.id}
-                      isOpen={editModalIsOpen}
-                    />
-                  )}
-                </Dialog.Root>
+                        },
+                      );
+                    }}
+                    actionId={action.id}
+                    isOpen={editModalIsOpen}
+                  />
+                )}
               </Fragment>
             ))}
             <AddActionButton
@@ -103,7 +101,7 @@ export const ModuleActionsList = ({ moduleId }: ModuleActionsGridProps) => {
             />
           </SortableContext>
         </DndContext>
-      </Flex>
+      </Stack>
     </section>
   );
 };

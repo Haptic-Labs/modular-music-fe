@@ -1,12 +1,3 @@
-import {
-  Avatar,
-  Button,
-  Card,
-  Dialog,
-  Flex,
-  IconButton,
-  Text,
-} from '@radix-ui/themes';
 import { Database } from '../../../types';
 import { ModuleActionIcon } from '../module-action-icon';
 import {
@@ -20,7 +11,6 @@ import {
   Pencil1Icon,
   Pencil2Icon,
 } from '@radix-ui/react-icons';
-import { colors } from '../../../theme/colors';
 import { useModuleActionData } from './use-module-action-data';
 import { LikedSongsIcon, RecentlyListenedIcon } from '../../../ui';
 import { ComponentProps, forwardRef, HTMLAttributes, useState } from 'react';
@@ -28,11 +18,21 @@ import { AnimatePresence, motion } from 'motion/react';
 import { ModulesQueries } from '../../../queries';
 import { useDisclosure } from '@mantine/hooks';
 import { SourceSelectionModal } from '../..';
+import {
+  ActionIcon,
+  Avatar,
+  Button,
+  Card,
+  Group,
+  Stack,
+  Text,
+  useMantineTheme,
+} from '@mantine/core';
 
 const ACTION_TYPES_WITH_SOURCES: Database['public']['Enums']['MODULE_ACTION_TYPE'][] =
   ['FILTER', 'COMBINE'];
 
-const MotionFlex = motion.create(Flex);
+const MotionGroup = motion.create(Group);
 
 type SimpleActionCardProps = {
   action: Database['public']['Tables']['module_actions']['Row'];
@@ -44,6 +44,7 @@ type SimpleActionCardProps = {
 
 export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
   ({ action, onRemove, handle, handleProps, onEdit, ...rest }, ref) => {
+    const theme = useMantineTheme();
     const [sourcesExpanded, setSourcesExpanded] = useState(false);
     const { subtitle, sources, recentlyListenedConfig } = useModuleActionData({
       actionId: action.id,
@@ -58,27 +59,20 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
 
     return (
       <Card {...rest} ref={ref}>
-        <Flex align='center' justify='between' gap='1'>
-          <Flex align='center' gap='2'>
+        <Group align='center' justify='between' gap='sm'>
+          <Group align='center' gap='md'>
             {!!handle && (
               <div {...handleProps}>
                 <DragHandleDots2Icon />
               </div>
             )}
-            <ModuleActionIcon
-              type={action.type}
-              color={colors.greenDark.green9}
-            />
-            <Flex direction='column'>
+            <ModuleActionIcon type={action.type} />
+            <Stack>
               <Text>{titleCase(action.type)}</Text>
-              {!!subtitle && (
-                <Text size='2' color='gray'>
-                  {subtitle}
-                </Text>
-              )}
-            </Flex>
-          </Flex>
-          <Flex gap='1' align='center'>
+              {!!subtitle && <Text c='gray'>{subtitle}</Text>}
+            </Stack>
+          </Group>
+          <Group gap='1' align='center'>
             {ACTION_TYPES_WITH_SOURCES.includes(action.type) && (
               <Button
                 onClick={() => setSourcesExpanded((prev) => !prev)}
@@ -89,64 +83,64 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
               </Button>
             )}
             {!!onEdit && (
-              <IconButton
+              <ActionIcon
                 onClick={onEdit}
                 variant='ghost'
                 data-override='fix-margin'
                 color='gray'
               >
                 <Pencil1Icon />
-              </IconButton>
+              </ActionIcon>
             )}
 
-            <IconButton
+            <ActionIcon
               onClick={onRemove}
               variant='ghost'
               data-override='fix-margin'
               color='gray'
             >
               <Cross1Icon />
-            </IconButton>
-          </Flex>
-        </Flex>
+            </ActionIcon>
+          </Group>
+        </Group>
         <AnimatePresence>
           {!!sources?.length && sourcesExpanded && (
-            <MotionFlex
+            <MotionGroup
               gap='1'
               align='center'
               css={{ width: '100%' }}
               initial={{
                 marginTop: 0,
                 paddingTop: 0,
-                borderTop: `1px solid ${colors.grayDark.gray5}00`,
+                borderTop: `1px solid ${theme.colors.gray[5]}00`,
                 height: 0,
                 overflow: 'clip',
               }}
               animate={{
                 marginTop: 8,
                 paddingTop: 8,
-                borderTop: `1px solid ${colors.grayDark.gray5}`,
+                borderTop: `1px solid ${theme.colors.gray[5]}`,
                 height: 'auto',
                 overflow: 'clip',
               }}
               exit={{
                 marginTop: 0,
                 paddingTop: 0,
-                borderTop: `1px solid ${colors.grayDark.gray5}00`,
+                borderTop: `1px solid ${theme.colors.gray[5]}00`,
                 height: 0,
                 overflow: 'clip',
               }}
             >
-              <CornerBottomLeftIcon color={colors.grayDark.gray8} />
+              <CornerBottomLeftIcon color={theme.colors.gray[8]} />
               {!!sourcesExpanded &&
                 sources.map((source, i) => (
-                  <Flex
+                  <Group
                     key={source.id + i}
                     align='center'
                     css={
                       i !== sources.length - 1
                         ? {
-                            borderRight: `1px solid ${colors.grayDark.gray5}`,
+                            borderRight: `1px solid ${theme.colors.gray[5]}`,
                             padding: '4px 16px 4px 4px',
                           }
                         : {
@@ -163,118 +157,111 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
                   >
                     <Avatar
                       src={source.image_url ?? undefined}
-                      fallback={
-                        source.source_type === 'RECENTLY_PLAYED' ? (
-                          <RecentlyListenedIcon
-                            css={{ width: 20, height: 20 }}
-                          />
-                        ) : source.source_type === 'LIKED_SONGS' ? (
-                          <LikedSongsIcon css={{ width: 20, height: 20 }} />
-                        ) : (
-                          <div></div>
-                        )
-                      }
                       css={
                         !!source.image_url && {
                           gap: 8,
                         }
                       }
-                    />
-                    <Flex direction='column'>
-                      <Text size='2'>{source.title}</Text>
+                    >
+                      {source.source_type === 'RECENTLY_PLAYED' ? (
+                        <RecentlyListenedIcon css={{ width: 20, height: 20 }} />
+                      ) : source.source_type === 'LIKED_SONGS' ? (
+                        <LikedSongsIcon css={{ width: 20, height: 20 }} />
+                      ) : (
+                        <div></div>
+                      )}
+                    </Avatar>
+                    <Stack>
+                      <Text>{source.title}</Text>
                       {!!recentlyListenedConfig &&
                         source.source_type === 'RECENTLY_PLAYED' && (
-                          <Text color='gray' size='1'>
+                          <Text c='gray'>
                             {`${recentlyListenedConfig.quantity.toLocaleString()} ${titleCase(recentlyListenedConfig.interval)}`}
                           </Text>
                         )}
                       {source.source_type !== 'RECENTLY_PLAYED' && (
-                        <Text color='gray' size='1'>
+                        <Text c='gray'>
                           {titleCase(source.source_type.replace('_', ' '))}
                         </Text>
                       )}
-                    </Flex>
-                  </Flex>
+                    </Stack>
+                  </Group>
                 ))}
-              <Dialog.Root
-                open={editSourcesIsOpen}
-                onOpenChange={(open) =>
+              <ActionIcon
+                variant='ghost'
+                css={{ marginLeft: 16 }}
+                title='Edit Filter Sources'
+                onClick={editSourcesFns.open}
+              >
+                <Pencil2Icon />
+              </ActionIcon>
+              <SourceSelectionModal
+                opened={editSourcesIsOpen}
+                onClose={editSourcesFns.close}
+                onChange={(open) =>
                   open ? editSourcesFns.open() : editSourcesFns.close()
                 }
-              >
-                <Dialog.Trigger>
-                  <IconButton
-                    variant='ghost'
-                    css={{ marginLeft: 16 }}
-                    title='Edit Filter Sources'
-                    onClick={() => {}}
-                  >
-                    <Pencil2Icon />
-                  </IconButton>
-                </Dialog.Trigger>
-                <SourceSelectionModal
-                  isSaving={isSaving}
-                  onSave={(selectedSources) => {
-                    const newRecentlyListenedConfig = selectedSources.find(
-                      (source) => source.source_type === 'RECENTLY_PLAYED',
-                    )?.recently_listened_config;
+                isSaving={isSaving}
+                onSave={(selectedSources) => {
+                  const newRecentlyListenedConfig = selectedSources.find(
+                    (source) => source.source_type === 'RECENTLY_PLAYED',
+                  )?.recently_listened_config;
 
-                    const newSources = selectedSources.reduce<
-                      Parameters<typeof replaceSources>[0]['newSources']
-                    >(
-                      (
-                        acc,
-                        {
+                  const newSources = selectedSources.reduce<
+                    Parameters<typeof replaceSources>[0]['newSources']
+                  >(
+                    (
+                      acc,
+                      {
+                        source_type,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        recently_listened_config,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        subtitle,
+                        ...rest
+                      },
+                    ) => {
+                      if (source_type)
+                        acc.push({
+                          ...rest,
+                          action_id: action.id,
                           source_type,
-                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                          recently_listened_config,
-                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                          subtitle,
-                          ...rest
-                        },
-                      ) => {
-                        if (source_type)
-                          acc.push({
-                            ...rest,
-                            action_id: action.id,
-                            source_type,
-                          });
-                        return acc;
-                      },
-                      [],
-                    );
+                        });
+                      return acc;
+                    },
+                    [],
+                  );
 
-                    replaceSources(
-                      {
-                        actionType: action.type,
-                        actionId: action.id,
-                        newSources,
-                        recentlyPlayedConfig:
-                          newRecentlyListenedConfig?.quantity &&
-                          newRecentlyListenedConfig?.interval
-                            ? {
-                                quantity: newRecentlyListenedConfig.quantity,
-                                interval: newRecentlyListenedConfig.interval,
-                              }
-                            : undefined,
+                  replaceSources(
+                    {
+                      actionType: action.type,
+                      actionId: action.id,
+                      newSources,
+                      recentlyPlayedConfig:
+                        newRecentlyListenedConfig?.quantity &&
+                        newRecentlyListenedConfig?.interval
+                          ? {
+                              quantity: newRecentlyListenedConfig.quantity,
+                              interval: newRecentlyListenedConfig.interval,
+                            }
+                          : undefined,
+                    },
+                    {
+                      onSuccess: () => {
+                        editSourcesFns.close();
                       },
-                      {
-                        onSuccess: () => {
-                          editSourcesFns.close();
-                        },
-                      },
-                    );
-                  }}
-                  initialSelectedSources={convertFilterActionSourcesToSelectedSources(
-                    sources,
-                    recentlyListenedConfig ?? undefined,
-                  )}
-                  isOpen={editSourcesIsOpen}
-                  onCancel={editSourcesFns.close}
-                  title='Select Filter Sources:'
-                />
-              </Dialog.Root>
-            </MotionFlex>
+                    },
+                  );
+                }}
+                initialSelectedSources={convertFilterActionSourcesToSelectedSources(
+                  sources,
+                  recentlyListenedConfig ?? undefined,
+                )}
+                isOpen={editSourcesIsOpen}
+                onCancel={editSourcesFns.close}
+                title='Select Filter Sources:'
+              />
+            </MotionGroup>
           )}
         </AnimatePresence>
       </Card>

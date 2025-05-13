@@ -1,8 +1,8 @@
 import { useDisclosure } from '@mantine/hooks';
 import { PlusIcon } from '@radix-ui/react-icons';
-import { Button, Dialog, Text } from '@radix-ui/themes';
 import { ModulesQueries } from '../../queries';
 import { UserPlaylistSelectionModalContents } from './user-playlist-selection-modal-contents';
+import { Button, Text } from '@mantine/core';
 
 export const AddModuleOutputButton = ({ moduleId }: { moduleId: string }) => {
   const { mutate, isPending: isSaving } =
@@ -11,29 +11,26 @@ export const AddModuleOutputButton = ({ moduleId }: { moduleId: string }) => {
   const [isOpen, { open, close }] = useDisclosure(false);
 
   return (
-    <Dialog.Root
-      open={isOpen}
-      onOpenChange={(newOpen) => (newOpen ? open() : close())}
-    >
-      <Dialog.Trigger>
-        <Button
-          variant='soft'
-          color='gray'
-          css={{
-            padding: 12,
-            minHeight: 0,
-            height: 'auto',
-            justifyContent: 'start',
-          }}
-          radius='large'
-        >
-          <PlusIcon width={25} height={25} />
-          <Text size='3' weight='regular'>
-            Add Output
-          </Text>
-        </Button>
-      </Dialog.Trigger>
+    <>
+      <Button
+        variant='soft'
+        color='gray'
+        css={{
+          padding: 12,
+          minHeight: 0,
+          height: 'auto',
+          justifyContent: 'start',
+        }}
+        radius='large'
+        onClick={open}
+      >
+        <PlusIcon width={25} height={25} />
+        <Text>Add Output</Text>
+      </Button>
       <UserPlaylistSelectionModalContents
+        opened={isOpen}
+        onClose={close}
+        onChange={(newOpen) => (newOpen ? open() : close())}
         enableQuery={isOpen}
         onSave={(playlist, mode) => {
           mutate(
@@ -55,6 +52,6 @@ export const AddModuleOutputButton = ({ moduleId }: { moduleId: string }) => {
         }}
         isSaving={isSaving}
       />
-    </Dialog.Root>
+    </>
   );
 };

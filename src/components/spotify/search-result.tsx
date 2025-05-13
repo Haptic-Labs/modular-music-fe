@@ -1,19 +1,19 @@
-import { ItemType } from "@soundify/web-api";
-import { Button, ButtonProps, Flex, Text } from "@radix-ui/themes";
-import { SourceImage } from "./source-image";
+import { ItemType } from '@soundify/web-api';
+import { SourceImage } from './source-image';
 import {
   convertItemTypeToSourceType,
   getSpotifySearchResultDisplayData,
-} from "../../utils";
-import { SpotifySearchItem } from "../../types";
-import { HTMLAttributes } from "react";
+} from '../../utils';
+import { SpotifySearchItem } from '../../types';
+import { HTMLAttributes } from 'react';
+import { Button, ButtonProps, Stack, Text } from '@mantine/core';
 
 type SearchResultProps<T extends ItemType> = {
   type: T;
   item: SpotifySearchItem<T>;
   imageSize?: number;
   isSelected?: boolean;
-} & Pick<ButtonProps, "color" | "variant" | "onClick"> &
+} & Pick<ButtonProps, 'color' | 'variant'> &
   HTMLAttributes<HTMLButtonElement>;
 
 export const SearchResult = <T extends ItemType>({
@@ -33,13 +33,13 @@ export const SearchResult = <T extends ItemType>({
     <Button
       title={`${displayData.title} | ${displayData.subtitle}`}
       css={{
-        justifyContent: "start",
-        height: "max-content",
+        justifyContent: 'start',
+        height: 'max-content',
         padding: 8,
         paddingRight: 24,
       }}
-      variant={isSelected ? "solid" : "soft"}
-      color={isSelected ? "green" : "gray"}
+      variant={isSelected ? 'solid' : 'soft'}
+      color={isSelected ? 'green' : 'gray'}
       {...rest}
     >
       <SourceImage
@@ -53,28 +53,25 @@ export const SearchResult = <T extends ItemType>({
           borderRadius: 8,
         }}
       />
-      <Flex direction="column" gap="1" align="start" width="100%">
+      <Stack gap='1' align='start' w='100%'>
         <Text
-          as="p"
           truncate
           css={{
-            maxWidth: "100%",
+            maxWidth: '100%',
           }}
         >
           {displayData.title}
         </Text>
         <Text
-          as="p"
-          color="gray"
+          c='gray'
           truncate
-          size="1"
           css={{
-            maxWidth: "100%",
+            maxWidth: '100%',
           }}
         >
           {displayData.subtitle}
         </Text>
-      </Flex>
+      </Stack>
     </Button>
   );
 };

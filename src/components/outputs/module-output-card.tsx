@@ -1,9 +1,9 @@
-import { Card, Flex, IconButton, Text } from '@radix-ui/themes';
 import { Database } from '../../types';
 import { SpotifyComponents } from '..';
 import { Cross1Icon } from '@radix-ui/react-icons';
 import { ModulesQueries } from '../../queries';
 import { titleCase } from '../../utils';
+import { ActionIcon, Card, Group, Stack, Text } from '@mantine/core';
 
 type ModuleOutputCardProps = {
   output: Database['public']['Tables']['module_outputs']['Row'];
@@ -23,7 +23,7 @@ export const ModuleOutputCard = ({ output }: ModuleOutputCardProps) => {
         opacity: isRemoving ? 0.5 : 1,
       }}
     >
-      <Flex gap='2' align='center'>
+      <Group gap='2' align='center'>
         <SpotifyComponents.SourceImage
           src={output.image_url ?? undefined}
           sourceType='PLAYLIST'
@@ -34,14 +34,12 @@ export const ModuleOutputCard = ({ output }: ModuleOutputCardProps) => {
             borderRadius: 8,
           }}
         />
-        <Flex direction='column'>
+        <Stack>
           <Text>{output.title}</Text>
-          <Text size='2' color='gray'>
-            {`Mode: ${titleCase(output.mode)}`}
-          </Text>
-        </Flex>
-      </Flex>
-      <IconButton
+          <Text c='gray'>{`Mode: ${titleCase(output.mode)}`}</Text>
+        </Stack>
+      </Group>
+      <ActionIcon
         variant='ghost'
         color='gray'
         data-override='fix-margin'
@@ -53,7 +51,7 @@ export const ModuleOutputCard = ({ output }: ModuleOutputCardProps) => {
         loading={isRemoving}
       >
         <Cross1Icon />
-      </IconButton>
+      </ActionIcon>
     </Card>
   );
 };

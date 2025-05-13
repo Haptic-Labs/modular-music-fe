@@ -1,17 +1,10 @@
-import {
-  Card,
-  Flex,
-  IconButton,
-  Popover,
-  Skeleton,
-  Text,
-} from '@radix-ui/themes';
 import { ModulesQueries, SpotifyQueries } from '../../queries';
 import { Database } from '../../types';
 import { SpotifyComponents } from '..';
 import { Cross1Icon, Pencil1Icon } from '@radix-ui/react-icons';
 import { RecentlyListenedConfigPopover } from '../popovers';
 import { useDisclosure } from '@mantine/hooks';
+import { ActionIcon, Card, Group, Skeleton, Stack, Text } from '@mantine/core';
 
 type ModuleSourceCardProps = {
   source: Database['public']['Tables']['module_sources']['Row'];
@@ -55,7 +48,7 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
         opacity: isRemoving || isUpdatingRecentlyListened ? 0.5 : 1,
       }}
     >
-      <Flex gap='2' align='center'>
+      <Group gap='md' align='center'>
         <SpotifyComponents.SourceImage
           src={source.image_url ?? undefined}
           sourceType={source.type}
@@ -65,48 +58,42 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
             padding: 4,
           }}
         />
-        <Flex direction='column'>
+        <Stack>
           <Text>{source.title}</Text>
           {source.type === 'RECENTLY_PLAYED' ? (
             <Skeleton
-              loading={isLoadingRecentlyListenedConfig}
+              visible={isLoadingRecentlyListenedConfig}
               css={{ opacity: 0.5 }}
             >
-              <Text color='gray' size='2'>
+              <Text c='gray'>
                 {`Last ${recentlyListenedConfig?.quantity.toLocaleString()} ${recentlyListenedConfig?.interval.slice(0, recentlyListenedConfig.quantity === 1 ? -1 : undefined).toLowerCase()}`}
               </Text>
             </Skeleton>
           ) : source.type === 'LIKED_SONGS' ? (
             <Skeleton
-              loading={likedSongsLengthIsLoading}
+              visible={likedSongsLengthIsLoading}
               css={{ opacity: 0.5 }}
             >
-              <Text
-                color='gray'
-                size='2'
-              >{`${likedSongsLength?.toLocaleString()} songs`}</Text>
+              <Text c='gray'>{`${likedSongsLength?.toLocaleString()} songs`}</Text>
             </Skeleton>
           ) : null}
-        </Flex>
-      </Flex>
-      <Flex gap='4' mr='2' align='center'>
+        </Stack>
+      </Group>
+      <Stack gap='4' mr='2' align='center'>
         {!!recentlyListenedConfig && (
-          <Popover.Root
-            open={editPopoverOpen}
-            onOpenChange={(open) =>
-              open ? openEditPopover() : closeEditPopover()
-            }
-          >
-            <Popover.Trigger>
-              <IconButton
-                color='gray'
-                variant='ghost'
-                loading={isUpdatingRecentlyListened}
-              >
-                <Pencil1Icon />
-              </IconButton>
-            </Popover.Trigger>
+          <>
+            <ActionIcon
+              color='gray'
+              variant='ghost'
+              loading={isUpdatingRecentlyListened}
+            >
+              <Pencil1Icon />
+            </ActionIcon>
             <RecentlyListenedConfigPopover
+              opened={editPopoverOpen}
+              onChange={(open) =>
+                open ? openEditPopover() : closeEditPopover()
+              }
               initialConfig={recentlyListenedConfig}
               onSave={({ interval, quantity }) => {
                 updateRecentlyListened({
@@ -117,9 +104,9 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
                 });
               }}
             />
-          </Popover.Root>
+          </>
         )}
-        <IconButton
+        <ActionIcon
           color='gray'
           variant='ghost'
           onClick={() => {
@@ -128,8 +115,8 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
           loading={isRemoving}
         >
           <Cross1Icon />
-        </IconButton>
-      </Flex>
+        </ActionIcon>
+      </Stack>
     </Card>
   );
 };

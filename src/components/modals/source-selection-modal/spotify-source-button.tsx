@@ -1,14 +1,14 @@
-import { Cross1Icon, QuestionMarkIcon } from '@radix-ui/react-icons';
 import {
+  ActionIcon,
   Avatar,
   Button,
   ButtonProps,
-  Flex,
-  IconButton,
+  Group,
+  Stack,
   Text,
-} from '@radix-ui/themes';
+} from '@mantine/core';
+import { Cross1Icon, QuestionMarkIcon } from '@radix-ui/react-icons';
 import { forwardRef, ReactNode } from 'react';
-import { colors } from '../../../theme/colors';
 
 type SpotifySourceButtonProps = {
   imageSrc: string | ReactNode;
@@ -16,6 +16,7 @@ type SpotifySourceButtonProps = {
   subtitle?: string;
   isSelected?: boolean;
   onRemove?: () => void;
+  onClick?: () => void;
 } & Omit<ButtonProps, 'title' | 'subtitle' | 'imageSrc'>;
 
 export const SpotifySourceButton = forwardRef<
@@ -23,14 +24,22 @@ export const SpotifySourceButton = forwardRef<
   SpotifySourceButtonProps
 >(
   (
-    { imageSrc, title, subtitle, isSelected, onRemove, disabled, ...rest },
+    {
+      imageSrc,
+      title,
+      subtitle,
+      isSelected,
+      onRemove,
+      disabled,
+      ...buttonProps
+    },
     ref,
   ) => {
     // TODO: implement removable
     const combinedTitle = `${title}${subtitle ? ` - ${subtitle}` : ''}`;
     const isUsingIcon = typeof imageSrc !== 'string';
     const icon = (isUsingIcon ? imageSrc : undefined) ?? <QuestionMarkIcon />;
-    const interactable = !!rest.onClick || !!rest.onClickCapture;
+    const interactable = !!buttonProps.onClick;
 
     return (
       <Button
@@ -54,27 +63,23 @@ export const SpotifySourceButton = forwardRef<
             opacity: 0.7,
           },
         ]}
-        size='3'
         variant={isSelected ? 'solid' : 'soft'}
         color={isSelected ? 'green' : 'gray'}
         disabled={disabled}
-        {...rest}
+        {...buttonProps}
         title={combinedTitle}
       >
-        <Flex align='center' gap='2'>
+        <Group align='center' gap='2'>
           <Avatar
             src={isUsingIcon ? undefined : imageSrc}
-            asChild
-            fallback={icon}
-            css={{
+            css={(theme) => ({
               padding: isUsingIcon ? 4 : undefined,
-              backgroundColor: colors.greenDark.green9,
-            }}
+              backgroundColor: theme.colors.green[9],
+            })}
           >
-            <figure />
+            {icon}
           </Avatar>
-          <Flex
-            direction='column'
+          <Stack
             align='start'
             css={{
               width: '100%',
@@ -82,25 +87,22 @@ export const SpotifySourceButton = forwardRef<
               overflow: 'hidden',
             }}
           >
-            <Text wrap='nowrap' css={{ maxWidth: '100%' }} truncate size='2'>
+            <Text css={{ maxWidth: '100%', textWrap: 'nowrap' }} truncate>
               {title}
             </Text>
             {!!subtitle && (
               <Text
-                color='gray'
-                size='1'
-                wrap='nowrap'
-                css={{ maxWidth: '100%' }}
+                c='gray'
+                css={{ maxWidth: '100%', textWrap: 'nowrap', fontWeight: 400 }}
                 truncate
-                weight='light'
               >
                 {subtitle}
               </Text>
             )}
-          </Flex>
-        </Flex>
+          </Stack>
+        </Group>
         {!!onRemove && (
-          <IconButton
+          <ActionIcon
             onClick={onRemove}
             color='gray'
             variant='ghost'
@@ -108,7 +110,7 @@ export const SpotifySourceButton = forwardRef<
             disabled={disabled}
           >
             <Cross1Icon />
-          </IconButton>
+          </ActionIcon>
         )}
       </Button>
     );

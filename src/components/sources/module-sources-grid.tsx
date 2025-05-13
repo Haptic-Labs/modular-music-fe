@@ -1,9 +1,9 @@
-import { Grid, Heading } from '@radix-ui/themes';
 import { ModulesQueries } from '../../queries';
 import { ModuleSourceCard } from './module-source-card';
 import { EditModuleSourcesButton } from './add-source-button';
 import { MODULE_GRID_CONFIG } from '../../constants';
 import { convertModuleSourcesToSelectedSources } from '../../utils';
+import { SimpleGrid, Title } from '@mantine/core';
 
 type ModuleSourcesGridProps = {
   moduleId: string;
@@ -28,8 +28,8 @@ export const ModuleSourcesGrid = ({ moduleId }: ModuleSourcesGridProps) => {
 
   return (
     <section>
-      <Heading my='2'>Sources</Heading>
-      <Grid columns={MODULE_GRID_CONFIG} gap='2'>
+      <Title my='2'>Sources</Title>
+      <SimpleGrid cols={MODULE_GRID_CONFIG} spacing='md'>
         {sources.map((source) => (
           <ModuleSourceCard key={source.id} source={source} />
         ))}
@@ -40,7 +40,7 @@ export const ModuleSourcesGrid = ({ moduleId }: ModuleSourcesGridProps) => {
           )}
           moduleId={moduleId}
         />
-      </Grid>
+      </SimpleGrid>
     </section>
   );
 };

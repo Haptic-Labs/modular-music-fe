@@ -1,19 +1,19 @@
 import { ImageIcon } from '@radix-ui/react-icons';
-import {
-  Avatar,
-  Button,
-  Flex,
-  Popover,
-  Text,
-  TextArea,
-  TextField,
-} from '@radix-ui/themes';
 import { useFileDialog } from '@mantine/hooks';
 import { useMemo, useState } from 'react';
 import { Playlist } from '@soundify/web-api';
 import { SpotifyQueries } from '../../queries';
 import imageCompression from 'browser-image-compression';
 import { convertImageToJpeg } from '../../utils';
+import {
+  Avatar,
+  Button,
+  Group,
+  Stack,
+  Text,
+  Textarea,
+  TextInput,
+} from '@mantine/core';
 
 const MAX_IMAGE_BYTES = 250 * 1000; // 256 KB with headroom
 
@@ -105,52 +105,40 @@ export const PlaylistCreationPopoverContent = ({
   };
 
   return (
-    <Popover.Content
-      css={{ display: 'flex', flexDirection: 'column', gap: 10 }}
-    >
-      <Text size='4' weight='bold'>
-        Create a new playlist:
-      </Text>
-      <Flex gap='2'>
+    <Stack gap='md'>
+      <Text css={{ fontWeight: 'bold' }}>Create a new playlist:</Text>
+      <Group gap='2'>
         <Avatar
-          asChild
-          size='9'
-          fallback={<ImageIcon width={30} height={30} />}
+          component='button'
           src={imageSrc}
           color='gray'
+          onClick={() => {
+            fileDialog.open();
+          }}
         >
-          <Button
-            css={{
-              height: 150,
-              width: 150,
-              padding: 0,
-            }}
-            onClick={() => {
-              fileDialog.open();
-            }}
-          />
+          <ImageIcon width={30} height={30} />
         </Avatar>
-        <Flex direction='column' gap='2'>
-          <TextField.Root
+        <Stack gap='md'>
+          <TextInput
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder='Playlist name'
           />
-          <TextArea
+          <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder='Playlist description'
           />
-          <Flex gap='2' width='100%' justify='end'>
+          <Group gap='2' w='100%' justify='end'>
             <Button variant='outline' color='gray'>
               Cancel
             </Button>
             <Button disabled={!name} onClick={handleSave} loading={isSaving}>
               Save
             </Button>
-          </Flex>
-        </Flex>
-      </Flex>
-    </Popover.Content>
+          </Group>
+        </Stack>
+      </Group>
+    </Stack>
   );
 };

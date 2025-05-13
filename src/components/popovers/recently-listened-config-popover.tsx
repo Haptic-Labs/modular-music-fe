@@ -1,25 +1,25 @@
-import { PopoverContentOwnProps } from '@radix-ui/themes/props';
 import { Database, RecentlyListenedConfig } from '../../types';
-import {
-  Text,
-  Flex,
-  Popover,
-  TextField,
-  Button,
-  Select,
-} from '@radix-ui/themes';
 import { Form, useForm } from '@mantine/form';
 import { useEffect } from 'react';
+import {
+  Button,
+  Popover,
+  PopoverProps,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+} from '@mantine/core';
 
 type RecentlyListenedConfigPopoverProps = {
   initialConfig?: Partial<RecentlyListenedConfig>;
   onSave: (config: RecentlyListenedConfig) => void;
-} & PopoverContentOwnProps;
+} & PopoverProps;
 
 export const RecentlyListenedConfigPopover = ({
   initialConfig,
   onSave,
-  ...rest
+  ...popoverProps
 }: RecentlyListenedConfigPopoverProps) => {
   const minMaxQuantityMap: Record<
     Database['public']['Enums']['RECENTLY_PLAYED_INTERVAL'],
@@ -68,9 +68,8 @@ export const RecentlyListenedConfigPopover = ({
   }, [form.values.interval]);
 
   return (
-    <Popover.Content {...rest}>
+    <Popover {...popoverProps}>
       <Form
-        id='brayden-test'
         form={form}
         onSubmit={() => {
           if (form.values.quantity) {
@@ -81,11 +80,11 @@ export const RecentlyListenedConfigPopover = ({
           }
         }}
       >
-        <Flex direction='column'>
-          <Text color='gray' size='2' mb='1'>
+        <Stack gap='md'>
+          <Text c='gray' mb='1'>
             Quantity
           </Text>
-          <TextField.Root
+          <TextInput
             {...form.getInputProps('quantity')}
             placeholder={`Enter amount of ${form.values.interval.toLowerCase()}...`}
             color={
@@ -94,46 +93,37 @@ export const RecentlyListenedConfigPopover = ({
                 : undefined
             }
           />
-          <Text color='red' size='1' mt='1'>
+          <Text c='red' mt='1'>
             {form.errors.quantity}
           </Text>
-          <Text color='gray' size='2' mt='2' mb='1'>
+          <Text c='gray' mt='2' mb='1'>
             Interval
           </Text>
-          <Select.Root
+          <Select
             {...form.getInputProps('interval')}
-            onValueChange={(value) =>
+            onChange={(value) =>
               form.setFieldValue(
                 'interval',
                 value as Database['public']['Enums']['RECENTLY_PLAYED_INTERVAL'],
               )
             }
-          >
-            <Select.Trigger
-              color={
-                form.errors.interval && form.getTouched().interval
-                  ? 'red'
-                  : undefined
-              }
-            />
-            <Select.Content position='popper'>
-              <Select.Item value='DAYS'>Days</Select.Item>
-              <Select.Item value='WEEKS'>Weeks</Select.Item>
-              <Select.Item value='MONTHS'>Months</Select.Item>
-            </Select.Content>
-          </Select.Root>
+            data={[
+              { value: 'DAYS', label: 'Days' },
+              { value: 'WEEKS', label: 'Weeks' },
+              { value: 'MONTHS', label: 'Months' },
+            ]}
+          />
           <Button
             disabled={
               !form.isValid() || !form.values.quantity || !valuesHaveChanges
             }
             mt='3'
-            size='2'
             type='submit'
           >
             Save
           </Button>
-        </Flex>
+        </Stack>
       </Form>
-    </Popover.Content>
+    </Popover>
   );
 };
