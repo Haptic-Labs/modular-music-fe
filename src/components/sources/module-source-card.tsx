@@ -4,7 +4,7 @@ import { SpotifyComponents } from '..';
 import { Cross1Icon, Pencil1Icon } from '@radix-ui/react-icons';
 import { RecentlyListenedConfigPopover } from '../popovers';
 import { useDisclosure } from '@mantine/hooks';
-import { ActionIcon, Card, Group, Skeleton, Stack, Text } from '@mantine/core';
+import { ActionIcon, Group, Paper, Skeleton, Stack, Text } from '@mantine/core';
 
 type ModuleSourceCardProps = {
   source: Database['public']['Tables']['module_sources']['Row'];
@@ -39,7 +39,8 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
     });
 
   return (
-    <Card
+    <Paper
+      radius='md'
       css={{
         display: 'flex',
         gap: 8,
@@ -47,18 +48,19 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
         justifyContent: 'space-between',
         opacity: isRemoving || isUpdatingRecentlyListened ? 0.5 : 1,
       }}
+      px='md'
+      py='xs'
     >
       <Group gap='md' align='center'>
         <SpotifyComponents.SourceImage
           src={source.image_url ?? undefined}
           sourceType={source.type}
           css={{
-            width: 20,
-            height: 20,
-            padding: 4,
+            width: 30,
+            height: 30,
           }}
         />
-        <Stack>
+        <Stack gap={0}>
           <Text>{source.title}</Text>
           {source.type === 'RECENTLY_PLAYED' ? (
             <Skeleton
@@ -84,7 +86,7 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
           <>
             <ActionIcon
               color='gray'
-              variant='ghost'
+              variant='subtle'
               loading={isUpdatingRecentlyListened}
             >
               <Pencil1Icon />
@@ -108,7 +110,7 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
         )}
         <ActionIcon
           color='gray'
-          variant='ghost'
+          variant='subtle'
           onClick={() => {
             removeSource({ sourceId: source.id });
           }}
@@ -117,6 +119,6 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
           <Cross1Icon />
         </ActionIcon>
       </Stack>
-    </Card>
+    </Paper>
   );
 };
