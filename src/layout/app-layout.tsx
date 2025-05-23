@@ -25,10 +25,10 @@ export const AppLayout = () => {
         <Stack
           component='nav'
           css={(theme) => ({
-            backgroundColor: darken(theme.colors.dark[8], 0.2),
+            backgroundColor: theme.colors.dark[9],
           })}
           p='sm'
-          gap='sm'
+          gap='xs'
           h='100%'
           w='350px'
         >
@@ -47,7 +47,7 @@ export const AppLayout = () => {
                   justifyContent: 'flex-start',
                 }}
                 to={route.path ?? '/'}
-                size='md'
+                size='sm'
               >
                 {route.id}
               </Button>
@@ -59,7 +59,7 @@ export const AppLayout = () => {
             height: '100%',
             width: '100%',
             overflow: 'auto',
-            backgroundColor: theme.colors.dark[9],
+            backgroundColor: darken(theme.colors.dark[9], 0.2),
           })}
         >
           <Outlet />

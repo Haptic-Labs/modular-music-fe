@@ -2,7 +2,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { Pencil1Icon, PlusIcon } from '@radix-ui/react-icons';
 import { ModulesQueries } from '../../queries';
 import { SelectedSource, SourceSelectionModal } from '../modals';
-import { Button, Text } from '@mantine/core';
+import { Button } from '@mantine/core';
 
 type EditModuleSourcesButtonProps = {
   moduleId: string;
@@ -27,23 +27,25 @@ export const EditModuleSourcesButton = ({
   return (
     <>
       <Button
-        variant='soft'
+        variant='light'
         color='gray'
+        size='md'
         css={{
-          padding: 12,
-          minHeight: 0,
           height: 'auto',
-          justifyContent: 'start',
+          fontWeight: 'normal',
         }}
-        radius='large'
+        radius='md'
+        justify='left'
         onClick={open}
+        leftSection={
+          currentSources.length ? (
+            <Pencil1Icon width={25} height={25} />
+          ) : (
+            <PlusIcon width={25} height={25} />
+          )
+        }
       >
-        {currentSources.length ? (
-          <Pencil1Icon width={25} height={25} />
-        ) : (
-          <PlusIcon width={25} height={25} />
-        )}
-        <Text>{currentSources.length ? 'Edit Sources' : 'Select Sources'}</Text>
+        {currentSources.length ? 'Edit Sources' : 'Select Sources'}
       </Button>
       <SourceSelectionModal
         opened={isOpen}

@@ -1,4 +1,4 @@
-import { Button, darken } from '@mantine/core';
+import { Button } from '@mantine/core';
 import { Wordmark } from '../assets';
 import { useAuth } from '../providers';
 
@@ -10,11 +10,11 @@ export const Header = () => {
       css={(theme) => ({
         display: 'flex',
         maxWidth: '100vw',
-        height: 60,
+        height: 70,
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '8px 16px',
-        backgroundColor: darken(theme.colors.dark[8], 0.2),
+        backgroundColor: theme.colors.dark[9],
       })}
     >
       <Wordmark
