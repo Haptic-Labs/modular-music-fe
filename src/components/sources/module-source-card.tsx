@@ -4,7 +4,15 @@ import { SpotifyComponents } from '..';
 import { Cross1Icon, Pencil1Icon } from '@radix-ui/react-icons';
 import { RecentlyListenedConfigPopover } from '../popovers';
 import { useDisclosure } from '@mantine/hooks';
-import { ActionIcon, Group, Paper, Skeleton, Stack, Text } from '@mantine/core';
+import {
+  ActionIcon,
+  Card,
+  Group,
+  Popover,
+  Skeleton,
+  Stack,
+  Text,
+} from '@mantine/core';
 
 type ModuleSourceCardProps = {
   source: Database['public']['Tables']['module_sources']['Row'];
@@ -39,10 +47,11 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
     });
 
   return (
-    <Paper
+    <Card
       radius='md'
       css={{
         display: 'flex',
+        flexDirection: 'row',
         gap: 8,
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -83,19 +92,20 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
       </Group>
       <Stack gap='4' mr='2' align='center'>
         {!!recentlyListenedConfig && (
-          <>
-            <ActionIcon
-              color='gray'
-              variant='subtle'
-              loading={isUpdatingRecentlyListened}
-            >
-              <Pencil1Icon />
-            </ActionIcon>
+          <Popover
+            opened={editPopoverOpen}
+            onChange={(open) => (open ? openEditPopover() : closeEditPopover())}
+          >
+            <Popover.Target>
+              <ActionIcon
+                color='gray'
+                variant='subtle'
+                loading={isUpdatingRecentlyListened}
+              >
+                <Pencil1Icon />
+              </ActionIcon>
+            </Popover.Target>
             <RecentlyListenedConfigPopover
-              opened={editPopoverOpen}
-              onChange={(open) =>
-                open ? openEditPopover() : closeEditPopover()
-              }
               initialConfig={recentlyListenedConfig}
               onSave={({ interval, quantity }) => {
                 updateRecentlyListened({
@@ -106,7 +116,7 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
                 });
               }}
             />
-          </>
+          </Popover>
         )}
         <ActionIcon
           color='gray'
@@ -119,6 +129,6 @@ export const ModuleSourceCard = ({ source }: ModuleSourceCardProps) => {
           <Cross1Icon />
         </ActionIcon>
       </Stack>
-    </Paper>
+    </Card>
   );
 };

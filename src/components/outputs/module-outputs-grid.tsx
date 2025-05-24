@@ -13,8 +13,6 @@ export const ModuleOutputsGrid = ({ moduleId }: ModuleOutputsGridProps) => {
     moduleId,
   });
 
-  // TODO: finish this
-
   return (
     <section>
       <Title order={3} my='2'>
