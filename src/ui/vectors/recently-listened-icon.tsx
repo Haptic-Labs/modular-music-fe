@@ -10,7 +10,7 @@ export const RecentlyListenedIcon = ({
   ...rest
 }: RecentlyListenedIconProps) => {
   const theme = useMantineTheme();
-  const color = providedColor ?? theme.colors.green[9];
+  const color = providedColor ?? theme.colors.green[7];
   return (
     <svg
       width='50'

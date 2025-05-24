@@ -40,7 +40,8 @@ type SimpleActionCardProps = {
   handle?: boolean;
   handleProps?: HTMLAttributes<HTMLDivElement>;
   onEdit?: () => void;
-} & Omit<ComponentProps<typeof Card>, 'ref' | 'children'>;
+} & Omit<ComponentProps<typeof Card>, 'ref' | 'children'> &
+  HTMLAttributes<HTMLDivElement>;
 
 export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
   ({ action, onRemove, handle, handleProps, onEdit, ...rest }, ref) => {
@@ -58,16 +59,19 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
     // TODO: add replaceCombinSources mutation
 
     return (
-      <Card {...rest} ref={ref}>
-        <Group align='center' justify='between' gap='sm'>
+      <Card py='xs' radius='md' bg={theme.colors.dark[7]} {...rest} ref={ref}>
+        <Group align='center' justify='space-between' gap='sm' w='100%'>
           <Group align='center' gap='md'>
             {!!handle && (
               <div {...handleProps}>
                 <DragHandleDots2Icon />
               </div>
             )}
-            <ModuleActionIcon type={action.type} />
-            <Stack>
+            <ModuleActionIcon
+              type={action.type}
+              color={theme.colors.green[8]}
+            />
+            <Stack gap={0}>
               <Text>{titleCase(action.type)}</Text>
               {!!subtitle && <Text c='gray'>{subtitle}</Text>}
             </Stack>
@@ -76,8 +80,9 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
             {ACTION_TYPES_WITH_SOURCES.includes(action.type) && (
               <Button
                 onClick={() => setSourcesExpanded((prev) => !prev)}
-                variant='ghost'
-                data-override='fix-margin'
+                variant='subtle'
+                size='sm'
+                css={{ fontWeight: 'normal' }}
               >
                 {sourcesExpanded ? 'Hide Sources' : 'View Sources'}
               </Button>
@@ -85,7 +90,7 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
             {!!onEdit && (
               <ActionIcon
                 onClick={onEdit}
-                variant='ghost'
+                variant='subtle'
                 data-override='fix-margin'
                 color='gray'
               >
@@ -95,7 +100,7 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
 
             <ActionIcon
               onClick={onRemove}
-              variant='ghost'
+              variant='subtle'
               data-override='fix-margin'
               color='gray'
             >
@@ -112,26 +117,26 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
               initial={{
                 marginTop: 0,
                 paddingTop: 0,
-                borderTop: `1px solid ${theme.colors.gray[5]}00`,
+                borderTop: `1px solid ${theme.colors.dark[4]}00`,
                 height: 0,
                 overflow: 'clip',
               }}
               animate={{
                 marginTop: 8,
                 paddingTop: 8,
-                borderTop: `1px solid ${theme.colors.gray[5]}`,
+                borderTop: `1px solid ${theme.colors.dark[4]}`,
                 height: 'auto',
                 overflow: 'clip',
               }}
               exit={{
                 marginTop: 0,
                 paddingTop: 0,
-                borderTop: `1px solid ${theme.colors.gray[5]}00`,
+                borderTop: `1px solid ${theme.colors.dark[4]}00`,
                 height: 0,
                 overflow: 'clip',
               }}
             >
-              <CornerBottomLeftIcon color={theme.colors.gray[8]} />
+              <CornerBottomLeftIcon color={theme.colors.gray[6]} />
               {!!sourcesExpanded &&
                 sources.map((source, i) => (
                   <Group
@@ -140,19 +145,18 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
                     css={
                       i !== sources.length - 1
                         ? {
-                            borderRight: `1px solid ${theme.colors.gray[5]}`,
+                            borderRight: `1px solid ${theme.colors.dark[4]}`,
                             padding: '4px 16px 4px 4px',
                           }
                         : {
                             marginLeft: 8,
-                            gap: 10,
                           }
                     }
                     gap={
-                      source.source_type !== 'LIKED_SONGS' &&
-                      source.source_type !== 'RECENTLY_PLAYED'
-                        ? '2'
-                        : undefined
+                      source.source_type === 'LIKED_SONGS' ||
+                      source.source_type === 'RECENTLY_PLAYED'
+                        ? 6
+                        : 'sm'
                     }
                   >
                     <Avatar
@@ -162,6 +166,10 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
                           gap: 8,
                         }
                       }
+                      styles={{
+                        placeholder: { backgroundColor: 'transparent' },
+                      }}
+                      radius='sm'
                     >
                       {source.source_type === 'RECENTLY_PLAYED' ? (
                         <RecentlyListenedIcon css={{ width: 20, height: 20 }} />
@@ -171,16 +179,16 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
                         <div></div>
                       )}
                     </Avatar>
-                    <Stack>
+                    <Stack gap={0}>
                       <Text>{source.title}</Text>
                       {!!recentlyListenedConfig &&
                         source.source_type === 'RECENTLY_PLAYED' && (
-                          <Text c='gray'>
+                          <Text c='gray' size='sm' css={{ opacity: 0.7 }}>
                             {`${recentlyListenedConfig.quantity.toLocaleString()} ${titleCase(recentlyListenedConfig.interval)}`}
                           </Text>
                         )}
                       {source.source_type !== 'RECENTLY_PLAYED' && (
-                        <Text c='gray'>
+                        <Text c='gray' size='sm' css={{ opacity: 0.7 }}>
                           {titleCase(source.source_type.replace('_', ' '))}
                         </Text>
                       )}
@@ -188,7 +196,7 @@ export const ActionCard = forwardRef<HTMLDivElement, SimpleActionCardProps>(
                   </Group>
                 ))}
               <ActionIcon
-                variant='ghost'
+                variant='subtle'
                 css={{ marginLeft: 16 }}
                 title='Edit Filter Sources'
                 onClick={editSourcesFns.open}

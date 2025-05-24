@@ -33,7 +33,9 @@ export const ModuleActionsList = ({ moduleId }: ModuleActionsGridProps) => {
 
   return (
     <section>
-      <Title my='2'>Actions</Title>
+      <Title order={3} my='2'>
+        Actions
+      </Title>
       <Stack gap='md'>
         <DndContext
           onDragEnd={({ active, over }) => {

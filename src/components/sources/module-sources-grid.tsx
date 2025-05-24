@@ -28,7 +28,9 @@ export const ModuleSourcesGrid = ({ moduleId }: ModuleSourcesGridProps) => {
 
   return (
     <section>
-      <Title my='2'>Sources</Title>
+      <Title order={3} my='2'>
+        Sources
+      </Title>
       <SimpleGrid cols={MODULE_GRID_CONFIG} spacing='md'>
         {sources.map((source) => (
           <ModuleSourceCard key={source.id} source={source} />
