@@ -3,14 +3,8 @@ import { PlusIcon } from '@radix-ui/react-icons';
 import { ModuleActionIcon } from './module-action-icon';
 import { useDisclosure } from '@mantine/hooks';
 import { LimitConfigModal, SourceSelectionModal } from '../modals';
-import {
-  ActionIcon,
-  Button,
-  Group,
-  Popover,
-  Text,
-  Tooltip,
-} from '@mantine/core';
+import { ActionIcon, Button, Group, Popover, Tooltip } from '@mantine/core';
+import { Database } from '../../types';
 
 type AddActionButtonProps = {
   moduleId: string;
@@ -33,92 +27,89 @@ export const AddActionButton = ({
   const [combineConfigIsOpen, combineConfigFns] = useDisclosure(false);
   const [popoverIsOpen, popoverFns] = useDisclosure(false);
 
+  const handleActionSelect = (
+    actionType: Database['public']['Enums']['MODULE_ACTION_TYPE'],
+  ) => {
+    switch (actionType) {
+      case 'SHUFFLE':
+        addShuffleMutation.mutate(
+          {
+            moduleId,
+            newOrder: currentActionCount,
+          },
+          {
+            onSuccess: () => {
+              popoverFns.close();
+            },
+          },
+        );
+        return;
+      case 'FILTER':
+        filterConfigFns.open();
+        break;
+      case 'LIMIT':
+        limitConfigFns.open();
+        break;
+      case 'COMBINE':
+        combineConfigFns.open();
+        break;
+    }
+    popoverFns.close();
+  };
+
   return (
-    <>
-      <Button
-        variant='soft'
-        color='gray'
-        css={{
-          padding: 12,
-          minHeight: 0,
-          height: 'auto',
-          justifyContent: 'start',
-        }}
-        radius='large'
+    <Popover
+      opened={popoverIsOpen}
+      onChange={(isOpen) => {
+        if (isOpen) popoverFns.open();
+        else popoverFns.close();
+      }}
+      withArrow
+      position='bottom-start'
+    >
+      <Popover.Target>
+        <Button
+          variant='light'
+          color='gray'
+          css={{
+            padding: 12,
+            minHeight: 0,
+            height: 'auto',
+            justifyContent: 'start',
+            fontWeight: 'normal',
+          }}
+          radius='large'
+          onClick={popoverFns.open}
+          leftSection={<PlusIcon width={25} height={25} />}
+          justify='start'
+        >
+          Add Action
+        </Button>
+      </Popover.Target>
+
+      <Popover.Dropdown
+        css={(theme) => ({
+          backgroundColor: theme.colors.dark[8],
+        })}
       >
-        <PlusIcon width={25} height={25} />
-        <Text>Add Action</Text>
-      </Button>
-      <Popover
-        opened={popoverIsOpen}
-        onChange={(isOpen) => {
-          if (isOpen) popoverFns.open();
-          else popoverFns.close();
-        }}
-      >
-        <Group gap='1' w='min-content'>
+        <Group gap='sm' w='min-content' wrap='nowrap'>
           <Tooltip label='Filter'>
             <ActionIcon
               color='gray'
-              variant='soft'
-              onClick={filterConfigFns.open}
+              variant='light'
+              onClick={() => handleActionSelect('FILTER')}
+              size='lg'
             >
               <ModuleActionIcon type='FILTER' />
             </ActionIcon>
           </Tooltip>
-          <SourceSelectionModal
-            opened={filterConfigIsOpen}
-            onClose={filterConfigFns.close}
-            onSave={(selectedSources) => {
-              addFilterMutation.mutate(
-                {
-                  module_id: moduleId,
-                  order: currentActionCount,
-                  sources: selectedSources.map(
-                    (source) => ({
-                      limit: null,
-                      action_id: null,
-                      id: null,
-                      recently_listened_config:
-                        source.source_type === 'RECENTLY_PLAYED'
-                          ? source.recently_listened_config
-                          : null,
-                      spotify_id: source.spotify_id ?? null,
-                      image_url: source.image_url ?? null,
-                      source_type: source.source_type,
-                      title: source.title,
-                    }),
-                    // TODO: update RLS on recently_played_sources_configs to account for sources other than modules_sources table (is this still applicable?)
-                  ),
-                },
-                {
-                  onSuccess: () => {
-                    filterConfigFns.close();
-                    popoverFns.close();
-                  },
-                },
-              );
-            }}
-            isOpen={filterConfigIsOpen}
-            onCancel={filterConfigFns.close}
-          />
+
           <Tooltip label='Shuffle'>
             <ActionIcon
               color='gray'
-              variant='soft'
-              onClick={() => {
-                addShuffleMutation.mutate(
-                  {
-                    moduleId,
-                    newOrder: currentActionCount,
-                  },
-                  {
-                    onSuccess: () => {
-                      popoverFns.close();
-                    },
-                  },
-                );
-              }}
+              variant='light'
+              size='lg'
+              onClick={() => handleActionSelect('SHUFFLE')}
             >
               <ModuleActionIcon type='SHUFFLE' />
             </ActionIcon>
@@ -126,86 +117,124 @@ export const AddActionButton = ({
           <Tooltip label='Limit'>
             <ActionIcon
               color='gray'
-              variant='soft'
+              size='lg'
+              variant='light'
               loading={upsertLimitMutation.isPending}
-              onClick={limitConfigFns.open}
+              onClick={() => handleActionSelect('LIMIT')}
             >
               <ModuleActionIcon type='LIMIT' />
             </ActionIcon>
           </Tooltip>
-          <LimitConfigModal
-            opened={limitConfigIsOpen}
-            onClose={limitConfigFns.close}
-            onChange={(newOpen) =>
-              newOpen ? limitConfigFns.open() : limitConfigFns.close()
-            }
-            onSave={(maxItems) => {
-              upsertLimitMutation.mutate(
-                {
-                  module_id: moduleId,
-                  order: currentActionCount,
-                  limit: maxItems,
-                },
-                {
-                  onSuccess: () => {
-                    popoverFns.close();
-                  },
-                },
-              );
-            }}
-            isOpen={limitConfigIsOpen}
-          />
           <Tooltip label='Add Sources'>
             <ActionIcon
               color='gray'
-              variant='soft'
-              onClick={combineConfigFns.open}
+              variant='light'
+              onClick={() => handleActionSelect('COMBINE')}
+              size='lg'
             >
               <ModuleActionIcon type='COMBINE' />
             </ActionIcon>
           </Tooltip>
-          <SourceSelectionModal
-            opened={combineConfigIsOpen}
-            onClose={combineConfigFns.close}
-            onChange={(isOpen) => {
-              if (isOpen) {
-                combineConfigFns.open();
-              } else {
-                combineConfigFns.close();
-              }
-            }}
-            onSave={(selectedSources) => {
-              addCombineMutation.mutate(
-                {
-                  module_id: moduleId,
-                  order: currentActionCount,
-                  sources: selectedSources.map((source) => ({
-                    limit: null,
-                    action_id: null,
-                    id: null,
-                    recently_listened_config:
-                      source.source_type === 'RECENTLY_PLAYED'
-                        ? source.recently_listened_config
-                        : null,
-                    spotify_id: source.spotify_id ?? null,
-                    image_url: source.image_url ?? null,
-                    source_type: source.source_type,
-                    title: source.title,
-                  })),
-                },
-                {
-                  onSuccess: () => {
-                    combineConfigFns.close();
-                    popoverFns.close();
-                  },
-                },
-              );
-            }}
-            isOpen={combineConfigIsOpen}
-            onCancel={combineConfigFns.close}
-          />
         </Group>
-      </Popover>
-    </>
+      </Popover.Dropdown>
+      <SourceSelectionModal
+        opened={combineConfigIsOpen}
+        onClose={combineConfigFns.close}
+        onChange={(isOpen) => {
+          if (isOpen) {
+            combineConfigFns.open();
+          } else {
+            combineConfigFns.close();
+          }
+        }}
+        onSave={(selectedSources) => {
+          addCombineMutation.mutate(
+            {
+              module_id: moduleId,
+              order: currentActionCount,
+              sources: selectedSources.map((source) => ({
+                limit: null,
+                action_id: null,
+                id: null,
+                recently_listened_config:
+                  source.source_type === 'RECENTLY_PLAYED'
+                    ? source.recently_listened_config
+                    : null,
+                spotify_id: source.spotify_id ?? null,
+                image_url: source.image_url ?? null,
+                source_type: source.source_type,
+                title: source.title,
+              })),
+            },
+            {
+              onSuccess: () => {
+                combineConfigFns.close();
+                popoverFns.close();
+              },
+            },
+          );
+        }}
+        isOpen={combineConfigIsOpen}
+        onCancel={combineConfigFns.close}
+      />
+      <SourceSelectionModal
+        opened={filterConfigIsOpen}
+        onClose={filterConfigFns.close}
+        onSave={(selectedSources) => {
+          addFilterMutation.mutate(
+            {
+              module_id: moduleId,
+              order: currentActionCount,
+              sources: selectedSources.map(
+                (source) => ({
+                  limit: null,
+                  action_id: null,
+                  id: null,
+                  recently_listened_config:
+                    source.source_type === 'RECENTLY_PLAYED'
+                      ? source.recently_listened_config
+                      : null,
+                  spotify_id: source.spotify_id ?? null,
+                  image_url: source.image_url ?? null,
+                  source_type: source.source_type,
+                  title: source.title,
+                }),
+                // TODO: update RLS on recently_played_sources_configs to account for sources other than modules_sources table (is this still applicable?)
+              ),
+            },
+            {
+              onSuccess: () => {
+                filterConfigFns.close();
+                popoverFns.close();
+              },
+            },
+          );
+        }}
+        isOpen={filterConfigIsOpen}
+        onCancel={filterConfigFns.close}
+      />
+      <LimitConfigModal
+        opened={limitConfigIsOpen}
+        onClose={limitConfigFns.close}
+        onChange={(newOpen) =>
+          newOpen ? limitConfigFns.open() : limitConfigFns.close()
+        }
+        onSave={(maxItems) => {
+          upsertLimitMutation.mutate(
+            {
+              module_id: moduleId,
+              order: currentActionCount,
+              limit: maxItems,
+            },
+            {
+              onSuccess: () => {
+                popoverFns.close();
+              },
+            },
+          );
+        }}
+        isOpen={limitConfigIsOpen}
+      />
+    </Popover>
   );
 };
