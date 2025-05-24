@@ -1,5 +1,6 @@
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
+import './global-styles.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { ROUTES } from './layout/routes';
 import { AuthProvider } from './providers';
@@ -20,7 +21,11 @@ function App() {
     <MantineProvider
       stylesTransform={emotionTransform}
       defaultColorScheme='dark'
-      theme={{ primaryColor: 'green', primaryShade: { dark: 8 } }}
+      theme={{
+        primaryColor: 'green',
+        primaryShade: { dark: 8 },
+        cursorType: 'pointer',
+      }}
     >
       <MantineEmotionProvider>
         <EmotionThemeProvider>

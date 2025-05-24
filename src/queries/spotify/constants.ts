@@ -1,6 +1,6 @@
 import { ItemType } from '@soundify/web-api';
 
-export const ALL_ITEM_TYPES: ItemType[] = [
+export const ALL_ITEM_TYPES = [
   'album',
   'playlist',
   'track',
@@ -8,4 +8,4 @@ export const ALL_ITEM_TYPES: ItemType[] = [
   // 'episode',
   // 'audiobook',
   'artist',
-] satisfies ItemType[];
+] as const satisfies ItemType[];

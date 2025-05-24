@@ -4,17 +4,16 @@ import { useEffect } from 'react';
 import {
   Button,
   Popover,
-  PopoverProps,
+  PopoverDropdownProps,
   Select,
   Stack,
-  Text,
   TextInput,
 } from '@mantine/core';
 
 type RecentlyListenedConfigPopoverProps = {
   initialConfig?: Partial<RecentlyListenedConfig>;
   onSave: (config: RecentlyListenedConfig) => void;
-} & PopoverProps;
+} & PopoverDropdownProps;
 
 export const RecentlyListenedConfigPopover = ({
   initialConfig,
@@ -68,7 +67,7 @@ export const RecentlyListenedConfigPopover = ({
   }, [form.values.interval]);
 
   return (
-    <Popover {...popoverProps}>
+    <Popover.Dropdown {...popoverProps} w={225}>
       <Form
         form={form}
         onSubmit={() => {
@@ -80,11 +79,9 @@ export const RecentlyListenedConfigPopover = ({
           }
         }}
       >
-        <Stack gap='md'>
-          <Text c='gray' mb='1'>
-            Quantity
-          </Text>
+        <Stack gap='xs'>
           <TextInput
+            label='Quantity'
             {...form.getInputProps('quantity')}
             placeholder={`Enter amount of ${form.values.interval.toLowerCase()}...`}
             color={
@@ -93,13 +90,8 @@ export const RecentlyListenedConfigPopover = ({
                 : undefined
             }
           />
-          <Text c='red' mt='1'>
-            {form.errors.quantity}
-          </Text>
-          <Text c='gray' mt='2' mb='1'>
-            Interval
-          </Text>
           <Select
+            label='Interval'
             {...form.getInputProps('interval')}
             onChange={(value) =>
               form.setFieldValue(
@@ -117,13 +109,12 @@ export const RecentlyListenedConfigPopover = ({
             disabled={
               !form.isValid() || !form.values.quantity || !valuesHaveChanges
             }
-            mt='3'
             type='submit'
           >
             Save
           </Button>
         </Stack>
       </Form>
-    </Popover>
+    </Popover.Dropdown>
   );
 };
