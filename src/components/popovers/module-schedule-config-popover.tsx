@@ -251,6 +251,7 @@ export const ModuleScheduleConfigPopover = ({
               disabled={!initialConfig?.nextScheduledRun}
               color='red'
               onClick={onDeleteSchedule}
+              variant='outline'
             >
               Delete
             </Button>
