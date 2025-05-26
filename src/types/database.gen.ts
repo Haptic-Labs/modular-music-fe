@@ -321,6 +321,7 @@ export type Database = {
           is_running: boolean
           name: string
           next_scheduled_run: string | null
+          previous_run: string | null
           schedule_config:
             | Database["public"]["CompositeTypes"]["ModuleScheduleConfig"]
             | null
@@ -334,6 +335,7 @@ export type Database = {
           is_running?: boolean
           name: string
           next_scheduled_run?: string | null
+          previous_run?: string | null
           schedule_config?:
             | Database["public"]["CompositeTypes"]["ModuleScheduleConfig"]
             | null
@@ -347,6 +349,7 @@ export type Database = {
           is_running?: boolean
           name?: string
           next_scheduled_run?: string | null
+          previous_run?: string | null
           schedule_config?:
             | Database["public"]["CompositeTypes"]["ModuleScheduleConfig"]
             | null

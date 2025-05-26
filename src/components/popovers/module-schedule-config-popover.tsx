@@ -154,6 +154,8 @@ export const ModuleScheduleConfigPopover = ({
                 },
               },
             }}
+            firstDayOfWeek={0}
+            highlightToday
             popoverProps={{ withinPortal: false }}
             css={(theme) => ({
               '.mantine-DateTimePicker-submitButton': {

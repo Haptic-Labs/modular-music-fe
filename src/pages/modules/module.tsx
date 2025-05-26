@@ -37,7 +37,7 @@ export const ModulePage = () => {
         padding: 12,
       }}
     >
-      <Group align='center' justify='space-between'>
+      <Group align='end' justify='space-between' mih={65}>
         <Title>{moduleName ?? ''}</Title>
         <ModuleScheduleButton moduleId={moduleId} />
       </Group>
