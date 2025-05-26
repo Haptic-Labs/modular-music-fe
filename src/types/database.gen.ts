@@ -55,7 +55,7 @@ export type Database = {
           image_url: string | null
           limit: number | null
           source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
-          spotify_id: string
+          spotify_id: string | null
           title: string | null
           updated_at: string | null
         }
@@ -67,7 +67,7 @@ export type Database = {
           image_url?: string | null
           limit?: number | null
           source_type: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
-          spotify_id: string
+          spotify_id?: string | null
           title?: string | null
           updated_at?: string | null
         }
@@ -79,7 +79,7 @@ export type Database = {
           image_url?: string | null
           limit?: number | null
           source_type?: Database["public"]["Enums"]["SPOTIFY_SOURCE_TYPE"]
-          spotify_id?: string
+          spotify_id?: string | null
           title?: string | null
           updated_at?: string | null
         }
@@ -321,6 +321,9 @@ export type Database = {
           is_running: boolean
           name: string
           next_scheduled_run: string | null
+          schedule_config:
+            | Database["public"]["CompositeTypes"]["ModuleScheduleConfig"]
+            | null
           updated_at: string | null
           user_id: string
         }
@@ -331,6 +334,9 @@ export type Database = {
           is_running?: boolean
           name: string
           next_scheduled_run?: string | null
+          schedule_config?:
+            | Database["public"]["CompositeTypes"]["ModuleScheduleConfig"]
+            | null
           updated_at?: string | null
           user_id: string
         }
@@ -341,6 +347,9 @@ export type Database = {
           is_running?: boolean
           name?: string
           next_scheduled_run?: string | null
+          schedule_config?:
+            | Database["public"]["CompositeTypes"]["ModuleScheduleConfig"]
+            | null
           updated_at?: string | null
           user_id?: string
         }
@@ -490,6 +499,7 @@ export type Database = {
       MODULE_ACTION_TYPE: "FILTER" | "SHUFFLE" | "LIMIT" | "COMBINE" | "MODULE"
       MODULE_OUTPUT_MODE: "REPLACE" | "APPEND" | "PREPEND"
       RECENTLY_PLAYED_INTERVAL: "DAYS" | "WEEKS" | "MONTHS"
+      SCHEDULE_INTERVAL: "DAYS" | "WEEKS" | "MONTHS" | "YEARS"
       SHUFFLE_TYPE: "RANDOM"
       SPOTIFY_OUTPUT_TYPE: "PLAYLIST"
       SPOTIFY_SOURCE_TYPE:
@@ -508,6 +518,7 @@ export type Database = {
         spotify_id: string | null
         limit: number | null
         title: string | null
+        image_url: string | null
       }
       FilterSourceUpsertRequest: {
         id: string | null
@@ -606,6 +617,10 @@ export type Database = {
         combineActions:
           | Database["public"]["CompositeTypes"]["ModuleAction:Combine"][]
           | null
+      }
+      ModuleScheduleConfig: {
+        interval: Database["public"]["Enums"]["SCHEDULE_INTERVAL"] | null
+        quantity: number | null
       }
       recently_listened_source_with_config: {
         source_id: string | null
@@ -974,6 +989,7 @@ export const Constants = {
       MODULE_ACTION_TYPE: ["FILTER", "SHUFFLE", "LIMIT", "COMBINE", "MODULE"],
       MODULE_OUTPUT_MODE: ["REPLACE", "APPEND", "PREPEND"],
       RECENTLY_PLAYED_INTERVAL: ["DAYS", "WEEKS", "MONTHS"],
+      SCHEDULE_INTERVAL: ["DAYS", "WEEKS", "MONTHS", "YEARS"],
       SHUFFLE_TYPE: ["RANDOM"],
       SPOTIFY_OUTPUT_TYPE: ["PLAYLIST"],
       SPOTIFY_SOURCE_TYPE: [

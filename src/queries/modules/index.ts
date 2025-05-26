@@ -22,3 +22,4 @@ export * from './use-remove-module-output-mutation';
 export * from './use-replace-module-sources';
 export * from './use-limit-config-query';
 export * from './use-combine-action-sources';
+export * from './use-set-module-schedule-config';
