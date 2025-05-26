@@ -34,12 +34,12 @@ export const useSearchQuery = <
   return useQuery<QuerySearchResponse<T>, E, D>({
     queryKey: queryKeys.search<T>({
       query,
-      type: type ?? (ALL_ITEM_TYPES as T),
+      type: type ?? (ALL_ITEM_TYPES as unknown as T),
     }),
     queryFn: async () => {
       const res = await search<T>(
         spotifyClient!,
-        type ?? (ALL_ITEM_TYPES as T),
+        type ?? (ALL_ITEM_TYPES as unknown as T),
         query,
       );
 
