@@ -1,34 +1,32 @@
-import { Text, Button, Flex, Heading, Section } from "@radix-ui/themes";
-import { Link, useNavigate } from "react-router-dom";
+import { Title, Text, Button, Group } from '@mantine/core';
+import { Link, useNavigate } from 'react-router-dom';
 
 export const PageNotFound = () => {
   const navigate = useNavigate();
 
   return (
-    <Section
+    <section
       css={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
         gap: 16,
       }}
     >
-      <Heading size="8">Oops!</Heading>
+      <Title>Oops!</Title>
       <Text>Looks like this page doesn't exist.</Text>
-      <Flex gap="3">
+      <Group gap='md'>
         <Button
-          variant="outline"
           onClick={() => {
             navigate(-1);
           }}
-          size="3"
         >
           Go Back
         </Button>
-        <Button variant="solid" asChild size="3">
-          <Link to="/">Go Home</Link>
+        <Button>
+          <Link to='/'>Go Home</Link>
         </Button>
-      </Flex>
-    </Section>
+      </Group>
+    </section>
   );
 };

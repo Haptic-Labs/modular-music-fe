@@ -1,8 +1,8 @@
 import { useDisclosure } from '@mantine/hooks';
 import { Pencil1Icon, PlusIcon } from '@radix-ui/react-icons';
-import { Button, Dialog, Text } from '@radix-ui/themes';
 import { ModulesQueries } from '../../queries';
 import { SelectedSource, SourceSelectionModal } from '../modals';
+import { Button } from '@mantine/core';
 
 type EditModuleSourcesButtonProps = {
   moduleId: string;
@@ -25,33 +25,31 @@ export const EditModuleSourcesButton = ({
   const [isOpen, { open, close }] = useDisclosure(false);
 
   return (
-    <Dialog.Root
-      open={isOpen}
-      onOpenChange={(newVal) => (newVal ? open() : close())}
-    >
-      <Dialog.Trigger>
-        <Button
-          variant='soft'
-          color='gray'
-          css={{
-            padding: 12,
-            minHeight: 0,
-            height: 'auto',
-            justifyContent: 'start',
-          }}
-          radius='large'
-        >
-          {currentSources.length ? (
+    <>
+      <Button
+        variant='light'
+        color='gray'
+        size='md'
+        css={{
+          height: 'auto',
+          fontWeight: 'normal',
+        }}
+        radius='md'
+        justify='left'
+        onClick={open}
+        leftSection={
+          currentSources.length ? (
             <Pencil1Icon width={25} height={25} />
           ) : (
             <PlusIcon width={25} height={25} />
-          )}
-          <Text size='3' weight='regular'>
-            {currentSources.length ? 'Edit Sources' : 'Select Sources'}
-          </Text>
-        </Button>
-      </Dialog.Trigger>
+          )
+        }
+      >
+        {currentSources.length ? 'Edit Sources' : 'Select Sources'}
+      </Button>
       <SourceSelectionModal
+        opened={isOpen}
+        onClose={close}
         initialSelectedSources={currentSources}
         onSave={(sources) => {
           if (!moduleId) return;
@@ -89,6 +87,6 @@ export const EditModuleSourcesButton = ({
         isOpen={isOpen}
         onCancel={close}
       />
-    </Dialog.Root>
+    </>
   );
 };

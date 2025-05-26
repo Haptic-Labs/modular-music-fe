@@ -1,4 +1,12 @@
-import { Button, Dialog, TextField, Text, Flex } from '@radix-ui/themes';
+import {
+  Modal,
+  ModalProps,
+  Title,
+  Text,
+  NumberInput,
+  Group,
+  Button,
+} from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 type LimitConfigModalProps = {
@@ -6,14 +14,14 @@ type LimitConfigModalProps = {
   initMaxItems?: number;
   onSave: (maxItems: number) => void;
   isOpen: boolean;
-} & Dialog.ContentProps;
+} & ModalProps;
 
 export const LimitConfigModal = ({
   title,
   initMaxItems,
   onSave,
   isOpen,
-  ...rest
+  ...modalProps
 }: LimitConfigModalProps) => {
   const [maxItems, setMaxItems] = useState<number | undefined>(initMaxItems);
   const enableSubmit =
@@ -26,7 +34,7 @@ export const LimitConfigModal = ({
   }, [isOpen]);
 
   return (
-    <Dialog.Content maxWidth='min(400px, 90vw)' {...rest}>
+    <Modal maw='min(400px, 90vw)' {...modalProps}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -35,33 +43,24 @@ export const LimitConfigModal = ({
           }
         }}
       >
-        <Dialog.Title>{title ?? 'Add Limit Action'}</Dialog.Title>
-        <Text size='2' weight='bold'>
-          Item Limit:
-        </Text>
-        <TextField.Root
+        <Title>{title ?? 'Add Limit Action'}</Title>
+        <Text css={{ fontWeight: 'bold' }}>Item Limit:</Text>
+        <NumberInput
           placeholder='Enter the maximum items...'
-          type='number'
           value={maxItems}
-          onChange={(e) => setMaxItems(Number(e.target.value))}
+          onChange={(value) => setMaxItems(Number(value))}
           mt='1'
           mb='3'
         />
-        <Flex justify='end' width='100%' gap='2'>
-          <Dialog.Close>
-            <Button
-              variant='outline'
-              color='gray'
-              onClick={() => onSave(maxItems ?? 0)}
-            >
-              Cancel
-            </Button>
-          </Dialog.Close>
+        <Group justify='end' w='100%' gap='md'>
+          <Button variant='outline' color='gray' onClick={modalProps.onClose}>
+            Cancel
+          </Button>
           <Button disabled={!enableSubmit} type='submit'>
             Save
           </Button>
-        </Flex>
+        </Group>
       </form>
-    </Dialog.Content>
+    </Modal>
   );
 };

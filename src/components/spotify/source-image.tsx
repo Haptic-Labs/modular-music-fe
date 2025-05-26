@@ -1,7 +1,6 @@
 import { HTMLAttributes } from 'react';
 import { Database } from '../../types';
 import { RecentlyListenedIcon } from '../../ui/vectors';
-import { colors } from '../../theme/colors';
 import {
   IconHeartFilled,
   IconMusic,
@@ -10,6 +9,7 @@ import {
   IconUser,
   IconVinyl,
 } from '@tabler/icons-react';
+import { useMantineTheme } from '@mantine/core';
 
 type SVGType = 'LIKED_SONGS' | 'RECENTLY_PLAYED';
 
@@ -30,9 +30,11 @@ export const SourceImage = <
 >({
   src,
   sourceType,
-  color = colors.greenDark.green9,
+  color: providedColor,
   ...rest
 }: SourceImageProps<T, Src>) => {
+  const theme = useMantineTheme();
+  const color = providedColor ?? theme.colors.green[9];
   if (sourceType === 'LIKED_SONGS') {
     const typedRest = rest as HTMLAttributes<SVGElement>;
     return <IconHeartFilled color={color} {...typedRest} />;

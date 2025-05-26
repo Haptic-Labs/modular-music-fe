@@ -1,8 +1,8 @@
-import { Grid, Heading } from '@radix-ui/themes';
 import { ModulesQueries } from '../../queries';
 import { MODULE_GRID_CONFIG } from '../../constants';
 import { ModuleOutputCard } from './module-output-card';
 import { AddModuleOutputButton } from './add-module-output-button';
+import { SimpleGrid, Title } from '@mantine/core';
 
 type ModuleOutputsGridProps = {
   moduleId: string;
@@ -13,17 +13,17 @@ export const ModuleOutputsGrid = ({ moduleId }: ModuleOutputsGridProps) => {
     moduleId,
   });
 
-  // TODO: finish this
-
   return (
     <section>
-      <Heading my='2'>Outputs</Heading>
-      <Grid columns={MODULE_GRID_CONFIG} gap='2'>
+      <Title order={3} my='2'>
+        Outputs
+      </Title>
+      <SimpleGrid cols={MODULE_GRID_CONFIG} spacing='md'>
         {outputs.map((output) => (
           <ModuleOutputCard key={output.id} output={output} />
         ))}
         <AddModuleOutputButton moduleId={moduleId} />
-      </Grid>
+      </SimpleGrid>
     </section>
   );
 };

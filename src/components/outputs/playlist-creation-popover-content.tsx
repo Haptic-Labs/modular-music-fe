@@ -1,31 +1,38 @@
-import { ImageIcon } from '@radix-ui/react-icons';
-import {
-  Avatar,
-  Button,
-  Flex,
-  Popover,
-  Text,
-  TextArea,
-  TextField,
-} from '@radix-ui/themes';
-import { useFileDialog } from '@mantine/hooks';
+import { ImageIcon, Pencil2Icon } from '@radix-ui/react-icons';
+import { useDisclosure, useFileDialog } from '@mantine/hooks';
 import { useMemo, useState } from 'react';
 import { Playlist } from '@soundify/web-api';
 import { SpotifyQueries } from '../../queries';
 import imageCompression from 'browser-image-compression';
 import { convertImageToJpeg } from '../../utils';
+import {
+  Avatar,
+  Button,
+  Container,
+  Group,
+  Overlay,
+  Stack,
+  Text,
+  Textarea,
+  TextInput,
+  useMantineTheme,
+} from '@mantine/core';
 
 const MAX_IMAGE_BYTES = 250 * 1000; // 256 KB with headroom
 
 type PlaylistCreationPopoverContentProps = {
   onSave?: (playlist: Playlist) => void;
+  onCancel: () => void;
 };
 
 export const PlaylistCreationPopoverContent = ({
   onSave,
+  onCancel,
 }: PlaylistCreationPopoverContentProps) => {
+  const theme = useMantineTheme();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [showImageUploadOverlay, imageUploadOverlayFns] = useDisclosure(false);
   const fileDialog = useFileDialog({ multiple: false, accept: 'image/*' });
   const imageSrc = useMemo(() => {
     const selectedFile = fileDialog.files?.item(0);
@@ -105,52 +112,70 @@ export const PlaylistCreationPopoverContent = ({
   };
 
   return (
-    <Popover.Content
-      css={{ display: 'flex', flexDirection: 'column', gap: 10 }}
-    >
-      <Text size='4' weight='bold'>
-        Create a new playlist:
-      </Text>
-      <Flex gap='2'>
-        <Avatar
-          asChild
-          size='9'
-          fallback={<ImageIcon width={30} height={30} />}
-          src={imageSrc}
-          color='gray'
+    <Stack gap='md'>
+      <Text css={{ fontWeight: 'bold' }}>Create a new playlist:</Text>
+      <Group gap='xs' align='start'>
+        <Container
+          pos='relative'
+          p={0}
+          onMouseEnter={imageUploadOverlayFns.open}
+          onMouseLeave={imageUploadOverlayFns.close}
         >
-          <Button
-            css={{
-              height: 150,
-              width: 150,
-              padding: 0,
-            }}
-            onClick={() => {
-              fileDialog.open();
-            }}
-          />
-        </Avatar>
-        <Flex direction='column' gap='2'>
-          <TextField.Root
+          <Avatar
+            radius='md'
+            size='xl'
+            src={imageSrc}
+            color='gray'
+            onClick={fileDialog.open}
+            role='button'
+            css={(theme) => ({
+              cursor: 'pointer',
+              ':hover': {
+                backgroundColor: theme.colors.dark[8],
+              },
+            })}
+          >
+            <ImageIcon width={30} height={30} />
+          </Avatar>
+          {showImageUploadOverlay && imageSrc && (
+            <Overlay
+              onClick={fileDialog.open}
+              css={{
+                cursor: 'pointer',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Pencil2Icon width={25} height={25} />
+            </Overlay>
+          )}
+        </Container>
+
+        <Stack gap='xs'>
+          <TextInput
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder='Playlist name'
+            styles={{ input: { backgroundColor: theme.colors.dark[8] } }}
           />
-          <TextArea
+          <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder='Playlist description'
+            styles={{ input: { backgroundColor: theme.colors.dark[8] } }}
           />
-          <Flex gap='2' width='100%' justify='end'>
-            <Button variant='outline' color='gray'>
+          <Group gap='xs' w='100%' justify='end'>
+            <Button variant='outline' color='gray' onClick={onCancel}>
               Cancel
             </Button>
             <Button disabled={!name} onClick={handleSave} loading={isSaving}>
               Save
             </Button>
-          </Flex>
-        </Flex>
-      </Flex>
-    </Popover.Content>
+          </Group>
+        </Stack>
+      </Group>
+    </Stack>
   );
 };

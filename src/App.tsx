@@ -1,13 +1,15 @@
-import { Theme } from '@radix-ui/themes';
-import '@radix-ui/themes/styles.css';
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import './global-styles.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { ThemeProvider as EmotionThemeProvider } from '@emotion/react';
-import { theme } from './theme';
 import { ROUTES } from './layout/routes';
 import { AuthProvider } from './providers';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { SoundifyProvider } from './providers/soundify-provider';
+import { MantineProvider } from '@mantine/core';
+import { emotionTransform, MantineEmotionProvider } from '@mantine/emotion';
+import { EmotionThemeProvider } from './providers/emotion-theme-provider';
 
 const router = createBrowserRouter(ROUTES);
 const queryClient = new QueryClient({
@@ -16,18 +18,28 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <Theme appearance='dark' panelBackground='translucent' accentColor='green'>
-      <EmotionThemeProvider theme={theme}>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <SoundifyProvider>
-              <RouterProvider router={router} />
-            </SoundifyProvider>
-          </AuthProvider>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
-      </EmotionThemeProvider>
-    </Theme>
+    <MantineProvider
+      stylesTransform={emotionTransform}
+      defaultColorScheme='dark'
+      theme={{
+        primaryColor: 'green',
+        primaryShade: { dark: 8 },
+        cursorType: 'pointer',
+      }}
+    >
+      <MantineEmotionProvider>
+        <EmotionThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <SoundifyProvider>
+                <RouterProvider router={router} />
+              </SoundifyProvider>
+            </AuthProvider>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </QueryClientProvider>
+        </EmotionThemeProvider>
+      </MantineEmotionProvider>
+    </MantineProvider>
   );
 }
 

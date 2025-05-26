@@ -1,25 +1,26 @@
-import {
-  Avatar,
-  Button,
-  Dialog,
-  Flex,
-  Grid,
-  IconButton,
-  Popover,
-  ScrollArea,
-  Select,
-  Text,
-  TextField,
-} from '@radix-ui/themes';
 import { SpotifyQueries } from '../../queries';
 import { IconPlaylist, IconSearch } from '@tabler/icons-react';
-import { colors } from '../../theme/colors';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Database } from '../../types';
-import { PlusIcon } from '@radix-ui/react-icons';
+import { PlusIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import { PlaylistCreationPopoverContent } from './playlist-creation-popover-content';
 import { useDisclosure } from '@mantine/hooks';
 import { SimplifiedPlaylist } from '@soundify/web-api';
+import {
+  ActionIcon,
+  Avatar,
+  Button,
+  Group,
+  Modal,
+  ModalProps,
+  Popover,
+  TextInput,
+  Text,
+  Select,
+  useMantineTheme,
+  SimpleGrid,
+  Tooltip,
+} from '@mantine/core';
 
 type UserPlaylistSelectionModalContentsProps = {
   hideCreation?: boolean;
@@ -29,19 +30,23 @@ type UserPlaylistSelectionModalContentsProps = {
     mode: Database['public']['Enums']['MODULE_OUTPUT_MODE'],
   ) => void;
   isSaving: boolean;
-};
+  otherOutputIds: string[];
+} & ModalProps;
 
 export const UserPlaylistSelectionModalContents = ({
   hideCreation,
   enableQuery,
   onSave,
   isSaving,
+  otherOutputIds,
+  ...modalProps
 }: UserPlaylistSelectionModalContentsProps) => {
+  const theme = useMantineTheme();
   const [selectedOutput, setSelectedOutput] = useState<SimplifiedPlaylist>();
   const [selectedMode, setSelectedMode] =
     useState<Database['public']['Enums']['MODULE_OUTPUT_MODE']>();
   const [searchText, setSearchText] = useState('');
-  const modeSelectRef = useRef<HTMLButtonElement>(null);
+  const modeSelectRef = useRef<HTMLInputElement>(null);
 
   const [playlistCreationIsOpen, playlistCreationFns] = useDisclosure(false);
 
@@ -57,121 +62,150 @@ export const UserPlaylistSelectionModalContents = ({
   const handleOutputSelect = (playlist?: SimplifiedPlaylist) => {
     if (playlist) {
       modeSelectRef.current?.click();
+      modeSelectRef.current?.focus();
     }
     setSelectedOutput(playlist);
   };
 
+  useEffect(() => {
+    if (!modalProps.opened) {
+      setSelectedOutput(undefined);
+      setSelectedMode(undefined);
+      setSearchText('');
+      playlistCreationFns.close();
+    }
+  }, [modalProps.opened]);
+
   return (
-    <Dialog.Content
-      maxHeight='min(700px, 90vh)'
-      minHeight='min(700px, 90vh)'
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        gap: 12,
+    <Modal
+      centered
+      title='Select an Output:'
+      styles={{
+        title: { fontSize: theme.fontSizes.xl, fontWeight: 'bold' },
+        content: {
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: 'min(650px, 90vh)',
+        },
+        body: {
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.xs,
+        },
       }}
+      {...modalProps}
     >
-      <Dialog.Title css={{ flexShrink: 0, marginBottom: 0 }}>
-        Select an Output:
-      </Dialog.Title>
-      <Flex css={{ flexShrink: 0, width: '100%' }} gap='2'>
-        <TextField.Root
+      <Group gap='xs' mih='fit-content'>
+        <TextInput
           placeholder='Search your playlists...'
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           css={{ flexGrow: 1 }}
-        >
-          <TextField.Slot>
-            <IconSearch />
-          </TextField.Slot>
-        </TextField.Root>
+          leftSection={<IconSearch width={15} height={15} />}
+        />
         {!hideCreation && (
-          <Popover.Root
-            open={playlistCreationIsOpen}
-            onOpenChange={(open) =>
+          <Popover
+            opened={playlistCreationIsOpen}
+            onChange={(open) =>
               open ? playlistCreationFns.open() : playlistCreationFns.close()
             }
+            withArrow
           >
-            <Popover.Trigger>
-              <IconButton title='Create a new playlist'>
-                <PlusIcon />
-              </IconButton>
-            </Popover.Trigger>
-            <PlaylistCreationPopoverContent
-              onSave={(playlist) => {
-                handleOutputSelect(playlist);
-                playlistCreationFns.close();
-              }}
-            />
-          </Popover.Root>
-        )}
-      </Flex>
-      <ScrollArea css={{ flexGrow: 1 }}>
-        <Grid columns='2' gap='2'>
-          {playlists.map((playlist) => {
-            return (
-              <Button
-                variant={selectedOutput?.id === playlist.id ? 'solid' : 'soft'}
-                color={selectedOutput?.id === playlist.id ? 'green' : 'gray'}
-                key={playlist.id}
-                size='3'
-                css={{
-                  display: 'flex',
-                  gap: 8,
-                  alignItems: 'center',
-                  justifyContent: 'start',
-                  padding: 8,
-                  height: 'fit-content',
-                  minHeight: 50,
-                }}
-                title={playlist.name}
-                onClick={() => handleOutputSelect(playlist)}
+            <Popover.Target>
+              <ActionIcon
+                size='lg'
+                title='Create a new playlist'
+                onClick={playlistCreationFns.open}
               >
+                <PlusIcon width={20} height={20} />
+              </ActionIcon>
+            </Popover.Target>
+            <Popover.Dropdown bg={theme.colors.dark[7]}>
+              <PlaylistCreationPopoverContent
+                onSave={(playlist) => {
+                  handleOutputSelect(playlist);
+                  playlistCreationFns.close();
+                }}
+                onCancel={playlistCreationFns.close}
+              />
+            </Popover.Dropdown>
+          </Popover>
+        )}
+      </Group>
+      <SimpleGrid
+        cols={{ sm: 2, base: 1 }}
+        spacing='xs'
+        h='100%'
+        css={{ overflowY: 'auto', overflowX: 'hidden' }}
+      >
+        {playlists.map((playlist) => {
+          if (otherOutputIds.includes(playlist.id)) return null;
+          return (
+            <Button
+              variant={selectedOutput?.id === playlist.id ? 'solid' : 'light'}
+              color={selectedOutput?.id === playlist.id ? 'green' : 'gray'}
+              key={playlist.id}
+              title={playlist.name}
+              onClick={() => handleOutputSelect(playlist)}
+              justify='start'
+              h={50}
+              leftSection={
                 <Avatar
+                  radius='md'
                   src={playlist.images?.[0]?.url}
-                  fallback={<IconPlaylist color={colors.greenDark.green10} />}
-                  css={{ backgroundColor: colors.grayDark.gray2 }}
-                />
-                <Text wrap='nowrap' truncate>
-                  {playlist.name}
-                </Text>
-              </Button>
-            );
-          })}
-        </Grid>
-      </ScrollArea>
-      <Flex justify='end' css={{ flexShrink: 0, gap: 8 }}>
-        <Select.Root
+                  css={(theme) => ({ backgroundColor: theme.colors.gray[2] })}
+                >
+                  <IconPlaylist />
+                </Avatar>
+              }
+            >
+              <Text size='sm' w='100%' truncate>
+                {playlist.name}
+              </Text>
+            </Button>
+          );
+        })}
+      </SimpleGrid>
+      <Group justify='end' css={{ flexShrink: 0, gap: 8 }}>
+        <Select
           value={selectedMode}
-          onValueChange={(value) =>
+          onChange={(value) =>
             setSelectedMode(
               value as Database['public']['Enums']['MODULE_OUTPUT_MODE'],
             )
           }
-        >
-          <Select.Trigger placeholder='Select a mode...' ref={modeSelectRef} />
-          <Select.Content position='popper' side='top'>
-            <Select.Item
-              value={'PREPEND' satisfies typeof selectedMode}
-              title='Add the resulting tracks to the beginning of the playlist'
-            >
-              Prepend
-            </Select.Item>
-            <Select.Item
-              value={'REPLACE' satisfies typeof selectedMode}
-              title='Replace all items in the pleylist with the resulting tracks'
-            >
-              Replace
-            </Select.Item>
-            <Select.Item
-              value={'APPEND' satisfies typeof selectedMode}
-              title='Add the resulting tracks to the end of the playlist'
-            >
-              Append
-            </Select.Item>
-          </Select.Content>
-        </Select.Root>
+          placeholder='Select a mode...'
+          ref={modeSelectRef}
+          data={[
+            { value: 'PREPEND', label: 'Prepend' },
+            { value: 'REPLACE', label: 'Replace' },
+            { value: 'APPEND', label: 'Append' },
+          ]}
+          styles={{ option: { paddingRight: 4 } }}
+          renderOption={(item) => (
+            <Group justify='space-between' w='100%'>
+              <Text>{item.option.label ?? item.option.value}</Text>
+              <Tooltip
+                color='dark'
+                label={
+                  item.option.value === 'PREPEND'
+                    ? 'Add the resulting tracks to the beginning of the playlist'
+                    : item.option.value === 'REPLACE'
+                      ? 'Replace all items in the playlist with the resulting tracks'
+                      : item.option.value === 'APPEND'
+                        ? 'Add the resulting tracks to the end of the playlist'
+                        : ''
+                }
+              >
+                <ActionIcon variant='subtle' color='gray'>
+                  <QuestionMarkCircledIcon />
+                </ActionIcon>
+              </Tooltip>
+            </Group>
+          )}
+        />
         <Button
           disabled={!selectedOutput || !selectedMode}
           onClick={() => {
@@ -183,7 +217,7 @@ export const UserPlaylistSelectionModalContents = ({
         >
           Save
         </Button>
-      </Flex>
-    </Dialog.Content>
+      </Group>
+    </Modal>
   );
 };

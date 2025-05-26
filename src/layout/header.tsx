@@ -1,6 +1,6 @@
-import { Button } from "@radix-ui/themes";
-import { Wordmark } from "../assets";
-import { useAuth } from "../providers";
+import { Button } from '@mantine/core';
+import { Wordmark } from '../assets';
+import { useAuth } from '../providers';
 
 export const Header = () => {
   const { session, login, logout } = useAuth();
@@ -8,20 +8,20 @@ export const Header = () => {
   return (
     <nav
       css={(theme) => ({
-        display: "flex",
-        maxWidth: "100vw",
-        height: 60,
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "8px 16px",
-        backgroundColor: theme.colors.grayDark.gray1,
+        display: 'flex',
+        maxWidth: '100vw',
+        height: 70,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '8px 16px',
+        backgroundColor: theme.colors.dark[9],
       })}
     >
       <Wordmark
-        variant="dark"
+        variant='dark'
         css={{
-          height: "80%",
-          width: "auto",
+          height: '80%',
+          width: 'auto',
         }}
       />
       <Button
@@ -33,7 +33,7 @@ export const Header = () => {
           }
         }}
       >
-        {session ? "Logout" : "Login"}
+        {session ? 'Logout' : 'Login'}
       </Button>
     </nav>
   );
