@@ -91,4 +91,5 @@ export const modulesMutationKeys = {
   addModuleOutput: ['module-outputs', 'add'],
   removeModuleOutput: ['module-outputs', 'remove'],
   replaceModuleSources: ['module-sources', 'replace'],
+  setModuleScheduleConfig: ['module', 'schedule-config'],
 };
