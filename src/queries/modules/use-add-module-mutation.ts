@@ -56,7 +56,6 @@ export const useAddModuleMutation = <E = unknown>(
               id: request.id ?? '',
               is_running: request.is_running ?? false,
               name: request.name,
-              next_scheduled_run: request.next_scheduled_run ?? null,
               updated_at: request.updated_at ?? new Date().toISOString(),
               schedule_config: null,
               previous_run: null,

@@ -320,7 +320,6 @@ export type Database = {
           id: string
           is_running: boolean
           name: string
-          next_scheduled_run: string | null
           previous_run: string | null
           schedule_config:
             | Database["public"]["CompositeTypes"]["ModuleScheduleConfig"]
@@ -334,7 +333,6 @@ export type Database = {
           id?: string
           is_running?: boolean
           name: string
-          next_scheduled_run?: string | null
           previous_run?: string | null
           schedule_config?:
             | Database["public"]["CompositeTypes"]["ModuleScheduleConfig"]
@@ -348,7 +346,6 @@ export type Database = {
           id?: string
           is_running?: boolean
           name?: string
-          next_scheduled_run?: string | null
           previous_run?: string | null
           schedule_config?:
             | Database["public"]["CompositeTypes"]["ModuleScheduleConfig"]
@@ -437,6 +434,10 @@ export type Database = {
       GetModuleActions: {
         Args: { moduleId: string }
         Returns: Database["public"]["CompositeTypes"]["ModuleActions"]
+      }
+      GetModuleRunData: {
+        Args: { moduleId: string; callerUserId: string }
+        Returns: Database["public"]["CompositeTypes"]["ModuleRunData"]
       }
       GetShuffleAction: {
         Args: { actionId: string }
@@ -621,6 +622,33 @@ export type Database = {
           | Database["public"]["CompositeTypes"]["ModuleAction:Combine"][]
           | null
       }
+      ModuleRunData: {
+        module: Database["public"]["Tables"]["modules"]["Row"] | null
+        moduleSources:
+          | Database["public"]["Tables"]["module_sources"]["Row"][]
+          | null
+        moduleActions:
+          | Database["public"]["Tables"]["module_actions"]["Row"][]
+          | null
+        moduleOutputs:
+          | Database["public"]["Tables"]["module_outputs"]["Row"][]
+          | null
+        limitConfigs:
+          | Database["public"]["Tables"]["limit_action_configs"]["Row"][]
+          | null
+        recentlyPlayedConfigs:
+          | Database["public"]["Tables"]["recently_played_source_configs"]["Row"][]
+          | null
+        shuffleConfigs:
+          | Database["public"]["Tables"]["shuffle_action_configs"]["Row"][]
+          | null
+        filterSources:
+          | Database["public"]["Tables"]["filter_action_sources"]["Row"][]
+          | null
+        combineSources:
+          | Database["public"]["Tables"]["combine_action_sources"]["Row"][]
+          | null
+      }
       ModuleScheduleConfig: {
         interval: Database["public"]["Enums"]["SCHEDULE_INTERVAL"] | null
         quantity: number | null
@@ -694,6 +722,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      upsert_provider_data: {
+        Args: {
+          p_user_id: string
+          p_access?: string
+          p_refresh?: string
+          p_expires_at?: string
+        }
+        Returns: {
+          access: string
+          expires_at: string
+          refresh: string
+          user_id: string
+        }
+      }
       UpsertProviderData: {
         Args: {
           p_user_id: string
@@ -736,27 +778,6 @@ export type Database = {
           created_at?: string
           id?: string
           track_ids?: string[]
-        }
-        Relationships: []
-      }
-      artists: {
-        Row: {
-          album_ids: string[]
-          artist_id: string
-          created_at: string
-          id: string
-        }
-        Insert: {
-          album_ids?: string[]
-          artist_id: string
-          created_at?: string
-          id?: string
-        }
-        Update: {
-          album_ids?: string[]
-          artist_id?: string
-          created_at?: string
-          id?: string
         }
         Relationships: []
       }
