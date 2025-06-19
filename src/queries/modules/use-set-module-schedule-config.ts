@@ -2,36 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../providers';
 import { Database, LimitedMutationOptions } from '../../types';
 import { modulesMutationKeys, modulesQueryKeys } from './keys';
-import { ScheduleConfig } from '../../components/popovers';
 import { UserModulesResponse } from './use-user-modules';
-
-const convertReqToColValues = (
-  req: UseSetModuleScheduleConfigMutationRequest,
-): Pick<
-  Database['public']['Tables']['modules']['Update'],
-  'next_scheduled_run' | 'schedule_config'
-> => {
-  if (!req.config) {
-    return {
-      next_scheduled_run: null,
-      schedule_config: null,
-    };
-  }
-
-  return {
-    next_scheduled_run: req.config.nextScheduledRun,
-    schedule_config: req.config.repeatConfig.enabled
-      ? {
-          quantity: req.config.repeatConfig.quantity,
-          interval: req.config.repeatConfig.interval,
-        }
-      : null,
-  };
-};
 
 export type UseSetModuleScheduleConfigMutationRequest = {
   moduleId: string;
-  config?: ScheduleConfig;
+  config?: Database['public']['CompositeTypes']['ModuleScheduleConfig'];
 };
 
 export type UseSetModuleScheduleConfigMutationResponse =
@@ -54,7 +29,9 @@ export const useSetModuleScheduleConfig = <E = unknown, C = unknown>(
       const query = supabaseClient
         .schema('public')
         .from('modules')
-        .update(convertReqToColValues(req))
+        .update({
+          schedule_config: req.config || null,
+        })
         .eq('id', req.moduleId)
         .select('*')
         .single()

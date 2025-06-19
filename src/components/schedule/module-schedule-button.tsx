@@ -1,10 +1,9 @@
-import { Button, Popover, Stack, Text } from '@mantine/core';
+import { Button, Popover, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconClock, IconClockEdit } from '@tabler/icons-react';
 import { ModulesQueries } from '../../queries';
 import { useAuth } from '../../providers';
 import { ModuleScheduleConfigPopover } from '../popovers';
-import { formatTimestamp } from '../../utils';
 
 type ModuleScheduleButtonProps = {
   moduleId: string;
@@ -25,7 +24,6 @@ export const ModuleScheduleButton = ({
         if (!module) return undefined;
         return {
           scheduleConfig: module.schedule_config ?? undefined,
-          nextScheduledRun: module.next_scheduled_run ?? undefined,
           previousRun: module.previous_run ?? undefined,
         };
       },
@@ -35,7 +33,6 @@ export const ModuleScheduleButton = ({
     ModulesQueries.useSetModuleScheduleConfig();
   const [scheduleConfigPopoverIsOpen, scheduleConfigPopoverFns] =
     useDisclosure(false);
-  const isScheduled = !!moduleData?.nextScheduledRun;
 
   return (
     <Popover
@@ -46,7 +43,7 @@ export const ModuleScheduleButton = ({
           : scheduleConfigPopoverFns.close()
       }
     >
-      {isScheduled ? (
+      {moduleData?.scheduleConfig ? (
         <Popover.Target>
           <Button
             variant='light'
@@ -58,15 +55,10 @@ export const ModuleScheduleButton = ({
             title='Edit Schedule'
             loading={isLoading}
           >
-            <Stack gap={0} align='start'>
-              <Text>{formatTimestamp(moduleData.nextScheduledRun!)}</Text>
-              {!!moduleData?.scheduleConfig && (
-                <Text
-                  size='sm'
-                  css={{ opacity: 0.7 }}
-                >{`Repeat every ${(moduleData.scheduleConfig?.quantity ?? 0) < 2 ? '' : (moduleData.scheduleConfig?.quantity?.toLocaleString() ?? '')} ${moduleData.scheduleConfig.interval?.toLowerCase().slice(0, (moduleData.scheduleConfig?.quantity ?? 0) > 1 ? undefined : -1)}`}</Text>
-              )}
-            </Stack>
+            <Text
+              size='sm'
+              css={{ opacity: 0.7 }}
+            >{`Repeat every ${(moduleData.scheduleConfig.quantity ?? 0) < 2 ? '' : (moduleData.scheduleConfig.quantity?.toLocaleString() ?? '')} ${moduleData.scheduleConfig.interval?.toLowerCase().slice(0, (moduleData.scheduleConfig.quantity ?? 0) > 1 ? undefined : -1)}`}</Text>
           </Button>
         </Popover.Target>
       ) : (
@@ -85,7 +77,6 @@ export const ModuleScheduleButton = ({
       )}
       <ModuleScheduleConfigPopover
         initialConfig={{
-          nextScheduledRun: moduleData?.nextScheduledRun,
           repeatConfig: {
             enabled: !!moduleData?.scheduleConfig,
             interval: moduleData?.scheduleConfig?.interval ?? 'WEEKS',
@@ -93,11 +84,11 @@ export const ModuleScheduleButton = ({
           },
         }}
         isOpen={scheduleConfigPopoverIsOpen}
-        onSave={(config) => {
+        onSave={({ repeatConfig }) => {
           mutate(
             {
               moduleId,
-              config,
+              config: repeatConfig,
             },
             {
               onSuccess: () => {
