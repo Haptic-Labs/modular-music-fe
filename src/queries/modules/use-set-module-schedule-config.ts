@@ -9,8 +9,10 @@ export type UseSetModuleScheduleConfigMutationRequest = {
   config?: Database['public']['CompositeTypes']['ModuleScheduleConfig'];
 };
 
-export type UseSetModuleScheduleConfigMutationResponse =
-  Database['public']['Tables']['modules']['Row'];
+export type UseSetModuleScheduleConfigMutationResponse = null | Pick<
+  Database['public']['Tables']['modules']['Row'],
+  'schedule_config' | 'next_run'
+>;
 
 export const useSetModuleScheduleConfig = <E = unknown, C = unknown>(
   options?: LimitedMutationOptions<
@@ -26,20 +28,23 @@ export const useSetModuleScheduleConfig = <E = unknown, C = unknown>(
   return useMutation({
     mutationKey: modulesMutationKeys.setModuleScheduleConfig,
     mutationFn: async (req) => {
-      const query = supabaseClient
-        .schema('public')
-        .from('modules')
-        .update({
-          schedule_config: req.config || null,
-        })
-        .eq('id', req.moduleId)
-        .select('*')
-        .single()
-        .throwOnError();
+      const query = supabaseClient.functions.invoke(
+        `modules/${req.moduleId}/schedule`,
+        {
+          body: {
+            next_run: req.config?.nextScheduledRun,
+            schedule_config: {
+              quantity: req.config?.repeatConfig.quantity,
+              interval: req.config?.repeatConfig.interval,
+            },
+          },
+        },
+      );
 
       const { data: res } = await query;
 
-      if (!res) throw new Error('Error setting module schedule config');
+      if (req.config?.repeatConfig && !res)
+        throw new Error('Error setting module schedule config');
 
       return res;
     },
@@ -54,14 +59,31 @@ export const useSetModuleScheduleConfig = <E = unknown, C = unknown>(
           (oldData) => {
             if (!oldData) return oldData;
 
-            return oldData.map((module) =>
-              module.id === res.id ? res : module,
+            // TODO: fix delete not updating, and slow update on schedule
+
+            return oldData.map<(typeof oldData)[number]>((module) =>
+              module.id === req.moduleId
+                ? {
+                    ...module,
+                    next_run: res?.next_run ?? null,
+                    schedule_config: res?.schedule_config
+                      ? {
+                          quantity: res.schedule_config.quantity,
+                          interval: res.schedule_config.interval,
+                        }
+                      : null,
+                  }
+                : module,
             );
           },
         );
       }
 
       return options?.onSuccess?.(res, req, ...rest);
+    },
+    onSettled: (res, error, req, context) => {
+      console.log('brayden-test', { res, error, req, context });
+      return options?.onSettled?.(res, error, req, context);
     },
   });
 };

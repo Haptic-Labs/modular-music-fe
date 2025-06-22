@@ -24,15 +24,17 @@ export const ModuleScheduleButton = ({
         if (!module) return undefined;
         return {
           scheduleConfig: module.schedule_config ?? undefined,
+          nextRun: module.next_run ?? undefined,
           previousRun: module.previous_run ?? undefined,
         };
       },
     },
   );
-  const { mutate, isPending: isSaving } =
+  const { mutateAsync, isPending: isSaving } =
     ModulesQueries.useSetModuleScheduleConfig();
   const [scheduleConfigPopoverIsOpen, scheduleConfigPopoverFns] =
     useDisclosure(false);
+  const isScheduled = !!moduleData?.nextRun;
 
   return (
     <Popover
@@ -55,10 +57,15 @@ export const ModuleScheduleButton = ({
             title='Edit Schedule'
             loading={isLoading}
           >
-            <Text
-              size='sm'
-              css={{ opacity: 0.7 }}
-            >{`Repeat every ${(moduleData.scheduleConfig.quantity ?? 0) < 2 ? '' : (moduleData.scheduleConfig.quantity?.toLocaleString() ?? '')} ${moduleData.scheduleConfig.interval?.toLowerCase().slice(0, (moduleData.scheduleConfig.quantity ?? 0) > 1 ? undefined : -1)}`}</Text>
+            <Stack gap={0} align='start'>
+              <Text>{formatTimestamp(moduleData.nextRun!)}</Text>
+              {!!moduleData?.scheduleConfig && (
+                <Text
+                  size='sm'
+                  css={{ opacity: 0.7 }}
+                >{`Repeat every ${(moduleData.scheduleConfig?.quantity ?? 0) < 2 ? '' : (moduleData.scheduleConfig?.quantity?.toLocaleString() ?? '')} ${moduleData.scheduleConfig.interval?.toLowerCase().slice(0, (moduleData.scheduleConfig?.quantity ?? 0) > 1 ? undefined : -1)}`}</Text>
+              )}
+            </Stack>
           </Button>
         </Popover.Target>
       ) : (
@@ -77,6 +84,7 @@ export const ModuleScheduleButton = ({
       )}
       <ModuleScheduleConfigPopover
         initialConfig={{
+          nextScheduledRun: moduleData?.nextRun,
           repeatConfig: {
             enabled: !!moduleData?.scheduleConfig,
             interval: moduleData?.scheduleConfig?.interval ?? 'WEEKS',
@@ -84,8 +92,8 @@ export const ModuleScheduleButton = ({
           },
         }}
         isOpen={scheduleConfigPopoverIsOpen}
-        onSave={({ repeatConfig }) => {
-          mutate(
+        onSave={async (config) => {
+          await mutateAsync(
             {
               moduleId,
               config: repeatConfig,
@@ -97,8 +105,8 @@ export const ModuleScheduleButton = ({
             },
           );
         }}
-        onDeleteSchedule={() => {
-          mutate(
+        onDeleteSchedule={async () => {
+          await mutateAsync(
             {
               moduleId,
               config: undefined,

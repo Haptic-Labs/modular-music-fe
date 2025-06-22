@@ -101,7 +101,7 @@ export const ModuleScheduleConfigPopover = ({
   useEffect(() => {
     form.setInitialValues(transformFormValues(initialConfig));
     form.reset();
-  }, [initialConfig]);
+  }, [JSON.stringify(initialConfig)]);
 
   return (
     <Popover.Dropdown
@@ -156,6 +156,7 @@ export const ModuleScheduleConfigPopover = ({
               color='red'
               onClick={onDeleteSchedule}
               variant='outline'
+              loading={isSaving}
             >
               Delete
             </Button>
@@ -164,6 +165,7 @@ export const ModuleScheduleConfigPopover = ({
               size='sm'
               disabled={!hasValueChange || !form.isValid}
               type='submit'
+              loading={isSaving}
             >
               Save
             </Button>
