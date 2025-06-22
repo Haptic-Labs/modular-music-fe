@@ -2,11 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../providers';
 import { Database, LimitedMutationOptions } from '../../types';
 import { modulesMutationKeys, modulesQueryKeys } from './keys';
+import { ScheduleConfig } from '../../components/popovers';
 import { UserModulesResponse } from './use-user-modules';
 
 export type UseSetModuleScheduleConfigMutationRequest = {
   moduleId: string;
-  config?: Database['public']['CompositeTypes']['ModuleScheduleConfig'];
+  config?: ScheduleConfig;
 };
 
 export type UseSetModuleScheduleConfigMutationResponse = null | Pick<

@@ -460,7 +460,7 @@ export type Database = {
       }
       ScheduleModuleCronJob: {
         Args: { moduleId: string; cronString: string }
-        Returns: undefined
+        Returns: boolean
       }
       UpsertModuleActionCombine: {
         Args: {

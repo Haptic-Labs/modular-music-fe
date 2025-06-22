@@ -1,9 +1,10 @@
-import { Button, Popover, Text } from '@mantine/core';
+import { Button, Popover, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconClock, IconClockEdit } from '@tabler/icons-react';
 import { ModulesQueries } from '../../queries';
 import { useAuth } from '../../providers';
 import { ModuleScheduleConfigPopover } from '../popovers';
+import { formatTimestamp } from '../../utils';
 
 type ModuleScheduleButtonProps = {
   moduleId: string;
@@ -45,7 +46,7 @@ export const ModuleScheduleButton = ({
           : scheduleConfigPopoverFns.close()
       }
     >
-      {moduleData?.scheduleConfig ? (
+      {isScheduled ? (
         <Popover.Target>
           <Button
             variant='light'
@@ -96,7 +97,7 @@ export const ModuleScheduleButton = ({
           await mutateAsync(
             {
               moduleId,
-              config: repeatConfig,
+              config,
             },
             {
               onSuccess: () => {
