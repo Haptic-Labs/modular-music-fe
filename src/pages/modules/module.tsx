@@ -6,31 +6,31 @@ import { Button, Center, Group, Loader, Stack, Title } from '@mantine/core';
 import { ModulesQueries } from '../../queries';
 import { useAuth } from '../../providers';
 import { ModuleScheduleButton } from '../../components/schedule';
-import { useState } from 'react';
 
 export const ModulePage = () => {
   const { moduleId } = useParams();
   const { user, supabaseClient } = useAuth();
-  const { data: moduleName, isLoading } = ModulesQueries.useUserModulesQuery(
+  const { data: module, isLoading } = ModulesQueries.useUserModulesQuery(
     {
       userId: user?.id ?? '',
     },
     {
       enabled: !!user?.id && !!moduleId,
-      select: (data) => data.find((module) => module.id === moduleId)?.name,
+      select: (data) => {
+        const module = data.find((module) => module.id === moduleId);
+        return {
+          moduleName: module?.name ?? '',
+          isRunning: module?.is_running ?? false,
+        };
+      },
     },
   );
-  const [isRunning, setIsRunning] = useState(false); // TODO: use supabase realtime to track running status
+  const { moduleName, isRunning } = module ?? {};
 
   const handleRun = async () => {
-    setIsRunning(true);
-    try {
-      await supabaseClient.functions.invoke(`/modules/${moduleId}/run`, {
-        method: 'POST',
-      });
-    } finally {
-      setIsRunning(false);
-    }
+    await supabaseClient.functions.invoke(`/modules/${moduleId}/run`, {
+      method: 'POST',
+    });
   };
 
   if (!moduleId) return <Navigate to='/404' />;
