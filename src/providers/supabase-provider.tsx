@@ -73,6 +73,22 @@ export const AuthProvider = ({ children }: SupabaseProviderProps) => {
       return;
     }
 
+    // Handle writing spotify auth data to the database
+    const { provider_token, provider_refresh_token, expires_at } =
+      existingSession;
+    if (provider_token && provider_refresh_token) {
+      await supabaseClient.schema('spotify_auth').rpc('UpsertProviderData', {
+        p_user_id: existingSession.user.id,
+        p_access: provider_token,
+        p_refresh: provider_refresh_token,
+        p_expires_at: provider_token
+          ? expires_at
+            ? new Date(expires_at * 1000).toISOString()
+            : new Date(new Date().getTime() * 1000).toISOString()
+          : undefined,
+      });
+    }
+
     // Set context values
     setAuth({
       session: existingSession,

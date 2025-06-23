@@ -10,6 +10,7 @@ import { SoundifyProvider } from './providers/soundify-provider';
 import { MantineProvider } from '@mantine/core';
 import { emotionTransform, MantineEmotionProvider } from '@mantine/emotion';
 import { EmotionThemeProvider } from './providers/emotion-theme-provider';
+import { WSProvider } from './websockets';
 
 const router = createBrowserRouter(ROUTES);
 const queryClient = new QueryClient({
@@ -32,7 +33,9 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <SoundifyProvider>
-                <RouterProvider router={router} />
+                <WSProvider>
+                  <RouterProvider router={router} />
+                </WSProvider>
               </SoundifyProvider>
             </AuthProvider>
             <ReactQueryDevtools initialIsOpen={false} />
