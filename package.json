@@ -7,13 +7,40 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gen-types": "supabase gen types --lang=typescript --linked --schema public,spotify_auth,spotify_cache,feature_flags 1>&1 > ./src/types/database.gen.ts",
+    "prepare": "husky",
+    "type-check": "tsc -b --noEmit"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@emotion/cache": "^11.14.0",
+    "@emotion/react": "^11.13.3",
+    "@emotion/serialize": "^1.3.3",
+    "@emotion/utils": "^1.4.2",
+    "@mantine/core": "^8.0.0",
+    "@mantine/dates": "^8.0.0",
+    "@mantine/emotion": "^8.0.0",
+    "@mantine/form": "^8.0.0",
+    "@mantine/hooks": "^8.0.0",
+    "@radix-ui/react-icons": "^1.3.0",
+    "@soundify/web-api": "^1.1.5",
+    "@supabase/supabase-js": "^2.46.1",
+    "@tabler/icons-react": "^3.24.0",
+    "@tanstack/react-query": "^5.62.0",
+    "@tanstack/react-query-devtools": "^5.66.0",
+    "browser-image-compression": "^2.0.2",
+    "dayjs": "^1.11.13",
+    "motion": "^12.4.3",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "ts-toolbelt": "^9.6.0"
   },
   "devDependencies": {
+    "@emotion/babel-plugin": "^11.12.0",
     "@eslint/js": "^9.11.1",
     "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",
@@ -22,8 +49,15 @@
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.12",
     "globals": "^15.9.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.7.0",
     "vite": "^5.4.8"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ]
   }
 }
