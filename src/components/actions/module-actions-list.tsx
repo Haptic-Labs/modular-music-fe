@@ -33,7 +33,7 @@ export const ModuleActionsList = ({ moduleId }: ModuleActionsGridProps) => {
 
   return (
     <section>
-      <Title order={3} my='2'>
+      <Title order={2} mb='sm'>
         Actions
       </Title>
       <Stack gap='md'>

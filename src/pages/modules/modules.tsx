@@ -21,7 +21,11 @@ export const ModulesPage = () => {
 
   const { data: modules = [] } = ModulesQueries.useUserModulesQuery(
     { userId: user?.id ?? '' },
-    { enabled: !!user },
+    {
+      enabled: !!user,
+      select: (data) =>
+        data.sort((a, b) => a.created_at.localeCompare(b.created_at)),
+    },
   );
 
   const { mutateAsync: createModule, isPending: isCreatingModule } =
@@ -51,6 +55,7 @@ export const ModulesPage = () => {
           xl: 5,
         }}
         spacing='xs'
+        mih={60}
       >
         {modules.map((module) => (
           <Button
@@ -59,7 +64,7 @@ export const ModulesPage = () => {
             to={`/modules/${module.id}`}
             variant='light'
             color='gray'
-            h={60}
+            h='auto'
           >
             {module.name}
           </Button>

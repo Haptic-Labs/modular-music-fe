@@ -71,17 +71,19 @@ export const AddActionButton = ({
         <Button
           variant='light'
           color='gray'
+          size='md'
           css={{
             padding: 12,
-            minHeight: 0,
+            minHeight: 70,
             height: 'auto',
             justifyContent: 'start',
             fontWeight: 'normal',
           }}
-          radius='large'
+          radius='md'
           onClick={popoverFns.open}
           leftSection={<PlusIcon width={25} height={25} />}
           justify='start'
+          maw={387}
         >
           Add Action
         </Button>

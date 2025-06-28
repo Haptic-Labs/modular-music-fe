@@ -15,10 +15,10 @@ export const ModuleOutputsGrid = ({ moduleId }: ModuleOutputsGridProps) => {
 
   return (
     <section>
-      <Title order={3} my='2'>
+      <Title order={2} mb='sm'>
         Outputs
       </Title>
-      <SimpleGrid cols={MODULE_GRID_CONFIG} spacing='md'>
+      <SimpleGrid cols={MODULE_GRID_CONFIG} spacing='md' mih={70}>
         {outputs.map((output) => (
           <ModuleOutputCard key={output.id} output={output} />
         ))}

@@ -25,7 +25,7 @@ export const AddModuleOutputButton = ({ moduleId }: { moduleId: string }) => {
           height: 'auto',
           fontWeight: 'normal',
         }}
-        radius='large'
+        radius='md'
         onClick={open}
         justify='start'
         leftSection={<PlusIcon width={25} height={25} />}
