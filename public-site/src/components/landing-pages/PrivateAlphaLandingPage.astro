@@ -1,0 +1,114 @@
+---
+import Hero from '../Hero.astro';
+import Wordmark from '../Wordmark.astro';
+import InfoCard from '../InfoCard.astro';
+---
+
+<style>
+  h1 {
+    font-size: max(1.5rem, 40px);
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    line-height: 1.2;
+  }
+
+  .highlight {
+    color: var(--logoColor);
+  }
+
+  .title-text {
+    width: 100%;
+    text-align: center;
+  }
+
+  .subtitle-text {
+    width: 80%;
+    font-size: max(0.6rem, 15px);
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .wordmark-container {
+    height: '2rem';
+    margin: 0;
+    position: absolute;
+    top: 100px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .wordmark-shadow {
+    filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.5));
+  }
+
+  .hero-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 40px auto;
+  }
+
+  .info-card-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 20px;
+  }
+
+  p {
+    text-align: left;
+    font-size: max(0.5rem, 12px);
+  }
+
+  .link-button {
+    background-color: var(--logoColor);
+    color: var(--darkerGray);
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.5rem;
+    min-width: 80px;
+    text-decoration: none;
+  }
+
+  .info-card {
+    margin: 40px auto;
+    max-width: min(90vw, 800px);
+  }
+</style>
+
+<Hero>
+  <div class='hero-text'>
+    <h1 class='title-text'>
+      Take <span class='highlight'>control</span> of your music
+    </h1>
+    <p class='subtitle-text'>
+      Automate the creation and editing of your Spotify playlists to create the
+      listening experience you deserve.
+    </p>
+  </div>
+
+  <InfoCard class='info-card'>
+    <div class='info-card-content'>
+      <p>
+        Modular Music is currenly in a private alpha. If you would like to apply
+        to join the private alpha, send us an email, and we will reach out to
+        you soon!
+      </p>
+      <a
+        class='link-button'
+        target='_blank'
+        href='mailto:alpha@modularmusic.net?subject=Private Alpha Application'
+        >Apply</a
+      >
+    </div>
+  </InfoCard>
+</Hero>
+<figure class='wordmark-container'>
+  <Wordmark class='wordmark-shadow' height='2rem' />
+</figure>
