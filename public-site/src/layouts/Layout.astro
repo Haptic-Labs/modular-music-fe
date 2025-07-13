@@ -1,0 +1,42 @@
+---
+import Head from '../components/Head.astro';
+import Navbar from '../components/Navbar.astro';
+---
+
+<style
+  define:vars={{
+    black: '#000000',
+    darkGray: '#2e2d2d',
+    darkerGray: '#1a1a1a',
+    logoColor: '#1DBA53',
+  }}
+>
+  html,
+  body {
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    color: white;
+  }
+
+  body {
+    background-color: var(--black);
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    height: '100%';
+    flex: 1;
+  }
+</style>
+
+<html lang='en'>
+  <Head />
+  <body>
+    <!-- <Navbar /> -->
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>

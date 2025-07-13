@@ -1,0 +1,19 @@
+---
+import '../global-styles.css';
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'head'> {
+  pageTitle?: string;
+  title?: string;
+}
+
+const { title = 'Modular Music', pageTitle, ...rest } = Astro.props;
+---
+
+<head {...rest}>
+  <meta charset='UTF-8' />
+  <meta name='viewport' content='width=device-width' />
+  <link rel='icon' type='image/svg+xml' href='/favicon.svg' />
+  <meta name='generator' content={Astro.generator} />
+  <title>{`${title} ${pageTitle ? ` | ${pageTitle}` : ''}`.trim()}</title>
+</head>

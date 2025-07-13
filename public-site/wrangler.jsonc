@@ -1,0 +1,13 @@
+{
+  "name": "modularmusic-net",
+  "compatibility_date": "2025-07-12",
+  "assets": {
+    "directory": "./dist",
+  },
+  "routes": [
+    {
+      "pattern": "modularmusic.net",
+      "custom_domain": true,
+    },
+  ],
+}
